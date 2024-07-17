@@ -2,7 +2,7 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import Router from "./src/router/Router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar, useColorScheme } from "react-native";
+import { StatusBar, StyleSheet, useColorScheme } from "react-native";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 
 function App(): React.JSX.Element {
@@ -13,7 +13,7 @@ function App(): React.JSX.Element {
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <SafeAreaView style={[backgroundStyle, styles.rootContainer]}>
       <StatusBar
         barStyle={isDarkMode ? "light-content" : "dark-content"}
         backgroundColor={backgroundStyle.backgroundColor}
@@ -25,3 +25,9 @@ function App(): React.JSX.Element {
   );
 }
 export default App;
+
+const styles = StyleSheet.create({
+  rootContainer: {
+    flex: 1
+  }
+});
