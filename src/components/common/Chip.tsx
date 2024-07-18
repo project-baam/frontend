@@ -77,7 +77,7 @@ const ChipView = styled.View<{
 
 const ChipText = styled.Text<{ color: string; size: "small" | "medium" }>`
   ${({ size }) => css`
-    ${size === "small" ? Theme.typo.Paragraph_01 : Theme.typo.Body_01}
+    ${size === "small" ? Theme.typo.Label_01 : Theme.typo.Label_02}
   `}
   color: ${({ color }) => color};
 `;
