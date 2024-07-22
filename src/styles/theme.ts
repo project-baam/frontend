@@ -10,7 +10,7 @@ const typoCreator = (fontFamily: string, fontSize: string, lineHeight: string) =
 
 export const Theme = {
   colors: {
-    White: "#FFFFFF",
+    White: "#ffffff",
     Gray100: "#f5f5f5",
     Gray200: "#e9e9e9",
     Gray300: "#d9d9d9",
