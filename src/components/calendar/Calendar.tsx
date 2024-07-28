@@ -1,9 +1,14 @@
+import styled from "@emotion/native";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import React, { useCallback, useRef } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { AgendaList, CalendarProvider, ExpandableCalendar, LocaleConfig, WeekCalendar } from "react-native-calendars";
-import AgendaItem from "../mocks/AgendaItem";
-import { agendaItems, getMarkedDates } from "../mocks/agendaItems";
-import { getTheme } from "../mocks/theme";
+import IconGear from "../../assets/images/icon_gear.svg";
+import { agendaItems, getMarkedDates } from "../../mocks/agendaItems";
+import { Theme } from "../../styles/theme";
+import { CalendarStackParamList } from "../../types/navigation";
+import AgendaItem from "./AgendaItem";
+import { getTheme } from "./calendarTheme";
 
 LocaleConfig.locales["kr"] = {
   monthNames: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
@@ -19,7 +24,8 @@ interface Props {
   weekView?: boolean;
 }
 
-const ExpandableCalendarScreen = ({ weekView = false }: Props) => {
+function Calendar({ weekView = false }: Props) {
+  const navigation = useNavigation<NavigationProp<CalendarStackParamList>>();
   const marked = useRef(getMarkedDates());
   const theme = useRef(getTheme());
   const todayBtnTheme = useRef({
@@ -29,12 +35,14 @@ const ExpandableCalendarScreen = ({ weekView = false }: Props) => {
   const renderItem = useCallback(({ item, index, section }: { item: any; index: number; section: any }) => {
     const isFirst = index === 0;
     const isLast = index === section.data.length - 1;
-    return <AgendaItem key={index} item={item} isFirst={isFirst} isLast={isLast} />;
+    const uniqueKey = `${item.date}_${item.hour}_${index}`;
+
+    return <AgendaItem key={uniqueKey} item={item} isFirst={isFirst} isLast={isLast} />;
   }, []);
 
   return (
     <CalendarProvider date={ITEMS[1]?.title} showTodayButton theme={todayBtnTheme.current}>
-      <View style={{ flex: 1 }}>
+      <StyledView>
         {weekView ? (
           <WeekCalendar markingType="multi-dot" theme={theme.current} firstDay={0} markedDates={marked.current} />
         ) : (
@@ -48,100 +56,58 @@ const ExpandableCalendarScreen = ({ weekView = false }: Props) => {
             monthFormat={"yyyy년 M월"}
           />
         )}
-        <View style={styles.agendaContainer}>
+        <AgendaContainer>
           <AgendaList
             sections={ITEMS}
             renderSectionHeader={() => <></>}
             renderItem={renderItem}
             sectionStyle={styles.section}
-            keyExtractor={(item, index) => item.date + index}
+            keyExtractor={(item, index) => item.id + index.toString()}
             initialNumToRender={10}
             maxToRenderPerBatch={5}
             windowSize={5}
           />
-        </View>
-      </View>
+          <AddButton onPress={() => navigation.navigate("CalendarAddScreen", {})}>
+            <IconGear />
+          </AddButton>
+        </AgendaContainer>
+      </StyledView>
     </CalendarProvider>
   );
-};
+}
 
-export default ExpandableCalendarScreen;
+export default Calendar;
 
 const styles = StyleSheet.create({
-  calendarBackground: {
-    backgroundColor: "gray"
-  },
-  calendar: {
-    paddingHorizontal: 20
-  },
-  header: {
-    backgroundColor: "#ffffff"
-  },
   section: {
     marginBottom: 16,
     borderRadius: 8,
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "lightgrey"
-  },
-  sectionHeader: {
-    padding: 10,
-    backgroundColor: "#f2f2f2",
-    borderBottomWidth: 1,
-    borderBottomColor: "lightgrey"
-  },
-  sectionContentContainer: {
-    backgroundColor: "#ffffff",
-    borderRadius: 8,
-    overflow: "hidden",
-    marginBottom: 16
-  },
-  itemWrapper: {
-    backgroundColor: "#ffffff",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "lightgrey"
-  },
-  dateText: {
-    fontSize: 20,
-    fontWeight: "600"
-  },
-  nonCurrentMonthDateText: {
-    color: "grey"
-  },
-  agendaContainer: {
-    flex: 1,
-    padding: 16
-  },
-  dotsContainer: {
-    position: "absolute",
-    bottom: -8,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 4
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 9999,
-    marginHorizontal: 1
-  },
-  dayContainer: {
-    position: "relative"
-  },
-  selectedDay: {
-    backgroundColor: "black"
-  },
-  today: {
-    backgroundColor: "black"
-  },
-  selectedDateText: {
-    color: "white"
-  },
-  todayDateText: {
-    color: "white"
   }
 });
+
+const StyledView = styled.View`
+  flex: 1;
+`;
+
+const AgendaContainer = styled.View`
+  background-color: white;
+  flex: 1;
+  padding: 16px;
+`;
+
+const AddButton = styled.Pressable`
+  width: 48px;
+  height: 48px;
+  position: absolute;
+  bottom: 72px;
+  right: 16px;
+  background-color: ${Theme.colors.Primary};
+  padding: 16px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  margin-top: 16px;
+`;
