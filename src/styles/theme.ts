@@ -41,6 +41,8 @@ export const Theme = {
     Heading_03: typoCreator("EsaManruMedium", "16px", "22px"),
     Paragraph_01: typoCreator("Pretendard-Medium", "14px", "22px"),
     Body_01: typoCreator("Esamanru", "16px", "22px"),
+    Body_02: typoCreator("Pretendard", "14px", "22px"),
+    Body_04: typoCreator("Pretendard", "18px", "26px"),
     Caption_01: typoCreator("Pretendard-Regular", "12px", "16px"),
     Label_01: typoCreator("Pretendard-Regular", "14px", "16px"),
     Label_02: typoCreator("Pretendard-Regular", "16px", "18px"),
