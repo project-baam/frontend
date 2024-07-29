@@ -42,6 +42,9 @@ export const Theme = {
     Paragraph_01: typoCreator("Pretendard-Medium", "14px", "22px"),
     Body_01: typoCreator("Esamanru", "16px", "22px"),
     Body_02: typoCreator("Pretendard", "14px", "22px"),
+    Body_03_Regular: typoCreator("Pretendard-Regular", "16px", "22px"),
+    Body_03_Bold: typoCreator("Pretendard-Bold", "16px", "22px"),
+    Body_04_Bold: typoCreator("Pretendard-Bold", "18px", "26px"),
     Body_04: typoCreator("Pretendard", "18px", "26px"),
     Caption_01: typoCreator("Pretendard-Regular", "12px", "16px"),
     Label_01: typoCreator("Pretendard-Regular", "14px", "16px"),
@@ -49,6 +52,5 @@ export const Theme = {
     Label_03: typoCreator("Pretendard-Regular", "18px", "20px")
   }
 };
-
 export type TColor = keyof (typeof Theme)["colors"];
 export type TTypo = keyof (typeof Theme)["typo"];
