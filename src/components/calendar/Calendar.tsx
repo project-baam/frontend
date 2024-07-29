@@ -4,11 +4,11 @@ import React, { useCallback, useRef } from "react";
 import { StyleSheet } from "react-native";
 import { AgendaList, CalendarProvider, ExpandableCalendar, LocaleConfig, WeekCalendar } from "react-native-calendars";
 import IconGear from "../../assets/images/icon_gear.svg";
-import { agendaItems, getMarkedDates } from "../../mocks/agendaItems";
 import { Theme } from "../../styles/theme";
 import { CalendarStackParamList } from "../../types/navigation";
 import AgendaItem from "./AgendaItem";
 import { getTheme } from "./calendarTheme";
+import { agendaItems, getMarkedDates } from "./mocks/agendaItems";
 
 LocaleConfig.locales["kr"] = {
   monthNames: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],

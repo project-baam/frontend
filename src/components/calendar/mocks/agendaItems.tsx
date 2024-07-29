@@ -46,7 +46,7 @@ export const agendaItems = [
         title: "1학기 중간고사",
         date: dates[0],
         dayOfWeek: getDayOfWeek(dates[0]),
-        color: "#E826F9",
+        color: "#E199F0",
         memo: "중간고사 준비물 챙기기"
       }
     ]
@@ -62,7 +62,7 @@ export const agendaItems = [
         title: "수학 수업",
         date: dates[1],
         dayOfWeek: getDayOfWeek(dates[1]),
-        color: "#327CEA",
+        color: "#8A7EFF",
         memo: "수학 문제집 풀어오기"
       },
       {
@@ -73,7 +73,7 @@ export const agendaItems = [
         title: "과학 실험",
         date: dates[1],
         dayOfWeek: getDayOfWeek(dates[1]),
-        color: "#20DC33",
+        color: "#A6E7DF",
         memo: "실험 도구 준비"
       }
     ]
@@ -89,7 +89,7 @@ export const agendaItems = [
         title: "영어 회화",
         date: dates[2],
         dayOfWeek: getDayOfWeek(dates[2]),
-        color: "#327CEA",
+        color: "#8A7EFF",
         memo: "영어 회화 연습하기"
       },
       {
@@ -100,7 +100,7 @@ export const agendaItems = [
         title: "체육 대회",
         date: dates[2],
         dayOfWeek: getDayOfWeek(dates[2]),
-        color: "#E826F9",
+        color: "#E199F0",
         memo: "체육복 챙기기"
       },
       {
@@ -111,7 +111,7 @@ export const agendaItems = [
         title: "역사 토론",
         date: dates[2],
         dayOfWeek: getDayOfWeek(dates[2]),
-        color: "#20DC33",
+        color: "#A6E7DF",
         memo: "토론 주제 준비"
       }
     ]
@@ -127,7 +127,7 @@ export const agendaItems = [
         title: "국어 시험",
         date: dates[3],
         dayOfWeek: getDayOfWeek(dates[3]),
-        color: "#E826F9",
+        color: "#E199F0",
         memo: "시험 준비물 챙기기"
       }
     ]
@@ -143,7 +143,7 @@ export const agendaItems = [
         title: "음악 수업",
         date: dates[4],
         dayOfWeek: getDayOfWeek(dates[4]),
-        color: "#327CEA",
+        color: "#8A7EFF",
         memo: "악기 준비"
       }
     ]
@@ -159,7 +159,7 @@ export const agendaItems = [
         title: "음악 수업",
         date: dates[5],
         dayOfWeek: getDayOfWeek(dates[5]),
-        color: "#20DC33",
+        color: "#A6E7DF",
         memo: "노래 연습"
       },
       {
@@ -170,7 +170,7 @@ export const agendaItems = [
         title: "미술 시간",
         date: dates[5],
         dayOfWeek: getDayOfWeek(dates[5]),
-        color: "#E826F9",
+        color: "#E199F0",
         memo: "그림 도구 준비"
       },
       {
@@ -181,7 +181,7 @@ export const agendaItems = [
         title: "도서관 방문",
         date: dates[5],
         dayOfWeek: getDayOfWeek(dates[5]),
-        color: "#327CEA",
+        color: "#8A7EFF",
         memo: "도서 목록 준비"
       },
       {
@@ -192,7 +192,7 @@ export const agendaItems = [
         title: "창작 글쓰기",
         date: dates[5],
         dayOfWeek: getDayOfWeek(dates[5]),
-        color: "#20DC33",
+        color: "#A6E7DF",
         memo: "글쓰기 주제 정하기"
       }
     ]
@@ -208,7 +208,7 @@ export const agendaItems = [
         title: "체육 수업",
         date: dates[6],
         dayOfWeek: getDayOfWeek(dates[6]),
-        color: "#E826F9",
+        color: "#E199F0",
         memo: "운동복 챙기기"
       }
     ]
@@ -224,7 +224,7 @@ export const agendaItems = [
         title: "필라테스",
         date: dates[7],
         dayOfWeek: getDayOfWeek(dates[7]),
-        color: "#327CEA",
+        color: "#8A7EFF",
         memo: "필라테스 매트 준비"
       }
     ]
@@ -240,7 +240,7 @@ export const agendaItems = [
         title: "필라테스",
         date: dates[8],
         dayOfWeek: getDayOfWeek(dates[8]),
-        color: "#20DC33",
+        color: "#A6E7DF",
         memo: "필라테스 매트 준비"
       },
       {
@@ -251,7 +251,7 @@ export const agendaItems = [
         title: "요가",
         date: dates[8],
         dayOfWeek: getDayOfWeek(dates[8]),
-        color: "#E826F9",
+        color: "#E199F0",
         memo: "요가복 준비"
       },
       {
@@ -262,7 +262,7 @@ export const agendaItems = [
         title: "TRX 운동",
         date: dates[8],
         dayOfWeek: getDayOfWeek(dates[8]),
-        color: "#327CEA",
+        color: "#8A7EFF",
         memo: "TRX 도구 준비"
       },
       {
@@ -273,7 +273,7 @@ export const agendaItems = [
         title: "달리기 모임",
         date: dates[8],
         dayOfWeek: getDayOfWeek(dates[8]),
-        color: "#20DC33",
+        color: "#A6E7DF",
         memo: "달리기 신발 준비"
       }
     ]
@@ -289,7 +289,7 @@ export const agendaItems = [
         title: "수학 시험",
         date: dates[9],
         dayOfWeek: getDayOfWeek(dates[9]),
-        color: "#E826F9",
+        color: "#E199F0",
         memo: "수학 문제집 복습"
       },
       {
@@ -300,7 +300,7 @@ export const agendaItems = [
         title: "체육 시간",
         date: dates[9],
         dayOfWeek: getDayOfWeek(dates[9]),
-        color: "#327CEA",
+        color: "#8A7EFF",
         memo: "운동복 준비"
       },
       {
@@ -311,7 +311,7 @@ export const agendaItems = [
         title: "독서 모임",
         date: dates[9],
         dayOfWeek: getDayOfWeek(dates[9]),
-        color: "#20DC33",
+        color: "#A6E7DF",
         memo: "책 읽기"
       }
     ]
@@ -327,7 +327,7 @@ export const agendaItems = [
         title: "마지막 수업",
         date: dates[10],
         dayOfWeek: getDayOfWeek(dates[10]),
-        color: "#E826F9",
+        color: "#E199F0",
         memo: "수업 준비물 챙기기"
       }
     ]
@@ -343,7 +343,7 @@ export const agendaItems = [
         title: "한국사",
         date: dates[11],
         dayOfWeek: getDayOfWeek(dates[11]),
-        color: "#327CEA",
+        color: "#8A7EFF",
         memo: "한국사 노트 준비"
       },
       {
@@ -354,7 +354,7 @@ export const agendaItems = [
         title: "미적분학",
         date: dates[11],
         dayOfWeek: getDayOfWeek(dates[11]),
-        color: "#20DC33",
+        color: "#A6E7DF",
         memo: "미적분학 문제집 풀기"
       },
       {
@@ -365,7 +365,7 @@ export const agendaItems = [
         title: "생물학 실험",
         date: dates[11],
         dayOfWeek: getDayOfWeek(dates[11]),
-        color: "#E826F9",
+        color: "#E199F0",
         memo: "실험 도구 챙기기"
       }
     ]
@@ -381,7 +381,7 @@ export const agendaItems = [
         title: "한국어 문법",
         date: dates[12],
         dayOfWeek: getDayOfWeek(dates[12]),
-        color: "#E826F9",
+        color: "#E199F0",
         memo: "문법 책 읽기"
       }
     ]
@@ -397,7 +397,7 @@ export const agendaItems = [
         title: "프로그래밍 수업",
         date: dates[13],
         dayOfWeek: getDayOfWeek(dates[13]),
-        color: "#327CEA",
+        color: "#8A7EFF",
         memo: "프로그래밍 노트 준비"
       }
     ]
@@ -428,11 +428,11 @@ export function getMarkedDates() {
 function getDotColor(key: string) {
   switch (key) {
     case "school_event":
-      return "#E826F9";
+      return "#E199F0";
     case "class_schedule":
-      return "#327CEA";
+      return "#8A7EFF";
     case "personal_event":
-      return "#20DC33";
+      return "#A6E7DF";
     default:
       return "grey";
   }
