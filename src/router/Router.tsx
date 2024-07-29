@@ -10,8 +10,8 @@ const Stack = createNativeStackNavigator();
 const Router = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="CalendarScreen" component={CalendarStackRouter} />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
+      <Stack.Screen name="CalendarScreen" component={CalendarStackRouter} />
     </Stack.Navigator>
   );
 };
