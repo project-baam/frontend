@@ -1,9 +1,9 @@
-import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import Router from "./src/router/Router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React from "react";
 import { StatusBar, StyleSheet, useColorScheme } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "react-native/Libraries/NewAppScreen";
+import Router from "./src/router/Router";
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === "dark";
