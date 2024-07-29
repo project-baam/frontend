@@ -10,7 +10,7 @@ const typoCreator = (fontFamily: string, fontSize: string, lineHeight: string) =
 
 export const Theme = {
   colors: {
-    White: "'#ffffff",
+    White: "#ffffff",
     Gray100: "#f5f5f5",
     Gray200: "#e9e9e9",
     Gray300: "#d9d9d9",
@@ -21,6 +21,7 @@ export const Theme = {
     Gray800: "#434343",
     Gray900: "#262626",
     Black: "#000000",
+    Primary: "#8A7EFF",
     Blue50: "#E6F3FE",
     Blue100: "#548CEA",
     Blue200: "#9DCCFE",
@@ -40,11 +41,15 @@ export const Theme = {
     Heading_03: typoCreator("EsaManruMedium", "16px", "22px"),
     Paragraph_01: typoCreator("Pretendard-Medium", "14px", "22px"),
     Body_01: typoCreator("Esamanru", "16px", "22px"),
-    Body_02: typoCreator("Esamanru", "16px", "22px"),
+    Body_02: typoCreator("Pretendard", "14px", "22px"),
     Body_03_Regular: typoCreator("Pretendard-Regular", "16px", "22px"),
     Body_03_Bold: typoCreator("Pretendard-Bold", "16px", "22px"),
     Body_04_Bold: typoCreator("Pretendard-Bold", "18px", "26px"),
-    Caption_01: typoCreator("Prentedard-Regular", "12px", "16px")
+    Body_04: typoCreator("Pretendard", "18px", "26px"),
+    Caption_01: typoCreator("Pretendard-Regular", "12px", "16px"),
+    Label_01: typoCreator("Pretendard-Regular", "14px", "16px"),
+    Label_02: typoCreator("Pretendard-Regular", "16px", "18px"),
+    Label_03: typoCreator("Pretendard-Regular", "18px", "20px")
   }
 };
 export type TColor = keyof (typeof Theme)["colors"];
