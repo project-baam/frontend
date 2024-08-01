@@ -1,17 +1,16 @@
 import styled from "@emotion/native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import Chip from "../components/common/Chip";
-import { Theme } from "../styles/theme";
-import { CalendarAddScreenNavigationProp, CalendarAddScreenRouteProp } from "../types/navigation";
+import Chip from "../../components/common/Chip";
+import { CalendarAddScreenRouteProp } from "../../navigations/CalendarStackNavigation";
+import { Theme } from "../../styles/theme";
 
 interface CalendarAddScreenProps {}
 
 function CalendarAddScreen({}: CalendarAddScreenProps) {
   const route = useRoute<CalendarAddScreenRouteProp>();
-  const navigation = useNavigation<CalendarAddScreenNavigationProp>();
   const { item } = route.params || {};
 
   const [formData, setFormData] = useState({

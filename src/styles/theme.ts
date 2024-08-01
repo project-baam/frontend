@@ -47,6 +47,7 @@ export const Theme = {
     Body_04_Bold: typoCreator("Pretendard-Bold", "18px", "26px"),
     Body_04: typoCreator("Pretendard", "18px", "26px"),
     Caption_01: typoCreator("Pretendard-Regular", "12px", "16px"),
+    Caption_02: typoCreator("Pretendard-Regular", "14px", "18px"),
     Label_01: typoCreator("Pretendard-Regular", "14px", "16px"),
     Label_02: typoCreator("Pretendard-Regular", "16px", "18px"),
     Label_03: typoCreator("Pretendard-Regular", "18px", "20px")

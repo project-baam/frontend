@@ -1,6 +1,6 @@
 import { RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Agenda } from "./agenda";
+import { Agenda } from "../types/agenda";
 
 export type CalendarStackParamList = {
   CalendarHomeScreen: undefined;
@@ -8,5 +8,4 @@ export type CalendarStackParamList = {
 };
 
 export type CalendarAddScreenNavigationProp = NativeStackNavigationProp<CalendarStackParamList, "CalendarAddScreen">;
-
 export type CalendarAddScreenRouteProp = RouteProp<CalendarStackParamList, "CalendarAddScreen">;
