@@ -2,19 +2,21 @@ import styled from "@emotion/native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native";
-import BtnRight from "../assets/images/btn_right.svg";
-import Knob from "../assets/images/knob.svg";
-import Dialog from "../components/common/Dialog";
-import Switch from "../components/common/Switch";
-import { Theme } from "../styles/theme";
-import { SettingStackParamList } from "../types/navigation";
+import BtnRight from "../../assets/images/btn_right.svg";
+import Knob from "../../assets/images/knob.svg";
+import Dialog from "../../components/common/Dialog";
+import Switch from "../../components/common/Switch";
+import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
+import { useProfileStore } from "../../store/store";
+import { Theme } from "../../styles/theme";
 
-interface SettingScreenProps {}
+interface SettingHomeScreenProps {}
 
-function SettingScreen({}: SettingScreenProps) {
+function SettingHomeScreen({}: SettingHomeScreenProps) {
   const [isSwitchOn, setIsSwitchOn] = useState(false);
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const navigation = useNavigation<NavigationProp<SettingStackParamList>>();
+  const { name, school } = useProfileStore();
 
   const handleToggleSwitch = () => {
     setIsSwitchOn((previousState) => !previousState);
@@ -33,14 +35,25 @@ function SettingScreen({}: SettingScreenProps) {
     handleHideDialog();
   };
 
+  const customerServiceOptions = [
+    {
+      label: "서비스약관",
+      action: () => navigation.navigate("TermsOfServiceScreen")
+    },
+    {
+      label: "회원 탈퇴하기",
+      action: handleShowDialog
+    }
+  ];
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Container>
         <ProfileButton onPress={() => navigation.navigate("ProfileScreen")}>
           <Knob width={48} height={48} style={{ width: 48, height: 48, borderRadius: 999, backgroundColor: "red" }} />
           <UserInfo>
-            <NameText>이름</NameText>
-            <SchoolText>명지대학교</SchoolText>
+            <NameText>{name}</NameText>
+            <SchoolText>{school}</SchoolText>
           </UserInfo>
           <BtnRight style={{ marginLeft: "auto" }} />
         </ProfileButton>
@@ -59,14 +72,12 @@ function SettingScreen({}: SettingScreenProps) {
         <SectionContainer>
           <SectionTitleText>고객센터</SectionTitleText>
           <CustomerContainer>
-            <StyledPressable onPress={() => navigation.navigate("TermsOfServiceScreen")}>
-              <ButtonText>서비스약관</ButtonText>
-              <BtnRight width={24} height={24} />
-            </StyledPressable>
-            <StyledPressable onPress={handleShowDialog}>
-              <ButtonText>회원 탈퇴하기</ButtonText>
-              <BtnRight width={24} height={24} />
-            </StyledPressable>
+            {customerServiceOptions.map((option, index) => (
+              <StyledPressable key={index} onPress={option.action}>
+                <ButtonText>{option.label}</ButtonText>
+                <BtnRight width={24} height={24} />
+              </StyledPressable>
+            ))}
           </CustomerContainer>
         </SectionContainer>
       </Container>
@@ -83,7 +94,7 @@ function SettingScreen({}: SettingScreenProps) {
   );
 }
 
-export default SettingScreen;
+export default SettingHomeScreen;
 
 const Container = styled.View`
   gap: 12px;

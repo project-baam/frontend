@@ -3,10 +3,10 @@ import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import { Image, Pressable } from "react-native";
-import CalendarAddScreen from "../pages/CalendarAddScreen";
-import CalendarHomeScreen from "../pages/CalendarHomeScreen";
+import { CalendarStackParamList } from "../navigations//CalendarStackNavigation";
+import CalendarAddScreen from "../pages/calendar/CalendarAddScreen";
+import CalendarHomeScreen from "../pages/calendar/CalendarHomeScreen";
 import { Theme } from "../styles/theme";
-import { CalendarStackParamList } from "../types/navigation";
 
 const Stack = createNativeStackNavigator<CalendarStackParamList>();
 

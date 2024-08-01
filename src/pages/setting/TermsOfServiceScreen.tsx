@@ -1,7 +1,7 @@
 import styled from "@emotion/native";
 import React from "react";
 import { SafeAreaView, ScrollView } from "react-native";
-import { Theme } from "../styles/theme";
+import { Theme } from "../../styles/theme";
 
 interface TermsOfServiceScreenProps {}
 
@@ -11,7 +11,6 @@ function TermsOfServiceScreen({}: TermsOfServiceScreenProps) {
       <Container>
         <ScrollView>
           <Content>
-            {/* 여기에 실제 서비스 약관 내용을 추가하세요 */}
             <Paragraph>
               안녕하세요. (주)카카오 입니다. {"\n"}
               {"\n"}카카오 서비스를 이용해주시는 회원 여러분께 감사드리며, 카카오 개인정보 처리방침 변경에 대한 안내

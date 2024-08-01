@@ -1,4 +1,4 @@
-import create from "zustand";
+import { create } from "zustand";
 
 interface ChatState {
   messages: Message[];
@@ -24,4 +24,26 @@ export const useChatStore = create<ChatState>((set) => ({
     set((state) => ({
       messages: [...state.messages, message]
     }))
+}));
+
+interface ProfileState {
+  name: string;
+  school: string;
+  grade: string;
+  class: string;
+  setName: (name: string) => void;
+  setSchool: (school: string) => void;
+  setGrade: (grade: string) => void;
+  setClass: (classValue: string) => void;
+}
+
+export const useProfileStore = create<ProfileState>((set) => ({
+  name: "한지우",
+  school: "태초대학교",
+  grade: "3학년",
+  class: "2반",
+  setName: (name) => set({ name }),
+  setSchool: (school) => set({ school }),
+  setGrade: (grade) => set({ grade }),
+  setClass: (classValue) => set({ class: classValue })
 }));

@@ -1,6 +1,6 @@
 import React from "react";
 import { SafeAreaView } from "react-native";
-import Calendar from "../components/calendar/Calendar";
+import Calendar from "../../components/calendar/Calendar";
 
 interface CalendarHomeScreenProps {}
 
