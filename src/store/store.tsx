@@ -31,10 +31,12 @@ interface ProfileState {
   school: string;
   grade: string;
   class: string;
+  profileImage: string;
   setName: (name: string) => void;
   setSchool: (school: string) => void;
   setGrade: (grade: string) => void;
   setClass: (classValue: string) => void;
+  setProfileImage: (profileImage: string) => void;
 }
 
 export const useProfileStore = create<ProfileState>((set) => ({
@@ -42,8 +44,10 @@ export const useProfileStore = create<ProfileState>((set) => ({
   school: "태초대학교",
   grade: "3학년",
   class: "2반",
+  profileImage: "",
   setName: (name) => set({ name }),
   setSchool: (school) => set({ school }),
   setGrade: (grade) => set({ grade }),
-  setClass: (classValue) => set({ class: classValue })
+  setClass: (classValue) => set({ class: classValue }),
+  setProfileImage: (profileImage) => set({ profileImage })
 }));

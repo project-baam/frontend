@@ -2,8 +2,9 @@ import styled from "@emotion/native";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { Keyboard, SafeAreaView, Text, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
+import { Keyboard, SafeAreaView, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import DropDownPicker, { ItemType } from "react-native-dropdown-picker";
+import HeaderRightText from "../../components/common/HeaderRightText";
 import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
 import { useProfileStore } from "../../store/store";
 import { Theme } from "../../styles/theme";
@@ -54,7 +55,7 @@ function ProfileEditScreen({}: ProfileEditScreenProps) {
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity onPress={handleSave}>
-          <Text>저장</Text>
+          <HeaderRightText>저장</HeaderRightText>
         </TouchableOpacity>
       )
     });

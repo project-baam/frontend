@@ -1,7 +1,7 @@
 import styled from "@emotion/native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
-import { FlatList, SafeAreaView, Text, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import { FlatList, SafeAreaView, TouchableOpacity } from "react-native";
 import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
 import { Theme } from "../../styles/theme";
 
@@ -14,7 +14,8 @@ const schools: School[] = [
   { name: "명지대학교", address: "서울특별시 서대문구 홍제동" },
   { name: "서울대학교", address: "서울특별시 관악구 관악로" },
   { name: "고려대학교", address: "서울특별시 성북구 안암로" },
-  { name: "연세대학교", address: "서울특별시 서대문구 연세로" }
+  { name: "연세대학교", address: "서울특별시 서대문구 연세로" },
+  { name: "태초대학교", address: "태초특별시 태초구 태초로" }
 ];
 
 function SchoolSearchScreen() {
@@ -35,16 +36,6 @@ function SchoolSearchScreen() {
   const handleSchoolSelect = (school: string) => {
     navigation.navigate("ProfileEditScreen", { school });
   };
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity onPress={() => handleSchoolSelect(searchQuery)}>
-          <Text>선택</Text>
-        </TouchableOpacity>
-      )
-    });
-  }, [navigation, searchQuery]);
 
   return (
     <SafeAreaView style={{ backgroundColor: Theme.colors.White, flex: 1 }}>

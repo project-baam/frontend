@@ -1,9 +1,8 @@
 import styled from "@emotion/native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
-import { SafeAreaView } from "react-native";
+import { Image, SafeAreaView } from "react-native";
 import BtnRight from "../../assets/images/btn_right.svg";
-import Knob from "../../assets/images/knob.svg";
 import Dialog from "../../components/common/Dialog";
 import Switch from "../../components/common/Switch";
 import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
@@ -16,7 +15,7 @@ function SettingHomeScreen({}: SettingHomeScreenProps) {
   const [isSwitchOn, setIsSwitchOn] = useState(false);
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const navigation = useNavigation<NavigationProp<SettingStackParamList>>();
-  const { name, school } = useProfileStore();
+  const { name, school, profileImage } = useProfileStore();
 
   const handleToggleSwitch = () => {
     setIsSwitchOn((previousState) => !previousState);
@@ -50,7 +49,12 @@ function SettingHomeScreen({}: SettingHomeScreenProps) {
     <SafeAreaView style={{ flex: 1 }}>
       <Container>
         <ProfileButton onPress={() => navigation.navigate("ProfileScreen")}>
-          <Knob width={48} height={48} style={{ width: 48, height: 48, borderRadius: 999, backgroundColor: "red" }} />
+          <Image
+            source={profileImage ? { uri: profileImage } : require("../../assets/images/dummyprofile.png")}
+            width={48}
+            height={48}
+            style={{ width: 48, height: 48, borderRadius: 24 }}
+          />
           <UserInfo>
             <NameText>{name}</NameText>
             <SchoolText>{school}</SchoolText>

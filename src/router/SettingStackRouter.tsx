@@ -2,8 +2,10 @@ import styled from "@emotion/native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
-import { Image, Pressable, Text } from "react-native";
+import { Image, Pressable } from "react-native";
+import HeaderRightText from "../components/common/HeaderRightText";
 import { SettingStackParamList } from "../navigations/SettingStackNavigation";
+import ImagePickerScreen from "../pages/setting/ImagePickerScreen";
 import ProfileEditScreen from "../pages/setting/ProfileEditScreen";
 import ProfileScreen from "../pages/setting/ProfileScreen";
 import SchoolSearchScreen from "../pages/setting/SchoolSearchScreen";
@@ -47,7 +49,7 @@ const SettingStackRouter = () => {
           headerTitle: "내 프로필",
           headerRight: () => (
             <Pressable onPress={() => navigateToProfileEditScreen()}>
-              <Text>수정</Text>
+              <HeaderRightText>수정</HeaderRightText>
             </Pressable>
           )
         }}
@@ -58,6 +60,11 @@ const SettingStackRouter = () => {
         name="TermsOfServiceScreen"
         component={TermsOfServiceScreen}
         options={{ headerTitle: "개인정보 처리 방침" }}
+      />
+      <Stack.Screen
+        name="ImagePickerScreen"
+        component={ImagePickerScreen}
+        options={{ headerTitle: "프로필 사진 변경" }}
       />
     </Stack.Navigator>
   );
