@@ -8,12 +8,14 @@ import CalendarStackRouter from "./CalendarStackRouter";
 import SettingStackRouter from "./SettingStackRouter";
 import { HomeIcon, PinIcon, FriendsIcon, CalendarIcon, SettingIcon } from "../assets/assets";
 import { Image, StyleSheet, View } from "react-native";
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 interface CustomTabBarProps {
   state: any;
   navigation: any;
 }
+
 const CustomTabBar = ({ state, navigation }: CustomTabBarProps) => {
   return (
     <TabBarContainer>
