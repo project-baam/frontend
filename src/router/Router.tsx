@@ -12,14 +12,12 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 interface CustomTabBarProps {
   state: any;
-  descriptors: any;
   navigation: any;
 }
-const CustomTabBar = ({ state, descriptors, navigation }: CustomTabBarProps) => {
+const CustomTabBar = ({ state, navigation }: CustomTabBarProps) => {
   return (
     <TabBarContainer>
       {state.routes.map((route: any, index: number) => {
-        // const { options } = descriptors[route.key];
         const isFocused = state.index === index;
         const onPress = () => {
           const event = navigation.emit({
@@ -53,9 +51,9 @@ const CustomTabBar = ({ state, descriptors, navigation }: CustomTabBarProps) => 
         };
 
         return (
-          <View key={route.key} style={styles.tabButton} onTouchEnd={onPress}>
+          <TabButton key={route.key} onTouchEnd={onPress}>
             <Image source={getIconSource()} style={[styles.icon, isFocused && styles.iconFocused]} />
-          </View>
+          </TabButton>
         );
       })}
     </TabBarContainer>
@@ -89,11 +87,11 @@ const TabBarContainer = styled(View)`
   align-items: center;
   margin: auto;
 `;
+const TabButton = styled(View)`
+  flex: 1;
+  align-items: center;
+`;
 const styles = StyleSheet.create({
-  tabButton: {
-    flex: 1,
-    alignItems: "center"
-  },
   icon: {
     width: 32,
     height: 32,
