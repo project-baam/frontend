@@ -1,13 +1,16 @@
 import { ReactNode } from "react";
 import * as S from "./styles";
+import { Pressable } from "react-native";
 
 interface IconButtonProps {
   type: "Rec" | "Ball";
   size: "Small" | "Medium" | "Large" | "Oasis";
   icon: ReactNode;
+  bgColor: string;
+  onPress: () => void;
 }
 
-export default function IconButton({ type, size, icon }: IconButtonProps) {
+export default function IconButton({ type, size, icon, bgColor, onPress }: IconButtonProps) {
   let number;
   let padding;
   switch (size) {
@@ -30,8 +33,10 @@ export default function IconButton({ type, size, icon }: IconButtonProps) {
   }
 
   return (
-    <S.StyledView type={type} number={number} padding={padding}>
-      <S.InnerView>{icon}</S.InnerView>
-    </S.StyledView>
+    <Pressable onPress={onPress}>
+      <S.StyledView type={type} number={number} padding={padding} bgColor={bgColor}>
+        <S.InnerView>{icon}</S.InnerView>
+      </S.StyledView>
+    </Pressable>
   );
 }
