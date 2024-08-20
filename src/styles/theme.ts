@@ -35,6 +35,10 @@ export const Theme = {
   },
   typo: {
     Display_01: typoCreator("EsaManruBold", "72px", "100%"),
+    Head_01_RD: typoCreator("EsaManruLight", "16px", "20px"),
+    Head_01_RP: typoCreator("EsaManruLight", "16px", "22px"),
+    Head_01_MD: typoCreator("EsaManruMedium", "16px", "20px"),
+    Head_01_MP: typoCreator("EsaManruMedium", "16px", "22px"),
     Title_01: typoCreator("EsaManruBold", "36px", "48px"),
     Heading_01: typoCreator("Pretendard-SemiBold", "24px", "30px"),
     Heading_02: typoCreator("EsaManruMedium", "24px", "28px"),
