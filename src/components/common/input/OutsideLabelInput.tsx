@@ -1,31 +1,30 @@
-import { useState } from "react";
 import * as S from "./styles";
-import { NativeSyntheticEvent, TextInputChangeEventData } from "react-native";
+import { TextInputProps } from "react-native";
 import IconButton from "../button/IconButton";
 import { Path, Svg } from "react-native-svg";
 
-interface OutSideLabelInputProps {
+interface OutSideLabelInputProps extends TextInputProps {
   label: string;
   placeholder: string;
+  value: any;
+  onUpdateValue?: (text: any) => void;
+  onClear?: () => void;
 }
 
-export default function OutSideLabelInput({ label, placeholder }: OutSideLabelInputProps) {
-  const [text, setText] = useState("");
-
-  function handleInputChange(e: NativeSyntheticEvent<TextInputChangeEventData>) {
-    setText(e.nativeEvent.text);
-  }
-
-  function handleInputClear() {
-    setText("");
-  }
-
+export default function OutSideLabelInput({
+  label,
+  placeholder,
+  value,
+  onUpdateValue,
+  onClear,
+  ...props
+}: OutSideLabelInputProps) {
   return (
     <S.RootContainer>
       <S.StyledLabel>{label}</S.StyledLabel>
       <S.InnerContainer>
-        <S.StyledTextInput placeholder={placeholder} value={text} onChange={handleInputChange} />
-        {text.length > 0 && (
+        <S.StyledTextInput placeholder={placeholder} value={value} onChangeText={onUpdateValue} {...props} />
+        {value.length > 0 && onClear && (
           <S.ButtonContainer>
             <IconButton
               type="Ball"
@@ -42,7 +41,7 @@ export default function OutSideLabelInput({ label, placeholder }: OutSideLabelIn
                 </Svg>
               }
               bgColor="transparent"
-              onPress={handleInputClear}
+              onPress={onClear}
             />
           </S.ButtonContainer>
         )}

@@ -1,31 +1,30 @@
-import { NativeSyntheticEvent, TextInputChangeEventData } from "react-native";
+import { TextInputProps } from "react-native";
 import * as S from "./styles";
-import { useState } from "react";
 import IconButton from "../button/IconButton";
 import { Path, Svg } from "react-native-svg";
 
-interface InsideLabelInputProps {
+interface InsideLabelInputProps extends TextInputProps {
   label: string;
   placeholder: string;
+  value: any;
+  onUpdateValue?: (text: any) => void;
+  onClear?: () => void;
 }
 
-export default function InsideLabelInput({ label, placeholder }: InsideLabelInputProps) {
-  const [text, setText] = useState("");
-
-  function handleInputChange(e: NativeSyntheticEvent<TextInputChangeEventData>) {
-    setText(e.nativeEvent.text);
-  }
-
-  function handleInputClear() {
-    setText("");
-  }
-
+export default function InsideLabelInput({
+  label,
+  placeholder,
+  value,
+  onUpdateValue,
+  onClear,
+  ...props
+}: InsideLabelInputProps) {
   return (
     <S.IRootContainer>
       <S.IStyledLabel>{label}</S.IStyledLabel>
       <S.IInnerContainer>
-        <S.IStyledTextInput placeholder={placeholder} value={text} onChange={handleInputChange} />
-        {text.length > 0 && (
+        <S.IStyledTextInput placeholder={placeholder} value={value} onChangeText={onUpdateValue} {...props} />
+        {value.length > 0 && onClear && (
           <S.IButtonContainer>
             <IconButton
               type="Ball"
@@ -42,7 +41,7 @@ export default function InsideLabelInput({ label, placeholder }: InsideLabelInpu
                 </Svg>
               }
               bgColor="transparent"
-              onPress={handleInputClear}
+              onPress={onClear}
             />
           </S.IButtonContainer>
         )}
