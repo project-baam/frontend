@@ -2,9 +2,10 @@ import styled from "@emotion/native";
 import { Theme } from "../../../styles/theme";
 
 export const RootContainer = styled.View`
-  width: 328px;
+  width: 100%;
   height: 80px;
   gap: 16px;
+  position: relative;
 `;
 
 export const InnerContainer = styled.View`
@@ -13,7 +14,7 @@ export const InnerContainer = styled.View`
 
 export const ButtonContainer = styled.View`
   position: absolute;
-  left: 285px;
+  left: 90%;
   top: 10px;
 `;
 
@@ -24,7 +25,7 @@ export const StyledLabel = styled.Text`
 
 export const StyledTextInput = styled.TextInput`
   width: 100%;
-  height: 48px;
+  height: 50px;
   background-color: ${Theme.colors.Gray100};
   padding: 12px 16px;
   color: ${Theme.colors.Gray900};
@@ -38,6 +39,7 @@ export const IRootContainer = styled.View`
   background-color: ${Theme.colors.Gray100};
   padding: 8px 16px 8px 16px;
   border-radius: 12px;
+  position: relative;
 `;
 
 export const IInnerContainer = styled.View`
@@ -56,5 +58,5 @@ export const IStyledTextInput = styled.TextInput`
 
 export const IButtonContainer = styled.View`
   position: absolute;
-  left: 275px;
+  left: 90%;
 `;
