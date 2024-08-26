@@ -5,7 +5,7 @@ import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
 import DropDownPicker, { ItemType } from "react-native-dropdown-picker";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 type SchoolInfoFormProps = StackScreenProps<SignUpStackParamList, "SchoolInfoForm">;
 
@@ -63,6 +63,7 @@ export default function SchoolInfoForm({ navigation, route }: SchoolInfoFormProp
 
   // 학년 선택에 따른 class dropdown 동적 변경
   function handleChangeClass() {
+    setActive(false);
     setOpenClass(false);
     setClassValue(null);
 
@@ -140,10 +141,24 @@ export default function SchoolInfoForm({ navigation, route }: SchoolInfoFormProp
               scrollViewProps={{
                 nestedScrollEnabled: true
               }}
+              onSelectItem={() => {
+                setActive(true);
+              }}
             />
           </DropdownContainer>
         </DropDownRootContainer>
       </InnerContainer>
+      <ButtonContainer active={active}>
+        <Pressable
+          onPress={() => {
+            navigation.navigate("UserNameForm");
+          }}
+        >
+          <View>
+            <ButtonText active={active}>다음</ButtonText>
+          </View>
+        </Pressable>
+      </ButtonContainer>
     </RootContainer>
   );
 }
@@ -167,14 +182,15 @@ const DropdownContainer = styled.View`
 `;
 
 const RootContainer = styled.SafeAreaView`
+  display: flex;
   flex: 1;
   background-color: ${Theme.colors.White};
+  padding: 27px 16px;
+  gap: 32px;
 `;
 
 const InnerContainer = styled.View`
   background-color: ${Theme.colors.White};
-  margin-top: 27px;
-  margin-horizontal: 16px;
   gap: 16px;
 `;
 
@@ -205,4 +221,15 @@ const ButtonText = styled.Text<{ active: boolean }>`
   ${Theme.typo.Label_03};
   text-align: center;
   color: ${({ active }) => (active ? Theme.colors.White : Theme.colors.Gray400)};
+`;
+
+const ButtonContainer = styled.View<{ active: boolean }>`
+  width: 100%;
+  position: absolute;
+  left: 16px;
+  bottom: 24px;
+  height: 52px;
+  padding: 16px 12px;
+  border-radius: 24px;
+  background-color: ${({ active }) => (active ? "#8A7EFF" : "#F3F2FF")};
 `;
