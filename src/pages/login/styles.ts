@@ -4,15 +4,11 @@ import { Theme } from "../../styles/theme";
 export const RootContainer = styled.View`
   flex: 1;
   background-color: white;
-  justify-content: space-between;
-  align-items: center;
-  padding: 80px 16px 0px 16px;
+  padding: 160px 16px 72px 16px;
 `;
 
 export const ImageContainer = styled.View`
-  width: 240px;
-  height: 240px;
-  background-color: ${Theme.colors.Gray300};
+  flex: 1;
   justify-content: center;
   align-items: center;
 `;
@@ -57,5 +53,24 @@ export const SecondaryButtonText = styled.Text`
 
 export const ButtonContainer = styled.View`
   width: 100%;
-  margin-bottom: 40px;
+`;
+
+export const TextContainer = styled.View`
+  margin-bottom: 36px;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const Title = styled.Text`
+  font-family: "Pretendard-Bold";
+  font-size: 20px;
+  line-height: 23.87px;
+  color: ${Theme.colors.Gray900};
+  margin-bottom: 8px;
+`;
+export const SubTitle = styled.Text`
+  font-family: "Pretendard";
+  font-size: 16px;
+  line-height: 19.09px;
+  color: ${Theme.colors.Gray900};
 `;
