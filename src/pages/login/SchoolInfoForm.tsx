@@ -5,13 +5,17 @@ import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
 import DropDownPicker, { ItemType } from "react-native-dropdown-picker";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 
 type SchoolInfoFormProps = StackScreenProps<SignUpStackParamList, "SchoolInfoForm">;
 
 type item = {
   grade: number;
   name: string[];
+};
+type DataType = {
+  grade: number;
+  names: string[];
 };
 
 export default function SchoolInfoForm({ navigation, route }: SchoolInfoFormProps) {
@@ -20,13 +24,20 @@ export default function SchoolInfoForm({ navigation, route }: SchoolInfoFormProp
   const name = params.schoolInfo.name;
   const roadNameAddress = params.schoolInfo.roadNameAddress;
 
+  // 전체 데이터
+  const [data, setData] = useState<DataType[] | null>(null);
+
   // 학년
   const [openGrade, setOpenGrade] = useState(false);
   const [grade, setGrade] = useState(null);
   const [gradeItems, setGradeItems] = useState<ItemType<string>[]>([]);
 
   // 학반
-  const [classItems, setClassItems] = useState("");
+  const [openClass, setOpenClass] = useState(false);
+  const [classValue, setClassValue] = useState(null);
+  const [classItems, setClassItems] = useState<ItemType<string>[]>([]);
+
+  const [active, setActive] = useState(false);
 
   // 학교별 학급 정보 조회 API
   useEffect(() => {
@@ -40,14 +51,35 @@ export default function SchoolInfoForm({ navigation, route }: SchoolInfoFormProp
       const items = response.data.list;
       const grades = items.map((item: item) => {
         return {
-          label: String(item.grade),
+          label: String(item.grade) + "학년",
           value: String(item.grade)
         };
       });
       setGradeItems(grades);
+      setData(items);
     }
     fetchSchool();
   }, [id]);
+
+  // 학년 선택에 따른 class dropdown 동적 변경
+  function handleChangeClass() {
+    setOpenClass(false);
+    setClassValue(null);
+
+    const idx = grade;
+
+    if (data && idx !== null) {
+      const nameArray = data[idx - 1].names;
+      const sortedNames = nameArray.sort((a, b) => Number(a) - Number(b));
+      const items = sortedNames.map((item: string) => ({
+        label: item + "반",
+        value: item
+      }));
+      setClassItems(items);
+    }
+
+    return;
+  }
 
   return (
     <RootContainer>
@@ -72,21 +104,42 @@ export default function SchoolInfoForm({ navigation, route }: SchoolInfoFormProp
               placeholder="선택 필요"
               style={pickerStyle}
               closeAfterSelecting={true}
-              dropDownContainerStyle={dropDownContainerStyle}
+              dropDownContainerStyle={{
+                borderColor: Theme.colors.Gray200,
+                backgroundColor: Theme.colors.Gray200,
+                position: "relative",
+                top: 0,
+                width: 156
+              }}
+              onChangeValue={handleChangeClass}
+              listMode="SCROLLVIEW"
+              scrollViewProps={{
+                nestedScrollEnabled: true
+              }}
             />
           </DropdownContainer>
           <DropdownContainer>
             <DropDownPicker
-              value={grade}
-              open={openGrade}
-              setOpen={setOpenGrade}
-              setValue={setGrade}
-              items={gradeItems}
-              setItems={setGradeItems}
+              open={openClass}
+              setOpen={setOpenClass}
+              value={classValue}
+              setValue={setClassValue}
+              items={classItems}
+              setItems={setClassItems}
               placeholder="선택 필요"
               style={pickerStyle}
               closeAfterSelecting={true}
-              dropDownContainerStyle={dropDownContainerStyle}
+              dropDownContainerStyle={{
+                borderColor: Theme.colors.Gray200,
+                backgroundColor: Theme.colors.Gray200,
+                position: "relative",
+                top: 0,
+                width: 156
+              }}
+              listMode="SCROLLVIEW"
+              scrollViewProps={{
+                nestedScrollEnabled: true
+              }}
             />
           </DropdownContainer>
         </DropDownRootContainer>
@@ -103,12 +156,6 @@ const pickerStyle = {
   borderRadius: 12,
   width: 156,
   height: 42
-};
-
-const dropDownContainerStyle = {
-  borderColor: Theme.colors.Gray200,
-  backgroundColor: Theme.colors.Gray200,
-  width: 156
 };
 
 const DropDownRootContainer = styled.View`
@@ -152,4 +199,10 @@ const SchoolName = styled.Text`
 const Address = styled.Text`
   ${Theme.typo.Body_03_Regular};
   color: ${Theme.colors.Gray900};
+`;
+
+const ButtonText = styled.Text<{ active: boolean }>`
+  ${Theme.typo.Label_03};
+  text-align: center;
+  color: ${({ active }) => (active ? Theme.colors.White : Theme.colors.Gray400)};
 `;
