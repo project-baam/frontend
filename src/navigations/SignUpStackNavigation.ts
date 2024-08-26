@@ -12,4 +12,6 @@ export type SignUpStackParamList = {
       roadNameAddress: string | null;
     };
   };
+  UserNameForm: undefined;
+  UserProfileForm: undefined;
 };
