@@ -3,11 +3,15 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
 import styled from "@emotion/native";
+import FriendListScreen from "../pages/friends/FriendListScreen";
 import ChatScreen from "../pages/ChatScreen";
 import CalendarStackRouter from "./CalendarStackRouter";
 import SettingStackRouter from "./SettingStackRouter";
 import { HomeIcon, PinIcon, FriendsIcon, CalendarIcon, SettingIcon } from "../assets/assets";
 import { Image, StyleSheet, View } from "react-native";
+import EditMemoScreen from "../pages/memo/EditMemoScreen";
+import FriendProfile from "../pages/friends/FriendProfile";
+import MemoScreen2 from "../pages/memo/MemoScreen2";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -71,8 +75,8 @@ export const MyTabs = () => {
       }}
     >
       <Tab.Screen name="Home" component={ChatScreen} />
-      <Tab.Screen name="Pin" component={ChatScreen} />
-      <Tab.Screen name="Friends" component={ChatScreen} />
+      <Tab.Screen name="Pin" component={MemoScreen2} />
+      <Tab.Screen name="Friends" component={FriendListScreen} />
       <Tab.Screen name="Calendar" component={CalendarStackRouter} />
       <Tab.Screen name="Setting" component={SettingStackRouter} />
     </Tab.Navigator>
@@ -110,6 +114,8 @@ const Router = () => {
       <Stack.Screen name="SettingScreen" component={SettingStackRouter} />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
       <Stack.Screen name="CalendarScreen" component={CalendarStackRouter} />
+      <Stack.Screen name="EditMemoScreen" component={EditMemoScreen} />
+      <Stack.Screen name="FriendProfile" component={FriendProfile} />
     </Stack.Navigator>
   );
 };
