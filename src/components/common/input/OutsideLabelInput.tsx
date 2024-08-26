@@ -4,7 +4,7 @@ import IconButton from "../button/IconButton";
 import { Path, Svg } from "react-native-svg";
 
 interface OutSideLabelInputProps extends TextInputProps {
-  label: string;
+  label?: string;
   placeholder: string;
   value: any;
   onUpdateValue?: (text: any) => void;
