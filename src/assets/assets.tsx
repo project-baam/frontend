@@ -16,5 +16,8 @@ export const FilterLine = require("../assets/images/filter-lines.png");
 export const FavoriteStar = require("../assets/images/star-01.png");
 export const Star01 = require("../assets/images/fvstar01.png");
 export const Star02 = require("../assets/images/fvstar02.png");
+export const AppleImg = require("../assets/images/apple.png");
+export const KakaoImg = require("../assets/images/kakao.png");
+export const LogoImg = require("../assets/images/baam_logo.png");
 //test
 export const DummyProfile = require("../assets/images/dummyprofile.png");
