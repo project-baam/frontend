@@ -14,5 +14,7 @@ export const AppleImg = require("../assets/images/apple.png");
 export const KakaoImg = require("../assets/images/kakao.png");
 export const LogoImg = require("../assets/images/baam_logo.png");
 export const AnimatedLogoImage = require("../assets/images/login.json");
+export const PencilImg = require("../assets/images/pencil.png");
+export const CardBackgroundImg = require("../assets/images/cardBackgroundImage.png");
 //test
 export const DummyProfile = require("../assets/images/dummyprofile.png");
