@@ -111,24 +111,24 @@ const memoList = {
       ]
     },
     {
-      subjectName: "수학1",
+      subjectName: "영어1",
       memos: [
         {
           id: 0,
-          subjectName: "수학1",
-          title: "수학메모1",
+          subjectName: "영어1",
+          title: "영어메모1",
           content: "",
           datetime: new Date()
         }
       ]
     },
     {
-      subjectName: "수학1",
+      subjectName: "과학1",
       memos: [
         {
           id: 0,
-          subjectName: "수학1",
-          title: "수학메모1",
+          subjectName: "과학1",
+          title: "과학1",
           content: "",
           datetime: new Date()
         }

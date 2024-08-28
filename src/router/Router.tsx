@@ -12,6 +12,7 @@ import { Image, StyleSheet, View } from "react-native";
 import EditMemoScreen from "../pages/memo/EditMemoScreen";
 import FriendProfile from "../pages/friends/FriendProfile";
 import MemoScreen2 from "../pages/memo/MemoScreen2";
+import HomeScreen from "../pages/HomeScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -43,7 +44,7 @@ const CustomTabBar = ({ state, navigation }: CustomTabBarProps) => {
               return isFocused
                 ? HomeIcon // 아이콘의 활성화된 상태
                 : HomeIcon; // 아이콘의 비활성화된 상태
-            case "Pin":
+            case "Memo":
               return isFocused ? PinIcon : PinIcon;
             case "Friends":
               return isFocused ? FriendsIcon : FriendsIcon;
@@ -74,8 +75,8 @@ export const MyTabs = () => {
         headerShown: false
       }}
     >
-      <Tab.Screen name="Home" component={ChatScreen} />
-      <Tab.Screen name="Pin" component={MemoScreen2} />
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Memo" component={MemoScreen2} />
       <Tab.Screen name="Friends" component={FriendListScreen} />
       <Tab.Screen name="Calendar" component={CalendarStackRouter} />
       <Tab.Screen name="Setting" component={SettingStackRouter} />
