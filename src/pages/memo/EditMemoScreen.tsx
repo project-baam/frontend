@@ -1,13 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, View, Text, TextInput, TouchableOpacity, Image, Modal, Pressable } from "react-native";
+import {
+  SafeAreaView,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Modal,
+  Pressable,
+  ActivityIndicator,
+  Platform
+} from "react-native";
 import DatePicker from "react-native-date-picker";
+import RNPickerSelect from "react-native-picker-select";
+import DropDownPicker from "react-native-dropdown-picker";
 import styled from "@emotion/native";
-import { VectorLeft } from "../../assets/assets";
+import { VectorLeft, DropDownDown } from "../../assets/assets";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import axios from "axios";
 
+type Subject = {
+  label: string;
+  value: string;
+};
 function EditMemoScreen({ navigation, route }: any) {
+  const [subjectList, setSubjectList] = useState<Subject[]>([]);
   const [subjectName, setSubjectName] = useState(route.params?.subjectName || "");
   const [date, setDate] = useState<Date>(route.params?.datetime ? new Date(route.params.datetime) : new Date());
   const [title, setTitle] = useState(route.params?.title || "");
@@ -16,21 +34,27 @@ function EditMemoScreen({ navigation, route }: any) {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(true);
   const [warningMessage, setWarningMessage] = useState<string>("");
-  const [memoId, setMemoId] = useState<number | undefined>(route.params?.memoId);
+  const [memoId, setMemoId] = useState<number | undefined>(route.params?.id);
+  const [loading, setLoading] = useState(false);
+  const accessToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQsInByb3ZpZGVyIjoia2FrYW8iLCJpYXQiOjE3MjQ4MjM5ODUsImV4cCI6MTcyNDgyNTc4NSwiYXVkIjoiaHR0cHM6Ly9iLXNpdGUuc2l0ZSIsImlzcyI6Imh0dHBzOi8vYi1zaXRlLnNpdGUifQ.EG5nuP1xc1ZjEEn6v9zwGtEDjdQ_c4tC7fvMA5aQf4s";
 
-  useEffect(() => {
-    if (!title.trim() || !content.trim() || content.length > 200) {
-      setIsSubmitDisabled(true);
-      if (content.length > 200) {
-        setWarningMessage("내용이 200자를 초과했습니다.");
-      } else {
-        setWarningMessage("");
-      }
-    } else {
-      setIsSubmitDisabled(false);
-      setWarningMessage("");
-    }
-  }, [title, content]);
+  // useEffect(() => {
+  //   getSubjectList();
+  // }, []);
+  // useEffect(() => {
+  //   if (!title.trim() || !content.trim() || content.length > 200) {
+  //     setIsSubmitDisabled(true);
+  //     if (content.length > 200) {
+  //       setWarningMessage("내용이 200자를 초과했습니다.");
+  //     } else {
+  //       setWarningMessage("");
+  //     }
+  //   } else {
+  //     setIsSubmitDisabled(false);
+  //     setWarningMessage("");
+  //   }
+  // }, [title, content]);
 
   const handleDateChange = (selectedDate: Date) => {
     setDate(selectedDate);
@@ -46,79 +70,151 @@ function EditMemoScreen({ navigation, route }: any) {
     setModalVisible(false);
   };
   const goMemoScreen = async () => {
-    await navigation.reset({
+    navigation.reset({
       index: 0,
-      routes: [{ name: "BottomTab", params: { screen: "MemoScreen" } }]
+      routes: [{ name: "BottomTab", params: { screen: "Memo" } }]
     });
   };
 
-  // const createMemo = async () => {
-  //   try {
-  //     const response = await axios.post(
-  //       "https://b-site.site/subject-memo",
-  //       {
-  //         subjectName: subjectName,
-  //         datetime: date.toISOString(), // ISOString으로 변환
-  //         title: title,
-  //         content: content
-  //       },
-  //       {
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${accessToken}`
-  //         }
-  //       }
-  //     );
+  const createMemo = async () => {
+    try {
+      const response = await axios.post(
+        "https://b-site.site/subject-memo",
+        {
+          subjectName: subjectName,
+          datetime: date.toISOString(), // ISOString으로 변환
+          title: title,
+          content: content
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      );
 
-  //     console.log(response.data);
-  //   } catch (error: any) {
-  //     console.error(error.response ? error.response.data : error.message);
-  //   }
-  // };
+      console.log(response.data);
+    } catch (error: any) {
+      console.error(error.response ? error.response.data : error.message);
+    }
+  };
 
-  // const updateMemo = async () => {
-  //   try {
-  //     const response = await axios.put(
-  //       // PUT 메서드 사용
-  //       `https://b-site.site/subject-memo/${memoId}`,
-  //       {
-  //         datetime: date.toISOString(), // ISOString으로 변환
-  //         title: title,
-  //         content: content
-  //       },
-  //       {
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${accessToken}`
-  //         }
-  //       }
-  //     );
+  const updateMemo = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.patch(
+        // PUT 메서드 사용
+        `https://b-site.site/subject-memo/${memoId}`,
+        {
+          title: title,
+          content: content,
+          datetime: date.toISOString() // ISOString으로 변환
+        },
+        {
+          headers: {
+            accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      );
 
-  //     console.log(response.data);
-  //   } catch (error: any) {
-  //     console.error(error.response ? error.response.data : error.message);
-  //   }
-  // };
+      setLoading(false);
+    } catch (error: any) {
+      console.error(error.response ? error.response.data : error.message);
+    }
+  };
 
-  // const postMemo = async () => {
-  //   if (memoId != undefined) await updateMemo();
-  //   else await createMemo();
+  const postMemo = async () => {
+    if (memoId != undefined) await updateMemo();
+    else await createMemo();
 
-  //   await goMemoScreen();
-  // };
+    await goMemoScreen();
+  };
 
+  const getSubjectList = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        // PUT 메서드 사용
+        `https://b-site.site/timetable?date=2024-08-28`,
+
+        {
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      );
+      response.data.list.map((subject: any) => {
+        console.log("print response datalist");
+        subjectList.push({ label: subject.subject, value: subject.subject });
+      });
+      setLoading(false);
+    } catch (error: any) {
+      console.error(error.response ? error.response.data : error.message);
+    }
+  };
   const formattedDate = format(date, "yyyy년 M월 d일(eee) HH:mm", { locale: ko });
 
   return (
     <Container>
       <InnerContainer>
+        {loading && ( // 로딩 상태면 인디케이터 표시
+          <LoadingContainer>
+            <ActivityIndicator size="large" color="#898989" />
+          </LoadingContainer>
+        )}
         <Header>
           <BackButton onPress={() => navigation.goBack()}>
             <BackIcon source={VectorLeft} />
           </BackButton>
-          <Title>{subjectName} 메모</Title>
-          <EmptyView />
+          {memoId ? <Title>{subjectName} 메모</Title> : <Title>메모 추가</Title>}
         </Header>
+        {memoId ? (
+          <></>
+        ) : (
+          <InputContainer>
+            <InputLabel>과목</InputLabel>
+            {Platform.OS === "ios" ? (
+              <RNPickerSelect
+                placeholder={{}}
+                onValueChange={setSubjectName}
+                items={subjectList}
+                style={{
+                  inputIOS: {
+                    fontSize: 16,
+                    color: "black",
+                    paddingRight: 250,
+                    width: "100%"
+                  }
+                }}
+                useNativeAndroidPickerStyle={false}
+                Icon={() => {
+                  return <DropdownIcon source={DropDownDown} />;
+                }}
+              />
+            ) : (
+              <DropDownPicker
+                open={open}
+                value={subjectName}
+                items={subjectList}
+                setOpen={setOpen}
+                setValue={setSubjectName}
+                setItems={() => {}}
+                style={{
+                  borderColor: "#e9e9e9",
+                  borderWidth: 1,
+                  borderRadius: 12
+                }}
+                dropDownContainerStyle={{
+                  borderColor: "#e9e9e9"
+                }}
+              />
+            )}
+          </InputContainer>
+        )}
 
         <InputContainer>
           <InputLabel>제목</InputLabel>
@@ -155,17 +251,11 @@ function EditMemoScreen({ navigation, route }: any) {
         {warningMessage ? <WarningText>{warningMessage}</WarningText> : null}
         <CharacterCount>{content.length}/200</CharacterCount>
         {isSubmitDisabled ? (
-          <SubmitButton
-            backgroundColor="#D9D9D9"
-            // onPress={postMemo}
-          >
+          <SubmitButton backgroundColor="#D9D9D9" onPress={postMemo}>
             <SubmitButtonText>작성 완료</SubmitButtonText>
           </SubmitButton>
         ) : (
-          <SubmitButton
-            backgroundColor="#8A7EFF"
-            // onPress={postMemo}
-          >
+          <SubmitButton backgroundColor="#8A7EFF" onPress={postMemo}>
             <SubmitButtonText>작성 완료</SubmitButtonText>
           </SubmitButton>
         )}
@@ -271,7 +361,17 @@ const CharacterCount = styled(Text)`
   font-family: Pretendard;
   color: #262626;
 `;
-
+const LoadingContainer = styled(View)`
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  align-items: center;
+  justify-content: center;
+  background-xolor: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+`;
 const SubmitButton = styled(TouchableOpacity)<{ backgroundColor: string }>`
   position: absolute;
   left: 16px;
@@ -319,3 +419,10 @@ const MemoInputContainer = styled(TouchableOpacity)`
 `;
 
 export default EditMemoScreen;
+const DropdownIcon = styled.Image`
+  width: 24px;
+  height: 24px;
+  transform: rotate(180deg);
+  align-items: center;
+  justify-content: center;
+`;

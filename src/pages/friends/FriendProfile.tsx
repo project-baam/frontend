@@ -1,6 +1,15 @@
 import React, { useState } from "react";
 import styled from "@emotion/native";
-import { View, Text, Image, TextInput, ScrollView, SafeAreaView, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TextInput,
+  ScrollView,
+  SafeAreaView,
+  TouchableOpacity,
+  ImageBackground
+} from "react-native";
 import { VectorLeft } from "../../assets/assets";
 import { Star01 } from "../../assets/assets";
 import { Star02 } from "../../assets/assets";
@@ -37,7 +46,7 @@ const timetable = [
   }
 ];
 
-function FriendProfile({ navigation }: any) {
+function FriendProfile({ navigation, route }: any) {
   const [selectedTab, setSelectedTab] = useState("today");
 
   const TodayTimetable = () => {
@@ -102,13 +111,57 @@ function FriendProfile({ navigation }: any) {
           <BackButton onPress={() => navigation.goBack()}>
             <BackIcon source={VectorLeft} />
           </BackButton>
-          <Image source={Star01} />
+          {/* 별 누를 시 즐겨찾기 추가 */}
+          {route.params.favorite ? <Image source={Star02} /> : <Image source={Star01} />}
         </Header>
-        <View style={{ justifyContent: "center" }}>
-          <Image
+        <View>
+          <ImageBackground
             source={{ uri: "https://picsum.photos/400/400" }}
-            style={{ marginHorizontal: 16, marginTop: 8, marginBottom: 20, height: 220, borderRadius: 16 }}
+            imageStyle={{ borderRadius: 16, height: 220, marginHorizontal: 16, marginTop: 8, marginBottom: 20 }}
+            style={{}}
           />
+          <View
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              height: 230
+            }}
+          >
+            <Image
+              source={{ uri: "https://picsum.photos/400/400" }}
+              style={{ height: 80, width: 80, borderRadius: 1000 }}
+            />
+            <Text
+              style={{
+                position: "absolute",
+                left: 35,
+                top: 160,
+                fontSize: 16,
+                lineHeight: 20,
+                fontWeight: "500",
+                fontFamily: "Esamanru OTF",
+                color: "#fff",
+                textAlign: "left"
+              }}
+            >
+              명지대학교
+            </Text>
+            <Text
+              style={{
+                position: "absolute",
+                left: 35,
+                top: 184,
+                fontSize: 16,
+                lineHeight: 20,
+                fontWeight: "500",
+                fontFamily: "Esamanru OTF",
+                color: "#fff",
+                textAlign: "left"
+              }}
+            >
+              3학년 2반
+            </Text>
+          </View>
         </View>
         <Tabs>
           <TabButton active={selectedTab === "today"} onPress={() => setSelectedTab("today")}>
