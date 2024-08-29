@@ -5,7 +5,8 @@ import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
 import DropDownPicker, { ItemType } from "react-native-dropdown-picker";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import useUserStore from "../../store/UserStore";
 
 type SchoolInfoFormProps = StackScreenProps<SignUpStackParamList, "SchoolInfoForm">;
 
@@ -18,23 +19,26 @@ type DataType = {
   names: string[];
 };
 
-export default function SchoolInfoForm({ navigation, route }: SchoolInfoFormProps) {
-  const params = route.params;
-  const id = params.schoolInfo.id;
-  const name = params.schoolInfo.name;
-  const roadNameAddress = params.schoolInfo.roadNameAddress;
+export default function SchoolInfoForm({ navigation }: SchoolInfoFormProps) {
+  const id = useUserStore((state) => state.schoolId);
+  const name = useUserStore((state) => state.schoolName);
+  const roadNameAddress = useUserStore((state) => state.schoolAddress);
+
+  // store
+  const { grade, className, setGrade, setClassName } = useUserStore((state) => state);
+
+  const [localGrade, setLocalGrade] = useState(grade);
+  const [localClassName, setLocalClassName] = useState(className);
 
   // 전체 데이터
   const [data, setData] = useState<DataType[] | null>(null);
 
   // 학년
   const [openGrade, setOpenGrade] = useState(false);
-  const [grade, setGrade] = useState(null);
-  const [gradeItems, setGradeItems] = useState<ItemType<string>[]>([]);
+  const [gradeItems, setGradeItems] = useState<ItemType<number>[]>([]);
 
   // 학반
   const [openClass, setOpenClass] = useState(false);
-  const [classValue, setClassValue] = useState(null);
   const [classItems, setClassItems] = useState<ItemType<string>[]>([]);
 
   const [active, setActive] = useState(false);
@@ -52,7 +56,7 @@ export default function SchoolInfoForm({ navigation, route }: SchoolInfoFormProp
       const grades = items.map((item: item) => {
         return {
           label: String(item.grade) + "학년",
-          value: String(item.grade)
+          value: item.grade
         };
       });
       setGradeItems(grades);
@@ -63,10 +67,11 @@ export default function SchoolInfoForm({ navigation, route }: SchoolInfoFormProp
 
   // 학년 선택에 따른 class dropdown 동적 변경
   function handleChangeClass() {
+    setActive(false);
     setOpenClass(false);
-    setClassValue(null);
+    setLocalClassName(null);
 
-    const idx = grade;
+    const idx = localGrade;
 
     if (data && idx !== null) {
       const nameArray = data[idx - 1].names;
@@ -79,6 +84,11 @@ export default function SchoolInfoForm({ navigation, route }: SchoolInfoFormProp
     }
 
     return;
+  }
+
+  function handleSchoolInfoSubmit() {
+    setGrade(localGrade);
+    setClassName(localClassName);
   }
 
   return (
@@ -95,12 +105,12 @@ export default function SchoolInfoForm({ navigation, route }: SchoolInfoFormProp
         <DropDownRootContainer>
           <DropdownContainer>
             <DropDownPicker
-              value={grade}
-              open={openGrade}
-              setOpen={setOpenGrade}
-              setValue={setGrade}
               items={gradeItems}
+              value={localGrade}
+              open={openGrade}
               setItems={setGradeItems}
+              setValue={setLocalGrade}
+              setOpen={setOpenGrade}
               placeholder="선택 필요"
               style={pickerStyle}
               closeAfterSelecting={true}
@@ -120,12 +130,12 @@ export default function SchoolInfoForm({ navigation, route }: SchoolInfoFormProp
           </DropdownContainer>
           <DropdownContainer>
             <DropDownPicker
-              open={openClass}
-              setOpen={setOpenClass}
-              value={classValue}
-              setValue={setClassValue}
               items={classItems}
+              value={localClassName}
+              open={openClass}
               setItems={setClassItems}
+              setValue={setLocalClassName}
+              setOpen={setOpenClass}
               placeholder="선택 필요"
               style={pickerStyle}
               closeAfterSelecting={true}
@@ -140,10 +150,26 @@ export default function SchoolInfoForm({ navigation, route }: SchoolInfoFormProp
               scrollViewProps={{
                 nestedScrollEnabled: true
               }}
+              onSelectItem={() => {
+                setActive(true);
+              }}
             />
           </DropdownContainer>
         </DropDownRootContainer>
       </InnerContainer>
+      <ButtonContainer active={active}>
+        <Pressable
+          onPress={() => {
+            handleSchoolInfoSubmit();
+            navigation.navigate("UserNameForm");
+          }}
+          disabled={!active}
+        >
+          <View>
+            <ButtonText active={active}>다음</ButtonText>
+          </View>
+        </Pressable>
+      </ButtonContainer>
     </RootContainer>
   );
 }
@@ -167,14 +193,15 @@ const DropdownContainer = styled.View`
 `;
 
 const RootContainer = styled.SafeAreaView`
+  display: flex;
   flex: 1;
   background-color: ${Theme.colors.White};
+  padding: 27px 16px;
+  gap: 32px;
 `;
 
 const InnerContainer = styled.View`
   background-color: ${Theme.colors.White};
-  margin-top: 27px;
-  margin-horizontal: 16px;
   gap: 16px;
 `;
 
@@ -205,4 +232,15 @@ const ButtonText = styled.Text<{ active: boolean }>`
   ${Theme.typo.Label_03};
   text-align: center;
   color: ${({ active }) => (active ? Theme.colors.White : Theme.colors.Gray400)};
+`;
+
+const ButtonContainer = styled.View<{ active: boolean }>`
+  width: 100%;
+  position: absolute;
+  left: 16px;
+  bottom: 24px;
+  height: 52px;
+  padding: 16px 12px;
+  border-radius: 24px;
+  background-color: ${({ active }) => (active ? "#8A7EFF" : "#F3F2FF")};
 `;

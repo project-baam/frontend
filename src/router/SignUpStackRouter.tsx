@@ -9,6 +9,9 @@ import { Theme } from "../styles/theme";
 import { Pressable } from "react-native";
 import styled from "@emotion/native";
 import SchoolInfoForm from "../pages/login/SchoolInfoForm";
+import UserInfoForm from "../pages/login/UserNameForm";
+import UserProfileForm from "../pages/login/UserProfileForm";
+import UserNameForm from "../pages/login/UserNameForm";
 
 const Stack = createNativeStackNavigator<SignUpStackParamList>();
 
@@ -47,6 +50,20 @@ export default function SignUpStackRouter() {
         component={SchoolInfoForm}
         options={{
           title: "정보 입력"
+        }}
+      />
+      <Stack.Screen
+        name="UserNameForm"
+        component={UserNameForm}
+        options={{
+          title: "이름 입력"
+        }}
+      />
+      <Stack.Screen
+        name="UserProfileForm"
+        component={UserProfileForm}
+        options={{
+          title: "프로필 설정"
         }}
       />
     </Stack.Navigator>

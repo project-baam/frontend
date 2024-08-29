@@ -5,11 +5,7 @@ export type SignUpStackParamList = {
     token: string;
   };
   SelectSchool: undefined;
-  SchoolInfoForm: {
-    schoolInfo: {
-      id: number | null;
-      name: string | null;
-      roadNameAddress: string | null;
-    };
-  };
+  SchoolInfoForm: undefined;
+  UserNameForm: undefined;
+  UserProfileForm: undefined;
 };

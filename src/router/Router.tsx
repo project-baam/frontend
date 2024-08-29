@@ -13,6 +13,7 @@ import EditMemoScreen from "../pages/memo/EditMemoScreen";
 import FriendProfile from "../pages/friends/FriendProfile";
 import MemoScreen2 from "../pages/memo/MemoScreen2";
 import HomeScreen from "../pages/HomeScreen";
+import SignUpStackRouter from "./SignUpStackRouter";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -111,6 +112,7 @@ const styles = StyleSheet.create({
 const Router = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Login" component={SignUpStackRouter} />
       <Stack.Screen name="BottomTab" component={MyTabs} />
       <Stack.Screen name="SettingScreen" component={SettingStackRouter} />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />

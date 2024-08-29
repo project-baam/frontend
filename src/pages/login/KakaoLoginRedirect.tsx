@@ -1,15 +1,15 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { View } from "react-native";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
+import useUserStore from "../../store/UserStore";
 
 type KakaoLoginRedirectProps = StackScreenProps<SignUpStackParamList, "KakaoLoginRedirect">;
 
 export default function KakaoLoginRedirect({ navigation, route }: KakaoLoginRedirectProps) {
   const code = route.params.token;
 
-  const [accessToken, setAccessToken] = useState("");
+  const { setAccessToken } = useUserStore((state) => state);
 
   useEffect(() => {
     const requestBody = {
