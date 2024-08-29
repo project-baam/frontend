@@ -5,15 +5,16 @@ import { useState } from "react";
 import { Pressable, View } from "react-native";
 import { StackScreenProps } from "@react-navigation/stack";
 import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
+import useUserStore from "../../store/UserStore";
 
 type UserNameFormProps = StackScreenProps<SignUpStackParamList, "UserNameForm">;
 
 export default function UserNameForm({ navigation }: UserNameFormProps) {
-  const [userName, setUserName] = useState("");
+  const { fullName, setFullName } = useUserStore((state) => state);
 
   let active = false;
 
-  if (userName !== "" && userName.trim().length > 0) {
+  if (fullName !== "" && fullName.trim().length > 0) {
     active = true;
   }
 
@@ -26,17 +27,18 @@ export default function UserNameForm({ navigation }: UserNameFormProps) {
       </TextContainer>
       <OutSideLabelInput
         placeholder="실명"
-        value={userName}
+        value={fullName}
         onClear={() => {
-          setUserName("");
+          setFullName("");
         }}
-        onUpdateValue={setUserName}
+        onUpdateValue={setFullName}
       />
       <ButtonContainer active={active}>
         <Pressable
           onPress={() => {
             navigation.navigate("UserProfileForm");
           }}
+          disabled={!active}
         >
           <View>
             <ButtonText active={active}>다음</ButtonText>

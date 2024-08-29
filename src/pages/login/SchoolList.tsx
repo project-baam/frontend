@@ -5,7 +5,7 @@ import { Theme } from "../../styles/theme";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
-import SelectSchool from "./SelectSchool";
+import useUserStore from "../../store/UserStore";
 
 type NavigationProps = StackNavigationProp<SignUpStackParamList, "SchoolInfoForm">;
 
@@ -20,28 +20,16 @@ interface SchoolListProps {
   items: School[];
 }
 
-type SelectedItem = {
-  id: number | null;
-  name: string | null;
-  roadNameAddress: string | null;
-};
-
 export default function SchoolList({ items }: SchoolListProps) {
   const navigation = useNavigation<NavigationProps>();
 
-  const [selectedSchool, setSelectedSchool] = useState<SelectedItem>({
-    id: null,
-    name: null,
-    roadNameAddress: null
-  });
+  const { schoolId, setSchoolId, setSchoolName, setSchoolAddress } = useUserStore((state) => state);
   const [active, setActive] = useState(false);
 
   const handleSelect = (item: School) => {
-    setSelectedSchool({
-      id: item.id,
-      name: item.name,
-      roadNameAddress: item.roadNameAddress
-    });
+    setSchoolId(item.id);
+    setSchoolName(item.name);
+    setSchoolAddress(item.roadNameAddress);
     setActive(true);
   };
 
@@ -53,7 +41,7 @@ export default function SchoolList({ items }: SchoolListProps) {
             data={items}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => {
-              const isActive = selectedSchool.id === item.id;
+              const isActive = schoolId === item.id;
               return (
                 <Pressable onPress={() => handleSelect(item)}>
                   <InnerContainer active={isActive}>
@@ -69,12 +57,11 @@ export default function SchoolList({ items }: SchoolListProps) {
       <ButtonContainer active={active}>
         <Pressable
           onPress={() => {
-            if (selectedSchool !== null) {
-              navigation.navigate("SchoolInfoForm", {
-                schoolInfo: selectedSchool
-              });
+            if (schoolId !== null) {
+              navigation.navigate("SchoolInfoForm");
             }
           }}
+          disabled={!active}
         >
           <View>
             <ButtonText active={active}>확인</ButtonText>
