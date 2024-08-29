@@ -8,6 +8,7 @@ import CalendarStackRouter from "./CalendarStackRouter";
 import SettingStackRouter from "./SettingStackRouter";
 import { HomeIcon, PinIcon, FriendsIcon, CalendarIcon, SettingIcon } from "../assets/assets";
 import { Image, StyleSheet, View } from "react-native";
+import SignUpStackRouter from "./SignUpStackRouter";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -106,6 +107,7 @@ const styles = StyleSheet.create({
 const Router = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Login" component={SignUpStackRouter} />
       <Stack.Screen name="BottomTab" component={MyTabs} />
       <Stack.Screen name="SettingScreen" component={SettingStackRouter} />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
