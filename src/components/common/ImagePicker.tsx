@@ -1,17 +1,16 @@
-import { Alert, Pressable } from "react-native";
-import styled from "@emotion/native";
+import { Alert, Pressable, StyleProp, View, ViewStyle } from "react-native";
 import { ReactNode, useState } from "react";
 import PermissionUtil from "../../utils/PermissionUtil";
 import { launchImageLibrary } from "react-native-image-picker";
 
 interface ImagePickerProps {
-  onTakeImage: (text: string) => void;
+  type: string;
+  onTakeImage: (args: { type: string; imageUri: string }) => void;
   children: ReactNode;
+  style?: StyleProp<ViewStyle>;
 }
 
-export default function ImagePickerComponent({ onTakeImage, children }: ImagePickerProps) {
-  const [pickedImage, setPickedImage] = useState<object | null>(null);
-
+export default function ImagePickerComponent({ type, onTakeImage, children, ...props }: ImagePickerProps) {
   async function takeImageHandler() {
     const hasPermission = await PermissionUtil.cmmReqGalleryPermission();
 
@@ -28,7 +27,7 @@ export default function ImagePickerComponent({ onTakeImage, children }: ImagePic
       } else if (response.assets && response.assets.length > 0) {
         const asset = response.assets[0];
         if (asset.uri) {
-          onTakeImage(asset.uri);
+          onTakeImage({ type: type, imageUri: asset.uri });
         } else {
           console.error("Image URI is undefined");
         }
@@ -39,21 +38,8 @@ export default function ImagePickerComponent({ onTakeImage, children }: ImagePic
   }
 
   return (
-    <IconContainer>
+    <View {...props}>
       <Pressable onPress={takeImageHandler}>{children}</Pressable>
-    </IconContainer>
+    </View>
   );
 }
-
-const IconContainer = styled.View`
-  position: absolute;
-  width: 32px;
-  height: 32px;
-  bottom: 12px;
-  right: 16px;
-`;
-
-const EditIcon = styled.Image`
-  width: 32px;
-  height: 32px;
-`;
