@@ -20,9 +20,9 @@ interface ChipProps extends ViewProps {
 
 function Chip({
   size = "small",
-  backGroundColor = Theme.colors.Gray200,
-  textColor = Theme.colors.Black,
-  borderColor = Theme.colors.Gray200,
+  backGroundColor = "#F8F8F8",
+  textColor = Theme.colors.Gray600,
+  borderColor = "#F8F8F8",
   children,
   borderRadius = "square",
   LeftIcon,
@@ -71,7 +71,7 @@ const ChipView = styled.View<{
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: ${({ size }) => (size === "small" ? "4px 8px" : "6px 8px")};
+  padding: ${({ size }) => (size === "small" ? "4px 8px" : "8px 12px")};
   border: ${({ borderColor }) => (borderColor ? `1px solid ${borderColor}` : "none")};
 `;
 
