@@ -1,6 +1,6 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { View } from "react-native";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
 import useUserStore from "../../store/UserStore";
 

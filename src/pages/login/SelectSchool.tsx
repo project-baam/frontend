@@ -1,10 +1,10 @@
 import styled from "@emotion/native";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { TextInput } from "react-native-gesture-handler";
 import SchoolList from "./SchoolList";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Theme } from "../../styles/theme";
+import { TextInput } from "react-native";
 
 export default function SelectSchool() {
   const [enteredText, setEnteredText] = useState("");
@@ -54,7 +54,7 @@ export default function SelectSchool() {
       <RootContainer>
         <InputContainer>
           <StyledImg source={require("../../assets/images/image.png")} />
-          <Input onChangeText={handleSearchSchool} value={enteredText} placeholder="Place holder" />
+          <TextInput onChangeText={handleSearchSchool} value={enteredText} placeholder="Place holder" />
         </InputContainer>
         <SchoolList items={schoolList.list} />
       </RootContainer>
@@ -82,5 +82,3 @@ const StyledImg = styled.Image`
   width: 20px;
   height: 20px;
 `;
-
-const Input = styled.TextInput``;

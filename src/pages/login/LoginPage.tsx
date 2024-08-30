@@ -1,9 +1,8 @@
-import { Image, Pressable, Text } from "react-native";
+import { Image, Pressable } from "react-native";
 import * as S from "./styles";
 import { AnimatedLogoImage, AppleImg, KakaoImg } from "../../assets/assets";
 import { StackScreenProps } from "@react-navigation/stack";
 import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
-import { LogoImg } from "../../assets/assets";
 import LottieView from "lottie-react-native";
 
 type LoginPageProps = StackScreenProps<SignUpStackParamList, "LoginPage">;
@@ -12,7 +11,6 @@ export default function LoginPage({ navigation }: LoginPageProps) {
   return (
     <S.RootContainer>
       <S.ImageContainer>
-        {/* <Image source={LogoImg} style={{ width: 240, height: 240 }} /> */}
         <LottieView source={AnimatedLogoImage} autoPlay loop style={{ width: 360, height: 800 }} />
       </S.ImageContainer>
       <S.TextContainer>

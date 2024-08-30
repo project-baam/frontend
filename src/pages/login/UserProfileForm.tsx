@@ -1,9 +1,8 @@
 import styled from "@emotion/native";
 import { Theme } from "../../styles/theme";
 import { CardBackgroundImg, PencilImg } from "../../assets/assets";
-import { useState } from "react";
 import ImagePickerComponent from "../../components/common/ImagePicker";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { StackScreenProps } from "@react-navigation/stack";
 import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
 import useUserStore from "../../store/UserStore";
