@@ -1,7 +1,6 @@
 import styled from "@emotion/native";
 import { Theme } from "../../styles/theme";
 import OutSideLabelInput from "../../components/common/input/OutsideLabelInput";
-import { useState } from "react";
 import { Pressable, View } from "react-native";
 import { StackScreenProps } from "@react-navigation/stack";
 import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";

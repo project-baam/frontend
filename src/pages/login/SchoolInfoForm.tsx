@@ -5,7 +5,7 @@ import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
 import DropDownPicker, { ItemType } from "react-native-dropdown-picker";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import useUserStore from "../../store/UserStore";
 
 type SchoolInfoFormProps = StackScreenProps<SignUpStackParamList, "SchoolInfoForm">;
