@@ -25,12 +25,14 @@ export default function KakaoLoginRedirect({ navigation, route }: KakaoLoginRedi
       body: JSON.stringify(requestBody)
     })
       .then((response) => response.json())
-      .then((data) => setAccessToken(data.accessToken))
+      .then((data) => {
+        setAccessToken(data.accessToken);
+        navigation.navigate("SelectSchool");
+      })
       .catch((error) => {
         console.error("Failed to handle kakao login:", error);
       });
-    navigation.navigate("SelectSchool");
   }, [code]);
 
-  return <View></View>;
+  return;
 }
