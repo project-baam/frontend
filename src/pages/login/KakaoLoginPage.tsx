@@ -19,7 +19,7 @@ export default function KakaoLoginPage({ navigation }: KakaoLoginPageProps) {
             });
           }
         }}
-      ></WebView>
+      />
     </SafeAreaView>
   );
 }
