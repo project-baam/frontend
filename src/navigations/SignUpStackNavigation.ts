@@ -8,4 +8,5 @@ export type SignUpStackParamList = {
   SchoolInfoForm: undefined;
   UserNameForm: undefined;
   UserProfileForm: undefined;
+  BottomTab: undefined;
 };

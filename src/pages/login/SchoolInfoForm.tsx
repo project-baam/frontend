@@ -192,7 +192,7 @@ const DropdownContainer = styled.View`
   flex: 1;
 `;
 
-const RootContainer = styled.SafeAreaView`
+const RootContainer = styled.View`
   display: flex;
   flex: 1;
   background-color: ${Theme.colors.White};

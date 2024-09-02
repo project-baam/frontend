@@ -2,7 +2,7 @@ import { NumberArray } from "react-native-svg";
 import { create } from "zustand";
 
 interface UserStore {
-  accessToken: string | null;
+  accessToken: string;
   schoolId: number | null;
   schoolName: string | null;
   schoolAddress: string | null;
@@ -23,7 +23,7 @@ interface UserStore {
 }
 
 const useUserStore = create<UserStore>((set) => ({
-  accessToken: null,
+  accessToken: "",
   schoolId: null,
   schoolName: null,
   schoolAddress: null,

@@ -1,7 +1,7 @@
 // Router.js
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/native";
 import FriendListScreen from "../pages/friends/FriendListScreen";
 import ChatScreen from "../pages/ChatScreen";
@@ -14,6 +14,9 @@ import FriendProfile from "../pages/friends/FriendProfile";
 import MemoScreen2 from "../pages/memo/MemoScreen2";
 import HomeScreen from "../pages/HomeScreen";
 import SignUpStackRouter from "./SignUpStackRouter";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import useAuthStore from "../store/UserAuthStore";
+import LoadingOverlay from "../components/common/ui/LoadingOverlay";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -109,10 +112,53 @@ const styles = StyleSheet.create({
     tintColor: "#fff" // 활성화된 아이콘의 색상
   }
 });
-const Router = () => {
+
+function Router() {
+  const { setToken, setIsAuthenticated } = useAuthStore();
+  const [isTryingLogin, setIsTryingLogin] = useState(true);
+
+  useEffect(() => {
+    async function fetchToken() {
+      const storedToken = await AsyncStorage.getItem("accessToken");
+
+      if (storedToken) {
+        setToken(storedToken);
+        setIsAuthenticated(true);
+        AsyncStorage.setItem("accessToken", storedToken);
+      }
+
+      setTimeout(() => {
+        setIsTryingLogin(false);
+      }, 2500);
+    }
+
+    fetchToken();
+  }, []);
+
+  if (isTryingLogin) {
+    return <LoadingOverlay />;
+  }
+
+  return <Navigation />;
+}
+
+function Navigation() {
+  const { isAuthenticated } = useAuthStore();
+
+  return !isAuthenticated ? <AuthStack /> : <AuthenticatedStack />;
+}
+
+function AuthStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={SignUpStackRouter} />
+    </Stack.Navigator>
+  );
+}
+
+export function AuthenticatedStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="BottomTab" component={MyTabs} />
       <Stack.Screen name="SettingScreen" component={SettingStackRouter} />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
@@ -121,6 +167,6 @@ const Router = () => {
       <Stack.Screen name="FriendProfile" component={FriendProfile} />
     </Stack.Navigator>
   );
-};
+}
 
 export default Router;

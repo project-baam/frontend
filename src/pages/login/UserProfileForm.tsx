@@ -7,6 +7,8 @@ import { StackScreenProps } from "@react-navigation/stack";
 import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
 import useUserStore from "../../store/UserStore";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import useAuthStore from "../../store/UserAuthStore";
 
 type UserProfileFormProps = StackScreenProps<SignUpStackParamList, "UserProfileForm">;
 
@@ -23,6 +25,8 @@ export default function UserProfileForm({ navigation }: UserProfileFormProps) {
     setProfileImage,
     setBackgroundImage
   } = useUserStore((state) => state);
+
+  const { setIsAuthenticated } = useAuthStore();
 
   function takeImageHandler({ type, imageUri }: { type: string; imageUri: string }) {
     switch (type) {
@@ -51,7 +55,12 @@ export default function UserProfileForm({ navigation }: UserProfileFormProps) {
         }
       })
       .then((response) => {
-        // TO-DO: 홈 화면으로 이동
+        AsyncStorage.setItem("accessToken", accessToken);
+        setIsAuthenticated(true);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "BottomTab" }]
+        });
       })
       .catch((error) => {
         console.log(error);

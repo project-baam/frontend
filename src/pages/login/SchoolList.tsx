@@ -72,24 +72,6 @@ export default function SchoolList({ items }: SchoolListProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  InnerContainer: {
-    width: "100%",
-    borderRadius: 12,
-    borderWidth: 2,
-    borderStyle: "solid",
-    borderColor: Theme.colors.Gray100,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    gap: 8,
-    marginBottom: 12
-  },
-  onPress: {
-    backgroundColor: "#F3F2FF",
-    borderColor: "#8A7EFF"
-  }
-});
-
 const InnerContainer = styled.View<{ active: boolean }>`
   width: 100%;
   border: 2px solid ${({ active }) => (active ? "#8A7EFF" : Theme.colors.Gray100)};
