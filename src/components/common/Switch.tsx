@@ -40,8 +40,8 @@ const SwitchPressable = styled.Pressable<{ isSwitchOn: boolean }>`
   align-items: center;
   padding: 2px;
   border-radius: 16px;
-  border: 2px solid ${({ isSwitchOn }) => (isSwitchOn ? Theme.colors.Gray800 : Theme.colors.Gray300)};
-  background-color: ${({ isSwitchOn }) => (isSwitchOn ? Theme.colors.Gray800 : Theme.colors.White)};
+  border: 2px solid ${({ isSwitchOn }) => (isSwitchOn ? Theme.colors.Primary : Theme.colors.Gray300)};
+  background-color: ${({ isSwitchOn }) => (isSwitchOn ? Theme.colors.Primary : Theme.colors.White)};
 `;
 
 const AnimatedKnob = styled(Animated.View)`

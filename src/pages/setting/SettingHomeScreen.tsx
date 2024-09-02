@@ -1,12 +1,14 @@
 import styled from "@emotion/native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { Image, SafeAreaView } from "react-native";
 import BtnRight from "../../assets/images/btn_right.svg";
 import Dialog from "../../components/common/Dialog";
 import Switch from "../../components/common/Switch";
 import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
 import { useProfileStore } from "../../store/store";
+import useUserStore from "../../store/UserStore";
 import { Theme } from "../../styles/theme";
 
 interface SettingHomeScreenProps {}
@@ -15,7 +17,8 @@ function SettingHomeScreen({}: SettingHomeScreenProps) {
   const [isSwitchOn, setIsSwitchOn] = useState(false);
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const navigation = useNavigation<NavigationProp<SettingStackParamList>>();
-  const { name, school, profileImage } = useProfileStore();
+  const { accessToken, schoolName, grade, className, fullName, profileImage, backgroundImage, isClassPublic } =
+    useUserStore();
 
   const handleToggleSwitch = () => {
     setIsSwitchOn((previousState) => !previousState);
@@ -56,8 +59,8 @@ function SettingHomeScreen({}: SettingHomeScreenProps) {
             style={{ width: 48, height: 48, borderRadius: 24 }}
           />
           <UserInfo>
-            <NameText>{name}</NameText>
-            <SchoolText>{school}</SchoolText>
+            <NameText>{fullName}</NameText>
+            <SchoolText>{schoolName}</SchoolText>
           </UserInfo>
           <BtnRight style={{ marginLeft: "auto" }} />
         </ProfileButton>

@@ -23,5 +23,8 @@ export const AnimatedLogoImage = require("../assets/images/login.json");
 export const AnimatedSplashImage = require("../assets/images/splash.json");
 export const PencilImg = require("../assets/images/pencil.png");
 export const CardBackgroundImg = require("../assets/images/cardBackgroundImage.png");
+export const TodayTodoImg = require("../assets/images/today_todo.png");
+export const ChevronRight = require("../assets/images/chevron-right.png");
+export const Hamburger = require("../assets/images/hamburger.png");
 //test
 export const DummyProfile = require("../assets/images/dummyprofile.png");

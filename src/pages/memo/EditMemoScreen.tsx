@@ -19,6 +19,7 @@ import { VectorLeft, DropDownDown } from "../../assets/assets";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import axios from "axios";
+import useUserStore from "../../store/UserStore";
 
 type Subject = {
   label: string;
@@ -36,25 +37,24 @@ function EditMemoScreen({ navigation, route }: any) {
   const [warningMessage, setWarningMessage] = useState<string>("");
   const [memoId, setMemoId] = useState<number | undefined>(route.params?.id);
   const [loading, setLoading] = useState(false);
-  const accessToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQsInByb3ZpZGVyIjoia2FrYW8iLCJpYXQiOjE3MjQ4MjM5ODUsImV4cCI6MTcyNDgyNTc4NSwiYXVkIjoiaHR0cHM6Ly9iLXNpdGUuc2l0ZSIsImlzcyI6Imh0dHBzOi8vYi1zaXRlLnNpdGUifQ.EG5nuP1xc1ZjEEn6v9zwGtEDjdQ_c4tC7fvMA5aQf4s";
+  const { accessToken } = useUserStore((state) => state);
 
-  // useEffect(() => {
-  //   getSubjectList();
-  // }, []);
-  // useEffect(() => {
-  //   if (!title.trim() || !content.trim() || content.length > 200) {
-  //     setIsSubmitDisabled(true);
-  //     if (content.length > 200) {
-  //       setWarningMessage("내용이 200자를 초과했습니다.");
-  //     } else {
-  //       setWarningMessage("");
-  //     }
-  //   } else {
-  //     setIsSubmitDisabled(false);
-  //     setWarningMessage("");
-  //   }
-  // }, [title, content]);
+  useEffect(() => {
+    getSubjectList();
+  }, []);
+  useEffect(() => {
+    if (!title.trim() || !content.trim() || content.length > 200) {
+      setIsSubmitDisabled(true);
+      if (content.length > 200) {
+        setWarningMessage("내용이 200자를 초과했습니다.");
+      } else {
+        setWarningMessage("");
+      }
+    } else {
+      setIsSubmitDisabled(false);
+      setWarningMessage("");
+    }
+  }, [title, content]);
 
   const handleDateChange = (selectedDate: Date) => {
     setDate(selectedDate);

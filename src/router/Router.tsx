@@ -4,14 +4,13 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React, { useEffect, useState } from "react";
 import styled from "@emotion/native";
 import FriendListScreen from "../pages/friends/FriendListScreen";
-import ChatScreen from "../pages/ChatScreen";
 import CalendarStackRouter from "./CalendarStackRouter";
 import SettingStackRouter from "./SettingStackRouter";
 import { HomeIcon, PinIcon, FriendsIcon, CalendarIcon, SettingIcon } from "../assets/assets";
 import { Image, StyleSheet, View } from "react-native";
 import EditMemoScreen from "../pages/memo/EditMemoScreen";
 import FriendProfile from "../pages/friends/FriendProfile";
-import MemoScreen2 from "../pages/memo/MemoScreen2";
+import MemoScreen from "../pages/memo/MemoScreen";
 import HomeScreen from "../pages/HomeScreen";
 import SignUpStackRouter from "./SignUpStackRouter";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -80,7 +79,7 @@ export const MyTabs = () => {
       }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Memo" component={MemoScreen2} />
+      <Tab.Screen name="Memo" component={MemoScreen} />
       <Tab.Screen name="Friends" component={FriendListScreen} />
       <Tab.Screen name="Calendar" component={CalendarStackRouter} />
       <Tab.Screen name="Setting" component={SettingStackRouter} />
@@ -161,7 +160,6 @@ export function AuthenticatedStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="BottomTab" component={MyTabs} />
       <Stack.Screen name="SettingScreen" component={SettingStackRouter} />
-      <Stack.Screen name="ChatScreen" component={ChatScreen} />
       <Stack.Screen name="CalendarScreen" component={CalendarStackRouter} />
       <Stack.Screen name="EditMemoScreen" component={EditMemoScreen} />
       <Stack.Screen name="FriendProfile" component={FriendProfile} />

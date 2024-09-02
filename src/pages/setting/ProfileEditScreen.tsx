@@ -7,6 +7,7 @@ import DropDownPicker, { ItemType } from "react-native-dropdown-picker";
 import HeaderRightText from "../../components/common/HeaderRightText";
 import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
 import { useProfileStore } from "../../store/store";
+import useUserStore from "../../store/UserStore";
 import { Theme } from "../../styles/theme";
 
 type ProfileEditScreenNavigationProp = NativeStackNavigationProp<SettingStackParamList, "ProfileEditScreen">;
@@ -17,26 +18,26 @@ interface ProfileEditScreenProps {}
 function ProfileEditScreen({}: ProfileEditScreenProps) {
   const navigation = useNavigation<ProfileEditScreenNavigationProp>();
   const route = useRoute<ProfileEditScreenRouteProp>();
+  const { fullName, schoolName, grade, className, setFullName, setSchoolName, setGrade, setClassName } = useUserStore();
 
-  const { name, school, grade, class: classValue, setName, setSchool, setGrade, setClass } = useProfileStore();
-
-  const [localName, setLocalName] = useState(name);
-  const [localSchool, setLocalSchool] = useState(school);
+  const [localName, setLocalName] = useState(fullName);
+  const [localSchool, setLocalSchool] = useState(schoolName);
   const [localGrade, setLocalGrade] = useState(grade);
-  const [localClass, setLocalClass] = useState(classValue);
+  const [localClass, setLocalClass] = useState(className);
 
   const [openGrade, setOpenGrade] = useState(false);
-  const [gradeItems, setGradeItems] = useState<ItemType<string>[]>([
-    { label: "1학년", value: "1학년" },
-    { label: "2학년", value: "2학년" },
-    { label: "3학년", value: "3학년" }
+  const [gradeItems, setGradeItems] = useState<ItemType<number>[]>([
+    { label: "1학년", value: 1 },
+    { label: "2학년", value: 2 },
+    { label: "3학년", value: 3 }
   ]);
 
   const [openClass, setOpenClass] = useState(false);
-  const [classItems, setClassItems] = useState<ItemType<string>[]>([
-    { label: "1반", value: "1반" },
-    { label: "2반", value: "2반" },
-    { label: "3반", value: "3반" }
+  //해당학교가 몇반까지 있는지 추가해야됨
+  const [classItems, setClassItems] = useState<ItemType<number>[]>([
+    { label: "1반", value: 1 },
+    { label: "2반", value: 2 },
+    { label: "3반", value: 3 }
   ]);
 
   const navigateToSchoolSearch = () => {
@@ -44,10 +45,10 @@ function ProfileEditScreen({}: ProfileEditScreenProps) {
   };
 
   const handleSave = () => {
-    setName(localName);
-    setSchool(localSchool);
+    setFullName(localName);
+    setSchoolName(localSchool);
     setGrade(localGrade);
-    setClass(localClass);
+    setClassName(localClass);
     navigation.goBack();
   };
 

@@ -4,8 +4,9 @@ import { View, Text, Image, TextInput, ScrollView, SafeAreaView } from "react-na
 import { IconSearch } from "../../assets/assets";
 import Chip from "../../components/common/Chip";
 import { FilterLine } from "../../assets/assets";
-import { FavoriteStar } from "../../assets/assets";
 import { TouchableOpacity } from "@gorhom/bottom-sheet";
+import axios from "axios";
+import useUserStore from "../../store/UserStore";
 const filterList = [
   {
     id: 0,
@@ -29,44 +30,78 @@ const filterList = [
   },
   {
     id: 4,
-    grade: "친한친구",
+    grade: "즐겨찾기",
     isSelected: false
   }
 ];
 const friends = [
-  { id: 1, name: "노하은1", grade: 1, favorite: true, avatar: "https://placehold.co/400x400" },
-  { id: 2, name: "노하은2", grade: 2, favorite: false, avatar: "https://placehold.co/400x400" },
-  { id: 3, name: "노하은3", grade: 3, favorite: false, avatar: "https://placehold.co/400x400" },
-  { id: 4, name: "노하은4", grade: 1, favorite: true, avatar: "https://placehold.co/400x400" },
-  { id: 5, name: "노하은5", grade: 2, favorite: false, avatar: "https://placehold.co/400x400" },
-  { id: 6, name: "노하은6", grade: 3, favorite: true, avatar: "https://placehold.co/400x400" },
-  { id: 7, name: "노하은7", grade: 1, favorite: false, avatar: "https://placehold.co/400x400" },
-  { id: 8, name: "노하은8", grade: 2, favorite: false, avatar: "https://placehold.co/400x400" },
-  { id: 9, name: "노하은9", grade: 3, favorite: true, avatar: "https://placehold.co/400x400" },
-  { id: 10, name: "노하은10", grade: 3, favorite: false, avatar: "https://placehold.co/400x400" }
+  {
+    userId: 5,
+    fullName: "혜림",
+    profileImage: "https://sgp1.digitaloceanspaces.com/baam/development/user-profiles/5",
+    grade: "2",
+    className: "2",
+    isFavorite: true,
+    initial: "",
+    activeClassNow: "ㅎ_ㅎ"
+  }
 ];
 function FriendListScreen({ navigation }: any) {
   const [selectedTab, setSelectedTab] = useState("friends");
-  const favoriteFriends = friends.filter((friend) => friend.favorite);
-  const allFriends = friends;
-  const [selectedFilter, setSelectedFilter] = useState("필터");
+  const [favoriteFriends, setFavoriteFriends] = useState(friends);
+  //friends.filter((friend) => friend.favorite);
+  const [allFriends, setAllFriends] = useState(friends);
+  const [schoolFriends, setSchoolFriends] = useState(friends);
+  const [selectedFilter, setSelectedFilter] = useState("전체");
   const [filteredFriends, setFilteredFriends] = useState(allFriends);
+  const { accessToken } = useUserStore((state) => state);
   useEffect(() => {
-    console.log(selectedFilter);
+    // console.log(selectedFilter);
     filterList.filter((fl) => {
       if (fl.grade === selectedFilter) fl.isSelected = !fl.isSelected;
       else fl.isSelected = false;
     });
     setFilteredFriends(
-      allFriends.filter((friend) => {
+      schoolFriends.filter((friend) => {
         if (selectedFilter === "전체") return true;
-        if (selectedFilter === "1학년") return friend.grade === 1;
-        if (selectedFilter === "2학년") return friend.grade === 2;
-        if (selectedFilter === "3학년") return friend.grade === 3;
-        if (selectedFilter === "친한친구") return friend.favorite;
+        if (selectedFilter === "1학년") return friend.grade === "1";
+        if (selectedFilter === "2학년") return friend.grade === "2";
+        if (selectedFilter === "3학년") return friend.grade === "3";
+        if (selectedFilter === "친한친구") return friend.isFavorite;
       })
     );
   }, [selectedFilter]);
+  const getFriends = async () => {
+    try {
+      const response = await axios.get("https://b-site.site/friends?count=10&page=0", {
+        headers: {
+          "Content-Type": "application/json", // JSON 형식으로 데이터를 보낼 것을 명시
+          Authorization: `Bearer ${accessToken}` // 필요시, Authorization 헤더에 토큰 포함
+        }
+      });
+      setFavoriteFriends(response.data.favaorites);
+      setAllFriends(response.data.all);
+    } catch (error: any) {
+      console.error(error.response ? error.response.data : error.message); // 오류 처리
+    }
+  };
+  const getSchoolFriends = async () => {
+    try {
+      const response = await axios.get("https://b-site.site/schoolmates?count=10&page=0", {
+        headers: {
+          "Content-Type": "application/json", // JSON 형식으로 데이터를 보낼 것을 명시
+          Authorization: `Bearer ${accessToken}` // 필요시, Authorization 헤더에 토큰 포함
+        }
+      });
+      setSchoolFriends(response.data.list);
+    } catch (error: any) {
+      console.error(error.response ? error.response.data : error.message); // 오류 처리
+    }
+  };
+  useEffect(() => {
+    getFriends();
+    getSchoolFriends();
+  }, []);
   const FriendsList = () => (
     <View style={{ flex: 1 }}>
       <SearchContainer>
@@ -78,20 +113,21 @@ function FriendListScreen({ navigation }: any) {
         {favoriteFriends.length > 0 ? (
           favoriteFriends.map((friend) => (
             <FriendItem
-              key={friend.id}
+              key={friend.userId}
               onPress={() =>
                 navigation.navigate("FriendProfile", {
-                  id: friend.id,
-                  name: friend.name,
-                  avatar: friend.avatar,
+                  userId: friend.userId,
+                  fullName: friend.fullName,
+                  profileImage: friend.profileImage,
                   grade: friend.grade,
-                  favorite: friend.favorite
+                  isFavorite: friend.isFavorite,
+                  isFriend: true
                 })
               }
             >
-              <Avatar source={{ uri: "https://picsum.photos/400/400" }} />
+              <Avatar source={{ uri: friend.profileImage }} />
               <FriendInfo>
-                <FriendName>{friend.name}</FriendName>
+                <FriendName>{friend.fullName}</FriendName>
                 <FriendGrade>{friend.grade}학년</FriendGrade>
               </FriendInfo>
             </FriendItem>
@@ -103,20 +139,21 @@ function FriendListScreen({ navigation }: any) {
         <SectionTitle>전체</SectionTitle>
         {allFriends.map((friend) => (
           <FriendItem
-            key={friend.id}
+            key={friend.userId}
             onPress={() =>
               navigation.navigate("FriendProfile", {
-                id: friend.id,
-                name: friend.name,
-                avatar: friend.avatar,
+                userId: friend.userId,
+                fullName: friend.fullName,
+                profileImage: friend.profileImage,
                 grade: friend.grade,
-                favorite: friend.favorite
+                isFavorite: friend.isFavorite,
+                isFriend: true
               })
             }
           >
-            <Avatar source={{ uri: "https://picsum.photos/400/400" }} />
+            <Avatar source={{ uri: friend.profileImage }} />
             <FriendInfo>
-              <FriendName>{friend.name}</FriendName>
+              <FriendName>{friend.fullName}</FriendName>
               <FriendGrade>{friend.grade}학년</FriendGrade>
             </FriendInfo>
           </FriendItem>
@@ -131,40 +168,6 @@ function FriendListScreen({ navigation }: any) {
         <Image source={IconSearch} style={{ width: 24, height: 24 }} />
         <SearchInput placeholder="검색어를 입력하세요" />
       </SearchContainer>
-      {/* <ScrollView
-        horizontal
-        contentContainerStyle={{ gap: 7, paddingVertical: 4, marginBottom: 26, height: "80%" }}
-        showsHorizontalScrollIndicator={false}
-      >
-        <TouchableOpacity onPress={() => setSelectedFilter("All")}>
-          <Chip
-            borderRadius="round"
-            children="필터"
-            textColor="#7b7b7b"
-            size="medium"
-            LeftIcon={<Image source={FilterLine} style={{ width: 18, height: 18 }} />}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setSelectedFilter("1학년")}>
-          <Chip borderRadius="circle" children="1학년" textColor="#7b7b7b" size="medium" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setSelectedFilter("2학년")}>
-          <Chip borderRadius="circle" children="2학년" textColor="#7b7b7b" size="medium" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setSelectedFilter("3학년")}>
-          <Chip borderRadius="circle" children="3학년" textColor="#7b7b7b" size="medium" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setSelectedFilter("친한친구")}>
-          <Chip
-            borderRadius="circle"
-            children="친한친구"
-            textColor="#7b7b7b"
-            size="medium"
-            LeftIcon={<Image source={FavoriteStar} style={{ width: 18, height: 18 }} />}
-          />
-        </TouchableOpacity>
-      </ScrollView> */}
-      {/* //두번째 */}
       <ScrollView
         horizontal
         contentContainerStyle={{ gap: 7, paddingVertical: 4, marginBottom: 26, height: "80%" }}
@@ -196,29 +199,33 @@ function FriendListScreen({ navigation }: any) {
         ))}
       </ScrollView>
 
-      <ScrollViewContainer>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-start", minHeight: "100%" }} // 추가: minHeight 설정
+      >
         <SectionTitle>전체</SectionTitle>
         {filteredFriends.map((friend) => (
           <FriendItem
-            key={friend.id}
+            key={friend.userId}
             onPress={() =>
               navigation.navigate("FriendProfile", {
-                id: friend.id,
-                name: friend.name,
-                avatar: friend.avatar,
+                userId: friend.userId,
+                fullName: friend.fullName,
+                profileImage: friend.profileImage,
                 grade: friend.grade,
-                favorite: friend.favorite
+                isFavorite: friend.isFavorite,
+                // 친구여부 설정
+                isFriend: false
               })
             }
           >
-            <Avatar source={{ uri: "https://picsum.photos/400/400" }} />
+            <Avatar source={{ uri: friend.profileImage }} />
             <FriendInfo>
-              <FriendName>{friend.name}</FriendName>
+              <FriendName>{friend.fullName}</FriendName>
               <FriendGrade>{friend.grade}학년</FriendGrade>
             </FriendInfo>
           </FriendItem>
         ))}
-      </ScrollViewContainer>
+      </ScrollView>
     </View>
   );
 
@@ -315,7 +322,7 @@ const EmptyText = styled(Text)`
   margin-top: 20px;
 `;
 const ScrollViewContainer = styled(ScrollView)`
-  flex-grow: 1;
+  flex: 1;
 `;
 
 const SectionTitle = styled(Text)`

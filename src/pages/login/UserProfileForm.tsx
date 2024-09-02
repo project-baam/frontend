@@ -55,12 +55,14 @@ export default function UserProfileForm({ navigation }: UserProfileFormProps) {
         }
       })
       .then((response) => {
+
         AsyncStorage.setItem("accessToken", accessToken);
         setIsAuthenticated(true);
         navigation.reset({
           index: 0,
           routes: [{ name: "BottomTab" }]
         });
+
       })
       .catch((error) => {
         console.log(error);
