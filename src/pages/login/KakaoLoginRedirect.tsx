@@ -34,5 +34,5 @@ export default function KakaoLoginRedirect({ navigation, route }: KakaoLoginRedi
       });
   }, [code]);
 
-  return;
+  return <View></View>;
 }
