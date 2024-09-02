@@ -52,6 +52,7 @@ export default function UserProfileForm({ navigation }: UserProfileFormProps) {
       })
       .then((response) => {
         // TO-DO: 홈 화면으로 이동
+        navigation.navigate("BottomTab");
       })
       .catch((error) => {
         console.log(error);
