@@ -9,7 +9,6 @@ import { Theme } from "../styles/theme";
 import { Pressable } from "react-native";
 import styled from "@emotion/native";
 import SchoolInfoForm from "../pages/login/SchoolInfoForm";
-import UserInfoForm from "../pages/login/UserNameForm";
 import UserProfileForm from "../pages/login/UserProfileForm";
 import UserNameForm from "../pages/login/UserNameForm";
 
