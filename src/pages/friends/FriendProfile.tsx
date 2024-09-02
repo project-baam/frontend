@@ -1,122 +1,182 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/native";
-import {
-  View,
-  Text,
-  Image,
-  TextInput,
-  ScrollView,
-  SafeAreaView,
-  TouchableOpacity,
-  ImageBackground
-} from "react-native";
+import { View, Text, Image, ScrollView, SafeAreaView, TouchableOpacity, ImageBackground } from "react-native";
 import { VectorLeft } from "../../assets/assets";
-import { Star01 } from "../../assets/assets";
-import { Star02 } from "../../assets/assets";
+import { Star01, Star02, Hamburger } from "../../assets/assets";
+import axios from "axios";
+import useUserStore from "../../store/UserStore";
 
 // Sample data
 const timetable = [
   {
-    subjectName: "국어1",
-    startTime: "9:00",
-    endTime: "9:45",
-    time: 1,
-    icon: "https://picsum.photos/400/400"
+    day: 1,
+    period: 1,
+    subject: "국어",
+    subjectShort: "국어"
   },
   {
-    subjectName: "수학1",
-    startTime: "10:00",
-    endTime: "10:45",
-    time: 2,
-    icon: "https://picsum.photos/400/400"
+    day: 1,
+    period: 2,
+    subject: "수학",
+    subjectShort: "수학"
   },
   {
-    subjectName: "과학1",
-    startTime: "11:00",
-    endTime: "11:45",
-    time: 3,
-    icon: "https://picsum.photos/400/400"
-  },
-  {
-    subjectName: "영어1",
-    startTime: "13:00",
-    endTime: "13:45",
-    time: 4,
-    icon: "https://picsum.photos/400/400"
+    day: 1,
+    period: 3,
+    subject: "영어",
+    subjectShort: "영어"
   }
 ];
-
+const fp = {
+  isClassPublic: true,
+  className: "2",
+  isTimetablePublic: true,
+  allTimetable: [],
+  todayTimetable: [],
+  profileImage: "https://sgp1.digitaloceanspaces.com/baam/development/user-profiles/5",
+  profileBackgroundImage: "https://sgp1.digitaloceanspaces.com/baam/development/user-backgrounds/5",
+  schoolName: "가락고등학교",
+  grade: 2
+};
+//
 function FriendProfile({ navigation, route }: any) {
   const [selectedTab, setSelectedTab] = useState("today");
+  const [profile, setProfile] = useState(fp);
+  const [isFriend, setIsFriend] = useState(false);
+  const [isSent, setIsSent] = useState(false);
+  const [timeTable, setTimeTable] = useState(timetable);
+  const { accessToken } = useUserStore((state) => state);
+  const getIsSent = async () => {
+    try {
+      const response = await axios.get(`https://b-site.site/friend-requests/sent?count=10&page=0`, {
+        headers: {
+          "Content-Type": "application/json", // JSON 형식으로 데이터를 보낼 것을 명시
+          Authorization: `Bearer ${accessToken}` // 필요시, Authorization 헤더에 토큰 포함
+        }
+      });
+      setIsSent(response.data.list.find((item: any) => item.userId === route.params.userId));
+      console.log("success2");
+    } catch (error: any) {
+      console.error(error.response ? error.response.data : error.message); // 오류 처리
+    }
+  };
+  const getFriendDetail = async () => {
+    try {
+      const response = await axios.get(`https://b-site.site/friends/detail/${route.params.userId}`, {
+        headers: {
+          "Content-Type": "application/json", // JSON 형식으로 데이터를 보낼 것을 명시
+          Authorization: `Bearer ${accessToken}` // 필요시, Authorization 헤더에 토큰 포함
+        }
+      });
+      setProfile(response.data);
+      setTimeTable(response.data.todayTimetable);
+    } catch (error: any) {
+      console.error(error.response ? error.response.data : error.message); // 오류 처리
+    } finally {
+      getIsSent();
+    }
+  };
+
+  useEffect(() => {
+    getFriendDetail();
+    setIsFriend(route.params.isFriend);
+  }, []);
 
   const TodayTimetable = () => {
     return (
-      <ScrollView>
-        {timetable.map((it, idx) => (
-          <View
-            key={idx}
-            style={{
-              backgroundColor: "rgba(207, 186, 240, 0.1)",
-              borderRadius: 12,
-              marginHorizontal: 16,
-              marginBottom: 8,
-              paddingHorizontal: 16,
-              paddingVertical: 18,
-              flexDirection: "row",
-              alignItems: "center"
-            }}
-          >
-            <Image source={{ uri: it.icon }} style={{ width: 40, height: 40 }} />
-            <View style={{ marginLeft: 20, gap: 8 }}>
-              <Text
+      <>
+        {profile.isTimetablePublic ? (
+          <ScrollView>
+            {timeTable.map((it, idx) => (
+              <View
+                key={idx}
                 style={{
-                  fontSize: 16,
-                  fontWeight: "600",
-                  fontFamily: "Pretendard",
-                  color: "#434343",
-                  textAlign: "left"
+                  backgroundColor: "rgba(207, 186, 240, 0.1)",
+                  borderRadius: 12,
+                  marginHorizontal: 16,
+                  marginBottom: 8,
+                  paddingHorizontal: 16,
+                  paddingVertical: 18,
+                  flexDirection: "row",
+                  alignItems: "center"
                 }}
               >
-                {it.subjectName}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: "500",
-                  fontFamily: "Pretendard",
-                  color: "#7b7b7b",
-                  textAlign: "left"
-                }}
-              >
-                {it.startTime} ~{it.endTime} ({it.time}교시)
-              </Text>
-            </View>
+                <Image source={{ uri: "https://picsum.photos/200/300" }} style={{ width: 40, height: 40 }} />
+                <View style={{ marginLeft: 20, gap: 8 }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                      fontFamily: "Pretendard",
+                      color: "#434343",
+                      textAlign: "left"
+                    }}
+                  >
+                    {it.subject}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "500",
+                      fontFamily: "Pretendard",
+                      color: "#7b7b7b",
+                      textAlign: "left"
+                    }}
+                  >
+                    ({it.period}교시)
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+        ) : (
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+            <Text>시간표 비공개 회원입니다.</Text>
           </View>
-        ))}
-      </ScrollView>
+        )}
+      </>
     );
   };
   const TotalTimetable = () => {
     return (
-      <ScrollView>
-        <Text>전체 시간표</Text>
-      </ScrollView>
+      <>
+        {profile.isTimetablePublic ? (
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+            <Text>시간표 공개 회원입니다.</Text>
+          </View>
+        ) : (
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+            <Text>시간표 비공개 회원입니다.</Text>
+          </View>
+        )}
+      </>
     );
   };
 
   return (
     <Container>
       <ContentContainer>
-        <Header>
-          <BackButton onPress={() => navigation.goBack()}>
-            <BackIcon source={VectorLeft} />
-          </BackButton>
-          {/* 별 누를 시 즐겨찾기 추가 */}
-          {route.params.favorite ? <Image source={Star02} /> : <Image source={Star01} />}
-        </Header>
+        {isFriend ? (
+          <Header>
+            <BackButton onPress={() => navigation.goBack()}>
+              <BackIcon source={VectorLeft} />
+            </BackButton>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              {route.params.isFavorite ? <Image source={Star02} /> : <Image source={Star01} />}
+              <Image source={Hamburger} style={{ width: 24, height: 24 }} />
+            </View>
+          </Header>
+        ) : (
+          <Header>
+            <BackButton onPress={() => navigation.goBack()}>
+              <BackIcon source={VectorLeft} />
+            </BackButton>
+          </Header>
+        )}
+
         <View>
           <ImageBackground
-            source={{ uri: "https://picsum.photos/400/400" }}
+            source={{ uri: profile.profileBackgroundImage }}
             imageStyle={{ borderRadius: 16, height: 220, marginHorizontal: 16, marginTop: 8, marginBottom: 20 }}
             style={{}}
           />
@@ -127,10 +187,7 @@ function FriendProfile({ navigation, route }: any) {
               height: 230
             }}
           >
-            <Image
-              source={{ uri: "https://picsum.photos/400/400" }}
-              style={{ height: 80, width: 80, borderRadius: 1000 }}
-            />
+            <Image source={{ uri: profile.profileImage }} style={{ height: 80, width: 80, borderRadius: 1000 }} />
             <Text
               style={{
                 position: "absolute",
@@ -144,23 +201,27 @@ function FriendProfile({ navigation, route }: any) {
                 textAlign: "left"
               }}
             >
-              명지대학교
+              {profile.schoolName}
             </Text>
-            <Text
-              style={{
-                position: "absolute",
-                left: 35,
-                top: 184,
-                fontSize: 16,
-                lineHeight: 20,
-                fontWeight: "500",
-                fontFamily: "Esamanru OTF",
-                color: "#fff",
-                textAlign: "left"
-              }}
-            >
-              3학년 2반
-            </Text>
+            {isFriend && profile.isClassPublic ? (
+              <Text
+                style={{
+                  position: "absolute",
+                  left: 35,
+                  top: 184,
+                  fontSize: 16,
+                  lineHeight: 20,
+                  fontWeight: "500",
+                  fontFamily: "Esamanru OTF",
+                  color: "#fff",
+                  textAlign: "left"
+                }}
+              >
+                {profile.grade}학년 {profile.className}반
+              </Text>
+            ) : (
+              <></>
+            )}
           </View>
         </View>
         <Tabs>
@@ -172,6 +233,21 @@ function FriendProfile({ navigation, route }: any) {
           </TabButton>
         </Tabs>
         <View style={{ flex: 1 }}>{selectedTab === "today" ? <TodayTimetable /> : <TotalTimetable />}</View>
+        {isFriend ? (
+          <></>
+        ) : (
+          <>
+            {isSent ? (
+              <SubmitButton backgroundColor="#555555" onPress={() => {}}>
+                <SubmitButtonText>친구 요청 취소하기</SubmitButtonText>
+              </SubmitButton>
+            ) : (
+              <SubmitButton backgroundColor="#8A7EFF" onPress={() => {}}>
+                <SubmitButtonText>친구 요청하기</SubmitButtonText>
+              </SubmitButton>
+            )}
+          </>
+        )}
       </ContentContainer>
     </Container>
   );
@@ -226,4 +302,23 @@ const BackButton = styled(TouchableOpacity)`
 const BackIcon = styled(Image)`
   width: 8.5px;
   height: 15px;
+`;
+const SubmitButton = styled(TouchableOpacity)<{ backgroundColor: string }>`
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 34px;
+  border-radius: 24px;
+  background-color: ${(props) => (props.backgroundColor ? props.backgroundColor : "#8A7EFF")};
+  justify-content: center;
+  padding-horizontal: 24px;
+  padding-vertical: 16px;
+`;
+
+const SubmitButtonText = styled(Text)`
+  font-size: 18px;
+  font-weight: 500;
+  font-family: Pretendard;
+  color: #fff;
+  text-align: center;
 `;

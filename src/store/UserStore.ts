@@ -11,6 +11,8 @@ interface UserStore {
   fullName: string;
   profileImage: string;
   backgroundImage: string;
+  isClassPublic: boolean;
+  isTimetablePublic: boolean;
   setAccessToken: (token: string) => void;
   setSchoolId: (id: number) => void;
   setSchoolName: (name: string) => void;
@@ -20,6 +22,8 @@ interface UserStore {
   setFullName: (userName: string) => void;
   setProfileImage: (profileImage: string) => void;
   setBackgroundImage: (backgroundImage: string) => void;
+  setIsClassPublic: (isClassPublic: boolean) => void;
+  setIsTimetablePublic: (isTimetablePublic: boolean) => void;
 }
 
 const useUserStore = create<UserStore>((set) => ({
@@ -32,6 +36,8 @@ const useUserStore = create<UserStore>((set) => ({
   fullName: "",
   profileImage: "",
   backgroundImage: "",
+  isClassPublic: true,
+  isTimetablePublic: true,
   setAccessToken: (token) => set({ accessToken: token }),
   setSchoolId: (id) => set({ schoolId: id }),
   setSchoolName: (name) => set({ schoolName: name }),
@@ -40,7 +46,9 @@ const useUserStore = create<UserStore>((set) => ({
   setClassName: (className) => set({ className: className }),
   setFullName: (fullName) => set({ fullName: fullName }),
   setProfileImage: (profileImage) => set({ profileImage: profileImage }),
-  setBackgroundImage: (backgroundImage) => set({ backgroundImage: backgroundImage })
+  setBackgroundImage: (backgroundImage) => set({ backgroundImage: backgroundImage }),
+  setIsClassPublic: (isClassPublic) => set({ isClassPublic: isClassPublic }),
+  setIsTimetablePublic: (isTimetablePublic) => set({ isTimetablePublic: isTimetablePublic })
 }));
 
 export default useUserStore;
