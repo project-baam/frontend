@@ -26,5 +26,11 @@ export const CardBackgroundImg = require("../assets/images/cardBackgroundImage.p
 export const TodayTodoImg = require("../assets/images/today_todo.png");
 export const ChevronRight = require("../assets/images/chevron-right.png");
 export const Hamburger = require("../assets/images/hamburger.png");
+export const White = require("../assets/images/white_wallpaper.jpg");
+export const Math = require("../assets/images/Math.png");
+export const English = require("../assets/images/English.png");
+export const Korean = require("../assets/images/Korean.png");
+export const Physics = require("../assets/images/Physics.png");
+export const Earth = require("../assets/images/Earth.png");
 //test
 export const DummyProfile = require("../assets/images/dummyprofile.png");
