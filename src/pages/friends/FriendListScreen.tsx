@@ -1,12 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "@emotion/native";
-import { View, Text, Image, TextInput, ScrollView, SafeAreaView } from "react-native";
+import { View, Text, Image, TextInput, ScrollView, SafeAreaView, FlatList, Pressable } from "react-native";
 import { IconSearch } from "../../assets/assets";
 import Chip from "../../components/common/Chip";
 import { FilterLine } from "../../assets/assets";
 import { TouchableOpacity } from "@gorhom/bottom-sheet";
 import axios from "axios";
-import useUserStore from "../../store/UserStore";
+import SchoolmateList from "./SchoolmateList";
+import useAuthStore from "../../store/UserAuthStore";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { FriendsStackParamList } from "../../navigations/FriendsStackNavigation";
+import { useNavigation } from "@react-navigation/native";
+
+type NavigationProps = StackNavigationProp<FriendsStackParamList, "FriendProfile">;
+
 const filterList = [
   {
     id: 0,
@@ -34,94 +41,215 @@ const filterList = [
     isSelected: false
   }
 ];
-const friends = [
-  {
-    userId: 5,
-    fullName: "혜림",
-    profileImage: "https://sgp1.digitaloceanspaces.com/baam/development/user-profiles/5",
-    grade: "2",
-    className: "2",
-    isFavorite: true,
-    initial: "",
-    activeClassNow: "ㅎ_ㅎ"
-  }
-];
-function FriendListScreen({ navigation }: any) {
+interface schoolmate {
+  userId: number;
+  fullName: string;
+  profileImage: string;
+  grade: number;
+  className: string;
+  initial: string;
+  activeClassNow: string;
+  isFavorite: boolean;
+}
+interface schoolmateList {
+  list: schoolmate[];
+  total: number;
+  initialCounts: {};
+}
+interface allFriendList {
+  favorites: schoolmate[];
+  all: schoolmate[];
+  total: number;
+  initialCounts: {};
+}
+function FriendListScreen() {
+  const navigation = useNavigation<NavigationProps>();
   const [selectedTab, setSelectedTab] = useState("friends");
-  const [favoriteFriends, setFavoriteFriends] = useState(friends);
-  //friends.filter((friend) => friend.favorite);
-  const [allFriends, setAllFriends] = useState(friends);
-  const [schoolFriends, setSchoolFriends] = useState(friends);
+  // const [favoriteFriends, setFavoriteFriends] = useState();
+  const [allFriends, setAllFriends] = useState<allFriendList>({
+    favorites: [],
+    all: [],
+    total: 0,
+    initialCounts: {}
+  });
+  const [page, setPage] = useState(0); // 페이지 번호 상태 추가
+  const [loading, setLoading] = useState(false); // 로딩 상태 추가
+  const [enteredText, setEnteredText] = useState("");
+  const [schoolFriends, setSchoolFriends] = useState<schoolmateList>({
+    list: [],
+    total: 0,
+    initialCounts: {}
+  });
   const [selectedFilter, setSelectedFilter] = useState("전체");
-  const [filteredFriends, setFilteredFriends] = useState(allFriends);
-  const { accessToken } = useUserStore((state) => state);
+  const { token } = useAuthStore();
   useEffect(() => {
-    // console.log(selectedFilter);
     filterList.filter((fl) => {
       if (fl.grade === selectedFilter) fl.isSelected = !fl.isSelected;
       else fl.isSelected = false;
     });
-    setFilteredFriends(
-      schoolFriends.filter((friend) => {
-        if (selectedFilter === "전체") return true;
-        if (selectedFilter === "1학년") return friend.grade === "1";
-        if (selectedFilter === "2학년") return friend.grade === "2";
-        if (selectedFilter === "3학년") return friend.grade === "3";
-        if (selectedFilter === "친한친구") return friend.isFavorite;
-      })
-    );
+    // 필터 변경 시 데이터 초기화 및 새로 요청
+    setPage(0);
+    setSchoolFriends({ list: [], total: 0, initialCounts: {} });
+
+    let grades: number | undefined;
+    let isFavorite: boolean | undefined;
+
+    switch (selectedFilter) {
+      case "1학년":
+        grades = 1;
+        break;
+      case "2학년":
+        grades = 2;
+        break;
+      case "3학년":
+        grades = 3;
+        break;
+      case "즐겨찾기":
+        isFavorite = true;
+        break;
+      default:
+        grades = undefined;
+        isFavorite = undefined;
+        break;
+    }
+
+    fetchSchoolMates(0, grades, undefined, isFavorite); // 첫 페이지 데이터 요청
   }, [selectedFilter]);
-  const getFriends = async () => {
+
+  async function fetchMyFriends(page: number, name?: string) {
+    setLoading(true); // 로딩 시작
+    const params: any = {
+      count: 1000,
+      page: page
+    };
+
+    if (name !== undefined) params.name = name;
+
     try {
-      const response = await axios.get("https://b-site.site/friends?count=10&page=0", {
+      const response = await axios.get("https://b-site.site/friends", {
+        params: params,
         headers: {
-          "Content-Type": "application/json", // JSON 형식으로 데이터를 보낼 것을 명시
-          Authorization: `Bearer ${accessToken}` // 필요시, Authorization 헤더에 토큰 포함
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`
         }
       });
-      setFavoriteFriends(response.data.favaorites);
-      setAllFriends(response.data.all);
-    } catch (error: any) {
-      console.error(error.response ? error.response.data : error.message); // 오류 처리
+
+      setAllFriends((prev) => ({
+        favorites: response.data.favorites,
+        all: response.data.all,
+        total: response.data.total,
+        initialCounts: {}
+      }));
+    } catch (error) {
+      console.error("Error fetching schoolmates:", error);
+    } finally {
+      setLoading(false); // 로딩 끝
     }
-  };
-  const getSchoolFriends = async () => {
+  }
+  async function fetchSchoolMates(page: number, grades?: number, name?: string, isFavorite?: boolean) {
+    setLoading(true); // 로딩 시작
+    const params: any = {
+      count: 10,
+      page: page
+    };
+
+    if (grades !== undefined) params.grades = grades;
+    if (name !== undefined) params.name = name;
+    if (isFavorite !== undefined) params.isFavorite = isFavorite;
+
     try {
-      const response = await axios.get("https://b-site.site/schoolmates?count=10&page=0", {
+      const response = await axios.get("https://b-site.site/schoolmates", {
+        params: params,
         headers: {
-          "Content-Type": "application/json", // JSON 형식으로 데이터를 보낼 것을 명시
-          Authorization: `Bearer ${accessToken}` // 필요시, Authorization 헤더에 토큰 포함
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`
         }
       });
-      setSchoolFriends(response.data.list);
-    } catch (error: any) {
-      console.error(error.response ? error.response.data : error.message); // 오류 처리
+
+      setSchoolFriends((prev) => ({
+        list: page === 0 ? response.data.list : [...prev.list, ...response.data.list], // 첫 페이지면 새로운 리스트, 아니면 기존 리스트에 추가
+        total: response.data.total,
+        initialCounts: {}
+      }));
+    } catch (error) {
+      console.error("Error fetching schoolmates:", error);
+    } finally {
+      setLoading(false); // 로딩 끝
     }
-  };
+  }
+
+  const fetchMoreData = useCallback(() => {
+    if (!loading && schoolFriends.list.length < (schoolFriends.total || 0)) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      let grades: number | undefined;
+      let isFavorite: boolean | undefined;
+
+      switch (selectedFilter) {
+        case "1학년":
+          grades = 1;
+          isFavorite = false;
+          break;
+        case "2학년":
+          grades = 2;
+          isFavorite = false;
+          break;
+        case "3학년":
+          grades = 3;
+          isFavorite = false;
+          break;
+        case "즐겨찾기":
+          grades = undefined;
+          isFavorite = true;
+          break;
+        default:
+          grades = undefined;
+          isFavorite = undefined;
+          break;
+      }
+
+      fetchSchoolMates(nextPage, grades, undefined, isFavorite); // 다음 페이지 데이터 요청
+    }
+  }, [loading, schoolFriends, page, selectedFilter]);
+
   useEffect(() => {
-    getFriends();
-    getSchoolFriends();
+    fetchSchoolMates(0); // 첫 페이지 데이터를 로드
+    fetchMyFriends(0);
   }, []);
+  useEffect(() => {
+    console.log("all", allFriends);
+  }, [allFriends]);
+  async function handleSearchSchoolmate(text: string) {
+    setEnteredText(text);
+    fetchSchoolMates(0, undefined, text, undefined);
+    // const response = await axios.get("https://b-site.site/schoolmates", {
+    //   params: {
+    //     count: 10,
+    //     page: 0,
+    //     name: text
+    //   },
+    //   headers: {
+    //     Accept: "application/json",
+    //     Authorization: `Bearer ${token}`
+    //   }
+    // });
+  }
   const FriendsList = () => (
     <View style={{ flex: 1 }}>
       <SearchContainer>
         <Image source={IconSearch} style={{ width: 24, height: 24 }} />
         <SearchInput placeholder="검색어를 입력하세요" />
       </SearchContainer>
+
       <ScrollViewContainer>
         <SectionTitle>즐겨찾기</SectionTitle>
-        {favoriteFriends.length > 0 ? (
-          favoriteFriends.map((friend) => (
+        {allFriends.favorites ? (
+          allFriends.favorites.map((friend) => (
             <FriendItem
               key={friend.userId}
               onPress={() =>
                 navigation.navigate("FriendProfile", {
-                  userId: friend.userId,
-                  fullName: friend.fullName,
-                  profileImage: friend.profileImage,
-                  grade: friend.grade,
-                  isFavorite: friend.isFavorite,
-                  isFriend: true
+                  userId: friend.userId
                 })
               }
             >
@@ -137,27 +265,26 @@ function FriendListScreen({ navigation }: any) {
         )}
 
         <SectionTitle>전체</SectionTitle>
-        {allFriends.map((friend) => (
-          <FriendItem
-            key={friend.userId}
-            onPress={() =>
-              navigation.navigate("FriendProfile", {
-                userId: friend.userId,
-                fullName: friend.fullName,
-                profileImage: friend.profileImage,
-                grade: friend.grade,
-                isFavorite: friend.isFavorite,
-                isFriend: true
-              })
-            }
-          >
-            <Avatar source={{ uri: friend.profileImage }} />
-            <FriendInfo>
-              <FriendName>{friend.fullName}</FriendName>
-              <FriendGrade>{friend.grade}학년</FriendGrade>
-            </FriendInfo>
-          </FriendItem>
-        ))}
+        {allFriends.all ? (
+          allFriends.all.map((friend) => (
+            <FriendItem
+              key={friend.userId}
+              onPress={() =>
+                navigation.navigate("FriendProfile", {
+                  userId: friend.userId
+                })
+              }
+            >
+              <Avatar source={{ uri: friend.profileImage }} />
+              <FriendInfo>
+                <FriendName>{friend.fullName}</FriendName>
+                <FriendGrade>{friend.grade}학년</FriendGrade>
+              </FriendInfo>
+            </FriendItem>
+          ))
+        ) : (
+          <EmptyText>친구가 없습니다.</EmptyText>
+        )}
       </ScrollViewContainer>
     </View>
   );
@@ -166,7 +293,7 @@ function FriendListScreen({ navigation }: any) {
     <View style={{ flex: 1 }}>
       <SearchContainer>
         <Image source={IconSearch} style={{ width: 24, height: 24 }} />
-        <SearchInput placeholder="검색어를 입력하세요" />
+        <SearchInput placeholder="검색어를 입력하세요" onChangeText={handleSearchSchoolmate} value={enteredText} />
       </SearchContainer>
       <ScrollView
         horizontal
@@ -199,33 +326,14 @@ function FriendListScreen({ navigation }: any) {
         ))}
       </ScrollView>
 
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-start", minHeight: "100%" }} // 추가: minHeight 설정
+      <View
+        style={{ flex: 1, justifyContent: "flex-start", minHeight: "82%" }} // 추가: minHeight 설정
       >
         <SectionTitle>전체</SectionTitle>
-        {filteredFriends.map((friend) => (
-          <FriendItem
-            key={friend.userId}
-            onPress={() =>
-              navigation.navigate("FriendProfile", {
-                userId: friend.userId,
-                fullName: friend.fullName,
-                profileImage: friend.profileImage,
-                grade: friend.grade,
-                isFavorite: friend.isFavorite,
-                // 친구여부 설정
-                isFriend: false
-              })
-            }
-          >
-            <Avatar source={{ uri: friend.profileImage }} />
-            <FriendInfo>
-              <FriendName>{friend.fullName}</FriendName>
-              <FriendGrade>{friend.grade}학년</FriendGrade>
-            </FriendInfo>
-          </FriendItem>
-        ))}
-      </ScrollView>
+        <SchoolmateList list={schoolFriends.list} fetchMoreData={fetchMoreData} />
+
+        {/* <SchoolmateList list={schoolFriends.list} /> */}
+      </View>
     </View>
   );
 
@@ -288,43 +396,6 @@ const TabText = styled.Text<{ active: boolean }>`
   font-family: "Esamanru OTF";
 `;
 
-const FriendItem = styled(TouchableOpacity)`
-  padding-vertical: 8px;
-  flex-direction: row;
-  align-items: center;
-`;
-
-const Avatar = styled(Image)`
-  width: 48px;
-  height: 48px;
-  border-radius: 25px;
-  margin-right: 12px;
-`;
-
-const FriendInfo = styled(View)`
-  margin-left: 12px;
-  gap: 4px;
-`;
-
-const FriendName = styled(Text)`
-  font-size: 16px;
-  font-weight: 500;
-`;
-
-const FriendGrade = styled(Text)`
-  font-size: 14px;
-  color: #666;
-`;
-const EmptyText = styled(Text)`
-  font-size: 14px;
-  color: #999;
-  text-align: center;
-  margin-top: 20px;
-`;
-const ScrollViewContainer = styled(ScrollView)`
-  flex: 1;
-`;
-
 const SectionTitle = styled(Text)`
   font-size: 16px;
   font-weight: 500px;
@@ -354,4 +425,38 @@ const SearchInput = styled(TextInput)`
   margin-left: 12px;
   text-align: left;
   align-items: center;
+`;
+const ScrollViewContainer = styled(ScrollView)`
+  flex: 1;
+`;
+
+const FriendInfo = styled(View)`
+  margin-left: 12px;
+  gap: 4px;
+`;
+
+const FriendName = styled(Text)`
+  font-size: 16px;
+  font-weight: 500;
+`;
+
+const FriendGrade = styled(Text)`
+  font-size: 14px;
+  color: #666;
+`;
+const Avatar = styled(Image)`
+  width: 48px;
+  height: 48px;
+  border-radius: 25px;
+  margin-right: 12px;
+`;
+const FriendItem = styled(Pressable)`
+  padding-vertical: 8px;
+  flex-direction: row;
+`;
+const EmptyText = styled(Text)`
+  font-size: 14px;
+  color: #999;
+  text-align: center;
+  margin-top: 20px;
 `;
