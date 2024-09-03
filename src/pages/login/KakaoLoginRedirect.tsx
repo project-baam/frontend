@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { useEffect } from "react";
 import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
 import useUserStore from "../../store/UserStore";
+import useAuthStore from "../../store/UserAuthStore";
 
 type KakaoLoginRedirectProps = StackScreenProps<SignUpStackParamList, "KakaoLoginRedirect">;
 
@@ -10,7 +11,7 @@ export default function KakaoLoginRedirect({ navigation, route }: KakaoLoginRedi
   const code = route.params.token;
 
   const { setAccessToken } = useUserStore((state) => state);
-
+  const { setToken } = useAuthStore();
   useEffect(() => {
     const requestBody = {
       code: code,
@@ -27,6 +28,7 @@ export default function KakaoLoginRedirect({ navigation, route }: KakaoLoginRedi
       .then((response) => response.json())
       .then((data) => {
         setAccessToken(data.accessToken);
+        setToken(data.accessToken);
         navigation.navigate("SelectSchool");
       })
       .catch((error) => {

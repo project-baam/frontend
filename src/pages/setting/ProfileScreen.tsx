@@ -1,21 +1,44 @@
 import styled from "@emotion/native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
-import React from "react";
-import { Pressable, View, ImageBackground, Image, Text } from "react-native";
+import React, { useState, useLayoutEffect } from "react";
+import { Pressable, View, ImageBackground, Image, Text, TouchableOpacity } from "react-native";
+import { launchImageLibrary } from "react-native-image-picker";
 import SubtractIcon from "../../assets/images/icon_subtract.svg";
 import Switch from "../../components/common/Switch";
 import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
-import { useProfileStore } from "../../store/store";
+import { White } from "../../assets/assets";
 import useUserStore from "../../store/UserStore";
 import { Theme } from "../../styles/theme";
 import ProfileInfoItem from "./ProfileInfoItem";
+import HeaderRightText from "../../components/common/HeaderRightText";
 
 interface ProfileScreenProps {}
 
 function ProfileScreen({}: ProfileScreenProps) {
-  const { fullName, schoolName, grade, className, profileImage, backgroundImage } = useUserStore();
+  const { fullName, schoolName, grade, className, profileImage, backgroundImage, setProfileImage, setBackgroundImage } =
+    useUserStore();
+  const [localProfileImage, setLocalProfileImage] = useState<string | null>(profileImage);
   const navigation = useNavigation<NavigationProp<SettingStackParamList>>();
 
+  const handleChoosePhoto = () => {
+    launchImageLibrary({ mediaType: "photo" }, (response) => {
+      if (response.didCancel) {
+        console.log("User cancelled image picker");
+      } else if (response.errorCode) {
+        console.error("ImagePicker Error: ", response.errorCode);
+      } else if (response.assets && response.assets.length > 0) {
+        const asset = response.assets[0];
+        if (asset.uri) {
+          console.log("Image URI: ", asset.uri);
+          setLocalProfileImage(asset.uri);
+        } else {
+          console.error("Image URI is undefined");
+        }
+      } else {
+        console.log("No image selected");
+      }
+    });
+  };
   const profileInfo = [
     { label: "이름", value: fullName },
     { label: "학교", value: schoolName },
@@ -25,12 +48,17 @@ function ProfileScreen({}: ProfileScreenProps) {
   const handleImagePress = () => {
     navigation.navigate("ImagePickerScreen");
   };
-
+  const handleSave = () => {
+    if (localProfileImage) {
+      setProfileImage(localProfileImage);
+    }
+    navigation.goBack();
+  };
   return (
     <Container>
       <View>
         <ImageBackground
-          source={profileImage ? { uri: profileImage } : { uri: "https://picsum.photos/400/400" }}
+          source={backgroundImage ? { uri: backgroundImage } : White}
           imageStyle={{ borderRadius: 16, height: 220, marginTop: 8, marginBottom: 20 }}
           style={{}}
         />
@@ -43,10 +71,10 @@ function ProfileScreen({}: ProfileScreenProps) {
         >
           <Pressable
             style={{ width: 80, height: 80, alignItems: "center", position: "relative" }}
-            onPress={handleImagePress}
+            onPress={handleChoosePhoto}
           >
             <ProfileImage
-              source={profileImage ? { uri: profileImage } : require("../../assets/images/dummyprofile.png")}
+              source={localProfileImage ? { uri: localProfileImage } : require("../../assets/images/dummyprofile.png")}
             />
             <IconContainer>
               <SubtractIcon />

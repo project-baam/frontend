@@ -7,12 +7,15 @@ import SubtractIcon from "../../assets/images/icon_subtract.svg";
 import HeaderRightText from "../../components/common/HeaderRightText";
 import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
 import { useProfileStore } from "../../store/store";
+import useUserStore from "../../store/UserStore";
 import { Theme } from "../../styles/theme";
 import ProfileInfoItem from "./ProfileInfoItem";
 
 function ImagePickerScreen() {
   const navigation = useNavigation<NavigationProp<SettingStackParamList>>();
-  const { name, school, grade, class: classValue, profileImage, setProfileImage } = useProfileStore();
+
+  const { fullName, schoolName, grade, className, profileImage, backgroundImage, setProfileImage, setBackgroundImage } =
+    useUserStore();
   const [localProfileImage, setLocalProfileImage] = useState<string | null>(profileImage);
 
   const handleChoosePhoto = () => {
@@ -36,9 +39,9 @@ function ImagePickerScreen() {
   };
 
   const profileInfo = [
-    { label: "이름", value: name },
-    { label: "학교", value: school },
-    { label: "학년 반", value: `${grade} ${classValue}` }
+    { label: "이름", value: fullName },
+    { label: "학교", value: schoolName },
+    { label: "학년 반", value: `${grade} ${className}` }
   ];
 
   const handleSave = () => {

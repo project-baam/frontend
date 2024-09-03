@@ -5,6 +5,7 @@ import axios from "axios";
 import { AddMemoIcon, TodayTodoImg, ChevronRight } from "../../assets/assets";
 import useUserStore from "../../store/UserStore";
 import { subjectList } from "../../store/subjectList";
+import useAuthStore from "../../store/UserAuthStore";
 type Memo = {
   id: number;
   subjectName: string;
@@ -51,14 +52,14 @@ function MemoScreen({ navigation, route }: any) {
   const [memos, setMemos] = useState<Memo[]>([]);
   const [subjectMemos, setSubjectMemos] = useState<SubjectMemos[]>([]);
   const [selectedTab, setSelectedTab] = useState("subjects");
-  const { accessToken } = useUserStore((state) => state);
+  const { token } = useAuthStore();
   const Todayform = formatDate();
   const getTodayMemo = async () => {
     try {
       const response = await axios.get("https://b-site.site/subject-memo/today", {
         headers: {
           "Content-Type": "application/json", // JSON 형식으로 데이터를 보낼 것을 명시
-          Authorization: `Bearer ${accessToken}` // 필요시, Authorization 헤더에 토큰 포함
+          Authorization: `Bearer ${token}` // 필요시, Authorization 헤더에 토큰 포함
         }
       });
       setMemos(response.data.list);
@@ -71,11 +72,10 @@ function MemoScreen({ navigation, route }: any) {
       const response = await axios.get("https://b-site.site/subject-memo?count=10&page=0", {
         headers: {
           "Content-Type": "application/json", // JSON 형식으로 데이터를 보낼 것을 명시
-          Authorization: `Bearer ${accessToken}` // 필요시, Authorization 헤더에 토큰 포함
+          Authorization: `Bearer ${token}` // 필요시, Authorization 헤더에 토큰 포함
         }
       });
       setSubjectMemos(response.data.list);
-      console.log(response.data); // 응답 데이터 출력
     } catch (error: any) {
       console.error(error.response ? error.response.data : error.message); // 오류 처리
     }
@@ -84,7 +84,6 @@ function MemoScreen({ navigation, route }: any) {
     getTodayMemo();
     getSubjectMemoList();
   }, []);
-
   const MySubjects = () => {
     return (
       <ScrollView style={{ marginTop: 15 }}>
