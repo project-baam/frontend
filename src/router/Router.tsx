@@ -16,6 +16,7 @@ import SignUpStackRouter from "./SignUpStackRouter";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import useAuthStore from "../store/UserAuthStore";
 import LoadingOverlay from "../components/common/ui/LoadingOverlay";
+import HomeStackRouter from "./HomeStackRouter";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -78,7 +79,7 @@ export const MyTabs = () => {
         headerShown: false
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Home" component={HomeStackRouter} />
       <Tab.Screen name="Memo" component={MemoScreen} />
       <Tab.Screen name="Friends" component={FriendListScreen} />
       <Tab.Screen name="Calendar" component={CalendarStackRouter} />

@@ -31,7 +31,9 @@ export const Theme = {
     Blue600: "#548CEA",
     Blue700: "#4E79D6",
     Blue800: "#4967C3",
-    Blue900: "#4048A3"
+    Blue900: "#4048A3",
+    Violet: "#8A7EFF",
+    Violet100: "#DBD7FF"
   },
   typo: {
     Display_01: typoCreator("EsaManruBold", "72px", "100%"),
