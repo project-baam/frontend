@@ -8,6 +8,7 @@ import Dialog from "../../components/common/Dialog";
 import Switch from "../../components/common/Switch";
 import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
 import { useProfileStore } from "../../store/store";
+import useAuthStore from "../../store/UserAuthStore";
 import useUserStore from "../../store/UserStore";
 import { Theme } from "../../styles/theme";
 
@@ -17,8 +18,8 @@ function SettingHomeScreen({}: SettingHomeScreenProps) {
   const [isSwitchOn, setIsSwitchOn] = useState(false);
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const navigation = useNavigation<NavigationProp<SettingStackParamList>>();
-  const { accessToken, schoolName, grade, className, fullName, profileImage, backgroundImage, isClassPublic } =
-    useUserStore();
+  const { schoolName, grade, className, fullName, profileImage, backgroundImage, isClassPublic } = useUserStore();
+  const { token } = useAuthStore();
 
   const handleToggleSwitch = () => {
     setIsSwitchOn((previousState) => !previousState);

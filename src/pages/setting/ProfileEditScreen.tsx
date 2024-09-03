@@ -1,27 +1,48 @@
 import styled from "@emotion/native";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import axios from "axios";
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { Keyboard, SafeAreaView, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
+import { Keyboard, Platform, SafeAreaView, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import DropDownPicker, { ItemType } from "react-native-dropdown-picker";
 import HeaderRightText from "../../components/common/HeaderRightText";
 import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
-import { useProfileStore } from "../../store/store";
+import useAuthStore from "../../store/UserAuthStore";
 import useUserStore from "../../store/UserStore";
 import { Theme } from "../../styles/theme";
+import RNPickerSelect from "react-native-picker-select";
+import { DropDownDown } from "../../assets/assets";
 
 type ProfileEditScreenNavigationProp = NativeStackNavigationProp<SettingStackParamList, "ProfileEditScreen">;
 type ProfileEditScreenRouteProp = RouteProp<SettingStackParamList, "ProfileEditScreen">;
+type Class = {
+  label: string;
+  value: string;
+};
+interface GradeData {
+  grade: number;
+  names: string[];
+}
 
+interface ResponseData {
+  total: number;
+  list: GradeData[];
+}
 interface ProfileEditScreenProps {}
 
 function ProfileEditScreen({}: ProfileEditScreenProps) {
   const navigation = useNavigation<ProfileEditScreenNavigationProp>();
   const route = useRoute<ProfileEditScreenRouteProp>();
-  const { fullName, schoolName, grade, className, setFullName, setSchoolName, setGrade, setClassName } = useUserStore();
-
+  const { fullName, schoolId, schoolName, grade, className, setFullName, setSchoolName, setGrade, setClassName } =
+    useUserStore();
+  const { token } = useAuthStore();
+  const [responseData, setResponseData] = useState<ResponseData>({
+    total: 0,
+    list: []
+  }); //학급정보
   const [localName, setLocalName] = useState(fullName);
   const [localSchool, setLocalSchool] = useState(schoolName);
+  const [localSchoolId, setLocalSchoolId] = useState(schoolId);
   const [localGrade, setLocalGrade] = useState(grade);
   const [localClass, setLocalClass] = useState(className);
 
@@ -34,21 +55,48 @@ function ProfileEditScreen({}: ProfileEditScreenProps) {
 
   const [openClass, setOpenClass] = useState(false);
   //해당학교가 몇반까지 있는지 추가해야됨
-  const [classItems, setClassItems] = useState<ItemType<number>[]>([
-    { label: "1반", value: 1 },
-    { label: "2반", value: 2 },
-    { label: "3반", value: 3 }
+  const [classItems, setClassItems] = useState<Class[]>([
+    {
+      label: "1",
+      value: "1"
+    }
   ]);
 
   const navigateToSchoolSearch = () => {
     navigation.navigate("SchoolSearchScreen");
   };
+  const updateProfile = async () => {
+    try {
+      // setLoading(true);
+      await axios.patch(
+        // PUT 메서드 사용
+        `https://b-site.site/user`,
+        {
+          schoolId: localSchoolId,
+          grade: localGrade,
+          className: localClass,
+          fullName: localName
+        },
+        {
+          headers: {
+            accept: "application/json",
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
 
+      // setLoading(false);
+    } catch (error: any) {
+      console.error(error.response ? error.response.data : error.message);
+    }
+  };
   const handleSave = () => {
     setFullName(localName);
     setSchoolName(localSchool);
     setGrade(localGrade);
     setClassName(localClass);
+    updateProfile();
     navigation.goBack();
   };
 
@@ -68,6 +116,39 @@ function ProfileEditScreen({}: ProfileEditScreenProps) {
     }
   }, [route.params?.school]);
 
+  useEffect(() => {
+    //학급정보 불러오기
+    // https://b-site.site/school-dataset/classes/1
+    const getClassInfo = async () => {
+      try {
+        const response = await axios.get(`https://b-site.site/school-dataset/classes/${schoolId}`, {
+          headers: {
+            accept: "application/json" // JSON 형식으로 데이터를 보낼 것을 명시
+          }
+        });
+        setResponseData(response.data);
+      } catch (error: any) {
+        console.error(error.response ? error.response.data : error.message); // 오류 처리
+      }
+    };
+    getClassInfo();
+  }, []);
+  useEffect(() => {
+    if (responseData?.list) {
+      const selectedGrade = responseData.list.find((l) => l.grade == localGrade);
+      if (selectedGrade) {
+        // selectedGrade가 존재하는지 확인
+        const newClassItems = selectedGrade.names.map((name) => ({
+          label: name,
+          value: name
+        }));
+        setClassItems(newClassItems);
+      } else {
+        // selectedGrade가 없을 때의 처리를 추가할 수도 있습니다.
+        setClassItems([]); // 빈 배열로 초기화
+      }
+    }
+  }, [localGrade, responseData]);
   return (
     <TouchableWithoutFeedback
       onPress={() => {
@@ -91,7 +172,44 @@ function ProfileEditScreen({}: ProfileEditScreenProps) {
           <RowContainer>
             <DropdownContainer style={{ zIndex: 3000 }}>
               <LabelText>학년</LabelText>
-              <DropDownPicker
+              {Platform.OS === "ios" ? (
+                <RNPickerSelect
+                  placeholder={{}}
+                  onValueChange={setLocalGrade}
+                  items={gradeItems}
+                  style={{
+                    inputIOS: {
+                      width: "100%",
+                      backgroundColor: "#e9e9e9",
+                      padding: 16,
+                      fontSize: 18,
+                      fontWeight: 500,
+                      color: "#7b7b7b",
+                      borderRadius: 12
+                    }
+                  }}
+                  useNativeAndroidPickerStyle={false}
+                  Icon={() => {
+                    return <DropdownIcon source={DropDownDown} />;
+                  }}
+                />
+              ) : (
+                <DropDownPicker
+                  open={openGrade}
+                  value={localGrade}
+                  items={gradeItems}
+                  setOpen={setOpenGrade}
+                  setValue={setLocalGrade}
+                  setItems={setGradeItems}
+                  placeholder="학년 선택"
+                  style={pickerStyle}
+                  dropDownContainerStyle={dropDownContainerStyle}
+                  closeAfterSelecting={true}
+                  closeOnBackPressed={true}
+                  onOpen={() => setOpenClass(false)}
+                />
+              )}
+              {/* <DropDownPicker
                 open={openGrade}
                 value={localGrade}
                 items={gradeItems}
@@ -104,24 +222,63 @@ function ProfileEditScreen({}: ProfileEditScreenProps) {
                 closeAfterSelecting={true}
                 closeOnBackPressed={true}
                 onOpen={() => setOpenClass(false)}
-              />
+              /> */}
             </DropdownContainer>
-            <DropdownContainer style={{ zIndex: 2000 }}>
+            <DropdownContainer style={{ zIndex: 3000 }}>
               <LabelText>반</LabelText>
-              <DropDownPicker
-                open={openClass}
-                value={localClass}
-                items={classItems}
-                setOpen={setOpenClass}
-                setValue={setLocalClass}
-                setItems={setClassItems}
-                placeholder="반 선택"
+              {Platform.OS === "ios" ? (
+                <RNPickerSelect
+                  placeholder={{}}
+                  onValueChange={setLocalClass}
+                  items={classItems}
+                  style={{
+                    inputIOS: {
+                      width: "100%",
+                      backgroundColor: "#e9e9e9",
+                      padding: 16,
+                      fontSize: 18,
+                      fontWeight: 500,
+                      color: "#7b7b7b",
+                      borderRadius: 12,
+                      justifyContent: "center",
+                      alignItems: "center"
+                    }
+                  }}
+                  useNativeAndroidPickerStyle={false}
+                  Icon={() => {
+                    return <DropdownIcon source={DropDownDown} />;
+                  }}
+                />
+              ) : (
+                <DropDownPicker
+                  open={openClass}
+                  value={localClass}
+                  items={classItems}
+                  setOpen={setOpenClass}
+                  setValue={setLocalClass}
+                  setItems={setClassItems}
+                  placeholder="반 선택"
+                  style={pickerStyle}
+                  dropDownContainerStyle={dropDownContainerStyle}
+                  closeAfterSelecting={true}
+                  closeOnBackPressed={true}
+                  onOpen={() => setOpenGrade(false)}
+                />
+              )}
+              {/* <DropDownPicker
+                open={openGrade}
+                value={localGrade}
+                items={gradeItems}
+                setOpen={setOpenGrade}
+                setValue={setLocalGrade}
+                setItems={setGradeItems}
+                placeholder="학년 선택"
                 style={pickerStyle}
                 dropDownContainerStyle={dropDownContainerStyle}
                 closeAfterSelecting={true}
                 closeOnBackPressed={true}
-                onOpen={() => setOpenGrade(false)}
-              />
+                onOpen={() => setOpenClass(false)}
+              /> */}
             </DropdownContainer>
           </RowContainer>
         </Container>
@@ -161,6 +318,18 @@ const RowContainer = styled.View`
   gap: 16px;
 `;
 
+const InputContainer2 = styled.View`
+  align-self: stretch;
+  border-radius: 8px;
+  border-color: #e9e9e9;
+  border-width: 1px;
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
+  padding: 16px;
+  gap: 20px;
+  margin-bottom: 12px;
+`;
 const DropdownContainer = styled.View`
   flex: 1;
   gap: 8px;
@@ -177,3 +346,8 @@ const dropDownContainerStyle = {
   borderColor: Theme.colors.Gray200,
   backgroundColor: Theme.colors.Gray200
 };
+const DropdownIcon = styled.Image`
+  width: 24px;
+  height: 24px;
+  transform: rotate(180deg);
+`;
