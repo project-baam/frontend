@@ -13,10 +13,14 @@ export default function KakaoLoginPage({ navigation }: KakaoLoginPageProps) {
           uri: "https://kauth.kakao.com/oauth/authorize?client_id=30bf4954316109d9e58b50bd515b9fd9&response_type=code&redirect_uri=https://b-site.site/authentication/kakao/callback"
         }}
         onNavigationStateChange={(navState) => {
-          if (navState.url.includes("authentication/kakao/callback")) {
-            navigation.navigate("KakaoLoginRedirect", {
-              token: navState.url.split("code=")[1]
-            });
+          if (!navState.loading && navState.url.includes("authentication/kakao/callback")) {
+            const code = navState.url.split("code=")[1];
+            if (code) {
+              navigation.navigate("KakaoLoginRedirect", { token: code });
+              console.log("Code received: ", code);
+            } else {
+              console.log("Code not found in URL.");
+            }
           }
         }}
       />
