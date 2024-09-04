@@ -26,7 +26,7 @@ export default function UserProfileForm({ navigation }: UserProfileFormProps) {
     setBackgroundImage
   } = useUserStore((state) => state);
 
-  const { setIsAuthenticated } = useAuthStore();
+  const { refreshToken, setIsAuthenticated } = useAuthStore();
 
   function takeImageHandler({ type, imageUri }: { type: string; imageUri: string }) {
     switch (type) {
@@ -55,8 +55,8 @@ export default function UserProfileForm({ navigation }: UserProfileFormProps) {
         }
       })
       .then((response) => {
-
         AsyncStorage.setItem("accessToken", accessToken);
+        AsyncStorage.setItem("refreshToken", refreshToken);
         setIsAuthenticated(true);
         navigation.reset({
           index: 0,

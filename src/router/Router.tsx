@@ -11,12 +11,12 @@ import { Image, StyleSheet, View } from "react-native";
 import EditMemoScreen from "../pages/memo/EditMemoScreen";
 import FriendProfile from "../pages/friends/FriendProfile";
 import MemoScreen from "../pages/memo/MemoScreen";
-import HomeScreen from "../pages/HomeScreen";
 import SignUpStackRouter from "./SignUpStackRouter";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import useAuthStore from "../store/UserAuthStore";
 import LoadingOverlay from "../components/common/ui/LoadingOverlay";
 import HomeStackRouter from "./HomeStackRouter";
+import axios from "axios";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -114,17 +114,38 @@ const styles = StyleSheet.create({
 });
 
 function Router() {
-  const { setToken, setIsAuthenticated } = useAuthStore();
+  const { setToken, setIsAuthenticated, setRefreshToken } = useAuthStore();
   const [isTryingLogin, setIsTryingLogin] = useState(true);
 
   useEffect(() => {
     async function fetchToken() {
-      const storedToken = await AsyncStorage.getItem("accessToken");
+      const storedToken = await AsyncStorage.getItem("refreshToken");
 
       if (storedToken) {
-        setToken(storedToken);
-        setIsAuthenticated(true);
-        AsyncStorage.setItem("accessToken", storedToken);
+        axios
+          .post(
+            "https://b-site.site/authentication/refresh-tokens",
+            {
+              refreshToken: storedToken
+            },
+            {
+              headers: {
+                accept: "application/json",
+                "Content-Type": "application/json"
+              }
+            }
+          )
+          .then((response) => {
+            const accessToken = response.data.accessToken;
+            const refreshToken = response.data.refreshToken;
+            AsyncStorage.setItem("refreshToken", refreshToken);
+            AsyncStorage.setItem("accessToken", accessToken);
+            setToken(accessToken);
+            setIsAuthenticated(true);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
       }
 
       setTimeout(() => {
