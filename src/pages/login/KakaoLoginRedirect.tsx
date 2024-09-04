@@ -11,7 +11,7 @@ export default function KakaoLoginRedirect({ navigation, route }: KakaoLoginRedi
   const code = route.params.token;
 
   const { setAccessToken } = useUserStore((state) => state);
-  const { setToken } = useAuthStore();
+  const { setToken, setRefreshToken } = useAuthStore();
   useEffect(() => {
     const requestBody = {
       code: code,
@@ -27,6 +27,7 @@ export default function KakaoLoginRedirect({ navigation, route }: KakaoLoginRedi
     })
       .then((response) => response.json())
       .then((data) => {
+        setRefreshToken(data.refreshToken);
         setAccessToken(data.accessToken);
         setToken(data.accessToken);
         navigation.navigate("SelectSchool");
