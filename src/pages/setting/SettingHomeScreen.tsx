@@ -7,7 +7,6 @@ import BtnRight from "../../assets/images/btn_right.svg";
 import Dialog from "../../components/common/Dialog";
 import Switch from "../../components/common/Switch";
 import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
-import { useProfileStore } from "../../store/store";
 import useAuthStore from "../../store/UserAuthStore";
 import useUserStore from "../../store/UserStore";
 import { Theme } from "../../styles/theme";
@@ -18,7 +17,10 @@ function SettingHomeScreen({}: SettingHomeScreenProps) {
   const [isSwitchOn, setIsSwitchOn] = useState(false);
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const navigation = useNavigation<NavigationProp<SettingStackParamList>>();
-  const { schoolName, grade, className, fullName, profileImage, backgroundImage, isClassPublic } = useUserStore();
+  const [schoolName, setSchoolName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [profileImage, setProfileImage] = useState("");
+  // const { schoolName, grade, className, fullName, profileImage, backgroundImage, isClassPublic } = useUserStore();
   const { token } = useAuthStore();
 
   const handleToggleSwitch = () => {
@@ -37,6 +39,24 @@ function SettingHomeScreen({}: SettingHomeScreenProps) {
     //[ ]TODO : 회원 탈퇴 로직 추가
     handleHideDialog();
   };
+  useEffect(() => {
+    const getUserProfile = async () => {
+      try {
+        const response = await axios.get("https://b-site.site/user", {
+          headers: {
+            "Content-Type": "application/json", // JSON 형식으로 데이터를 보낼 것을 명시
+            Authorization: `Bearer ${token}` // 필요시, Authorization 헤더에 토큰 포함
+          }
+        });
+        setSchoolName(response.data.schoolName);
+        setFullName(response.data.fullName);
+        setProfileImage(response.data.profileImageUrl);
+      } catch (error: any) {
+        console.error(error.response ? error.response.data : error.message); // 오류 처리
+      }
+    };
+    getUserProfile();
+  }, []);
 
   const customerServiceOptions = [
     {

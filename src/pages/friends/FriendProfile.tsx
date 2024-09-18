@@ -21,7 +21,6 @@ function getSubjectType(sj: string) {
   const subject = subjectList[sj];
   return getSubjectIcon(subject);
 }
-// Sample data
 
 interface timetable {
   day: number;
