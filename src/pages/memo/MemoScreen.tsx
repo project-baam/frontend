@@ -3,14 +3,15 @@ import { View, Text, ScrollView, SafeAreaView, Image, TouchableOpacity } from "r
 import styled from "@emotion/native";
 import axios from "axios";
 import { AddMemoIcon, TodayTodoImg, ChevronRight } from "../../assets/assets";
-import useUserStore from "../../store/UserStore";
 import { subjectList } from "../../store/subjectList";
 import useAuthStore from "../../store/UserAuthStore";
+import ChatRooms from "./ChatRooms";
+
 type Memo = {
   id: number;
   subjectName: string;
   title: string;
-  content: object; // `content`는 객체이므로 `object` 타입으로 정의
+  memo: object; // `content`는 객체이므로 `object` 타입으로 정의
   datetime: string;
 };
 
@@ -62,6 +63,7 @@ function MemoScreen({ navigation, route }: any) {
           Authorization: `Bearer ${token}` // 필요시, Authorization 헤더에 토큰 포함
         }
       });
+      console.log("여기", response.data.list);
       setMemos(response.data.list);
     } catch (error: any) {
       console.error(error.response ? error.response.data : error.message); // 오류 처리
@@ -111,7 +113,7 @@ function MemoScreen({ navigation, route }: any) {
               <Text
                 style={{ fontSize: 32, fontWeight: 700, fontFamily: "Esamanru OTF", color: "#fff", textAlign: "left" }}
               >
-                {memos.map.length}개
+                {memos.length}개
               </Text>
               <Text
                 style={{
@@ -146,7 +148,7 @@ function MemoScreen({ navigation, route }: any) {
                       subjectName: memo.subjectName,
                       title: memo.title,
                       datetime: memo.datetime,
-                      content: memo.content
+                      memo: memo.memo
                     })
                   }
                 >
@@ -161,14 +163,6 @@ function MemoScreen({ navigation, route }: any) {
     );
   };
 
-  const ChatRooms = () => {
-    return (
-      <View style={{ flexGrow: 1, alignItems: "center", justifyContent: "center" }}>
-        <Text style={{ fontSize: 16, fontWeight: 500, color: "#000" }}>준비중입니다</Text>
-      </View>
-    );
-  };
-
   return (
     <Container>
       <ContentContainer>
@@ -180,7 +174,7 @@ function MemoScreen({ navigation, route }: any) {
             <TabText active={selectedTab === "chats"}>수업 톡방</TabText>
           </TabButton>
         </Tabs>
-        <View>{selectedTab === "subjects" ? <MySubjects /> : <ChatRooms />}</View>
+        <View>{selectedTab === "subjects" ? <MySubjects /> : <ChatRooms navigation={navigation} />}</View>
         {/* 추가버튼  */}
         <AddMemo onPress={() => navigation.navigate("EditMemoScreen")}>
           <Image source={AddMemoIcon} style={{ width: 30, height: 30 }} />
