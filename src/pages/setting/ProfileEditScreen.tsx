@@ -1,20 +1,29 @@
 import styled from "@emotion/native";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import axios from "axios";
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { Keyboard, Platform, SafeAreaView, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
+import {
+  Image,
+  Keyboard,
+  Platform,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
+} from "react-native";
 import DropDownPicker, { ItemType } from "react-native-dropdown-picker";
 import HeaderRightText from "../../components/common/HeaderRightText";
-import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
 import useAuthStore from "../../store/UserAuthStore";
 import useUserStore from "../../store/UserStore";
 import { Theme } from "../../styles/theme";
 import RNPickerSelect from "react-native-picker-select";
 import { DropDownDown } from "../../assets/assets";
+import { VectorLeft, PencilImg } from "../../assets/assets";
+import { StackScreenProps } from "@react-navigation/stack";
+import { SettingScreenNavigationProp, SettingStackParamList } from "../../navigations/SettingStackNavigation";
+import { useNavigation } from "@react-navigation/native";
+type ProfileEditScreenProps = StackScreenProps<SettingStackParamList, "ProfileEditScreen">;
 
-type ProfileEditScreenNavigationProp = NativeStackNavigationProp<SettingStackParamList, "ProfileEditScreen">;
-type ProfileEditScreenRouteProp = RouteProp<SettingStackParamList, "ProfileEditScreen">;
 type Class = {
   label: string;
   value: string;
@@ -28,13 +37,9 @@ interface ResponseData {
   total: number;
   list: GradeData[];
 }
-interface ProfileEditScreenProps {}
 
-function ProfileEditScreen({}: ProfileEditScreenProps) {
-  const navigation = useNavigation<ProfileEditScreenNavigationProp>();
-  const route = useRoute<ProfileEditScreenRouteProp>();
-  const { fullName, schoolId, schoolName, grade, className, setFullName, setSchoolName, setGrade, setClassName } =
-    useUserStore();
+function ProfileEditScreen({ navigation, route }: ProfileEditScreenProps) {
+  const { fullName, schoolId, schoolName, grade, className } = route.params;
   const { token } = useAuthStore();
   const [responseData, setResponseData] = useState<ResponseData>({
     total: 0,
@@ -52,6 +57,7 @@ function ProfileEditScreen({}: ProfileEditScreenProps) {
     { label: "2학년", value: 2 },
     { label: "3학년", value: 3 }
   ]);
+  const router = useNavigation<SettingScreenNavigationProp>();
 
   const [openClass, setOpenClass] = useState(false);
   //해당학교가 몇반까지 있는지 추가해야됨
@@ -63,7 +69,8 @@ function ProfileEditScreen({}: ProfileEditScreenProps) {
   ]);
 
   const navigateToSchoolSearch = () => {
-    navigation.navigate("SchoolSearchScreen");
+    // navigation.navigate("SchoolSearchScreen");
+    router.push("SchoolSearchScreen", { changeSchoolId: setLocalSchoolId });
   };
   const updateProfile = async () => {
     try {
@@ -92,14 +99,20 @@ function ProfileEditScreen({}: ProfileEditScreenProps) {
     }
   };
   const handleSave = () => {
-    setFullName(localName);
-    setSchoolName(localSchool);
-    setGrade(localGrade);
-    setClassName(localClass);
+    // setFullName(localName);
+    // setSchoolName(localSchool);
+    // setGrade(localGrade);
+    // setClassName(localClass);
+    console.log("new info : ", localName, localSchool, localGrade, localClass);
     updateProfile();
-    navigation.goBack();
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "BottomTab", params: { screen: "Setting" } }]
+    });
   };
-
+  useEffect(() => {
+    console.log("schoolId : ", localSchoolId);
+  }, [localSchoolId]);
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -111,14 +124,13 @@ function ProfileEditScreen({}: ProfileEditScreenProps) {
   }, [navigation, handleSave]);
 
   useEffect(() => {
-    if (route.params?.school) {
-      setLocalSchool(route.params.school);
+    if (route.params?.schoolName) {
+      setLocalSchool(route.params.schoolName);
     }
-  }, [route.params?.school]);
+  }, [route.params?.schoolName]);
 
   useEffect(() => {
     //학급정보 불러오기
-    // https://b-site.site/school-dataset/classes/1
     const getClassInfo = async () => {
       try {
         const response = await axios.get(`https://b-site.site/school-dataset/classes/${schoolId}`, {
@@ -158,6 +170,42 @@ function ProfileEditScreen({}: ProfileEditScreenProps) {
       }}
     >
       <SafeAreaView style={{ backgroundColor: Theme.colors.White, flex: 1 }}>
+        <Header style={{ zIndex: 2 }}>
+          <BackButton onPress={() => navigation.goBack()}>
+            <BackIcon source={VectorLeft} />
+          </BackButton>
+          <Text
+            style={{
+              fontSize: 18,
+              lineHeight: 26,
+              fontWeight: "600",
+              fontFamily: "Pretendard",
+              color: "#262626",
+              textAlign: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 272,
+              height: 28
+            }}
+          >
+            내 프로필
+          </Text>
+          <TouchableOpacity onPress={handleSave}>
+            <Text
+              style={{
+                fontSize: 16,
+                lineHeight: 18,
+                fontWeight: "500",
+                fontFamily: "Pretendard",
+                color: "#262626",
+                textAlign: "right"
+              }}
+            >
+              완료
+            </Text>
+          </TouchableOpacity>
+        </Header>
         <Container>
           <InputContainer>
             <LabelText>이름</LabelText>
@@ -175,6 +223,7 @@ function ProfileEditScreen({}: ProfileEditScreenProps) {
               {Platform.OS === "ios" ? (
                 <RNPickerSelect
                   placeholder={{}}
+                  value={localGrade}
                   onValueChange={setLocalGrade}
                   items={gradeItems}
                   style={{
@@ -209,26 +258,13 @@ function ProfileEditScreen({}: ProfileEditScreenProps) {
                   onOpen={() => setOpenClass(false)}
                 />
               )}
-              {/* <DropDownPicker
-                open={openGrade}
-                value={localGrade}
-                items={gradeItems}
-                setOpen={setOpenGrade}
-                setValue={setLocalGrade}
-                setItems={setGradeItems}
-                placeholder="학년 선택"
-                style={pickerStyle}
-                dropDownContainerStyle={dropDownContainerStyle}
-                closeAfterSelecting={true}
-                closeOnBackPressed={true}
-                onOpen={() => setOpenClass(false)}
-              /> */}
             </DropdownContainer>
             <DropdownContainer style={{ zIndex: 3000 }}>
               <LabelText>반</LabelText>
               {Platform.OS === "ios" ? (
                 <RNPickerSelect
                   placeholder={{}}
+                  value={localClass}
                   onValueChange={setLocalClass}
                   items={classItems}
                   style={{
@@ -265,20 +301,6 @@ function ProfileEditScreen({}: ProfileEditScreenProps) {
                   onOpen={() => setOpenGrade(false)}
                 />
               )}
-              {/* <DropDownPicker
-                open={openGrade}
-                value={localGrade}
-                items={gradeItems}
-                setOpen={setOpenGrade}
-                setValue={setLocalGrade}
-                setItems={setGradeItems}
-                placeholder="학년 선택"
-                style={pickerStyle}
-                dropDownContainerStyle={dropDownContainerStyle}
-                closeAfterSelecting={true}
-                closeOnBackPressed={true}
-                onOpen={() => setOpenClass(false)}
-              /> */}
             </DropdownContainer>
           </RowContainer>
         </Container>
@@ -350,4 +372,19 @@ const DropdownIcon = styled.Image`
   width: 24px;
   height: 24px;
   transform: rotate(180deg);
+`;
+const Header = styled(View)`
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-vertical: 10px;
+  padding-horizontal: 16px;
+`;
+const BackButton = styled(TouchableOpacity)`
+  padding: 10px;
+`;
+
+const BackIcon = styled(Image)`
+  width: 8.5px;
+  height: 15px;
 `;

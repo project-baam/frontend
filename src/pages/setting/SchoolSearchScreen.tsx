@@ -1,103 +1,88 @@
 import styled from "@emotion/native";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
-import React, { useState } from "react";
-import { FlatList, SafeAreaView, TouchableOpacity } from "react-native";
-import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import SchoolList from "./SchoolList";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Theme } from "../../styles/theme";
+import { TextInput } from "react-native";
+import { StackScreenProps } from "@react-navigation/stack";
+import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
+type SchoolSearchScreenProps = StackScreenProps<SettingStackParamList, "SchoolSearchScreen">;
 
-interface School {
-  name: string;
-  address: string;
-}
+export default function SchoolSearchScreen({ navigation, route }: SchoolSearchScreenProps) {
+  const [enteredText, setEnteredText] = useState("");
+  const { changeSchoolId } = route.params;
+  const [schoolList, setSchoolList] = useState({
+    list: [],
+    total: null
+  });
 
-const schools: School[] = [
-  { name: "명지대학교", address: "서울특별시 서대문구 홍제동" },
-  { name: "서울대학교", address: "서울특별시 관악구 관악로" },
-  { name: "고려대학교", address: "서울특별시 성북구 안암로" },
-  { name: "연세대학교", address: "서울특별시 서대문구 연세로" },
-  { name: "태초대학교", address: "태초특별시 태초구 태초로" }
-];
+  useEffect(() => {
+    async function fetchSchool() {
+      const response = await axios.get("https://b-site.site/school-dataset/schools", {
+        params: {
+          count: 1000,
+          page: 0,
+          name: ""
+        },
+        headers: {
+          Accept: "application/json"
+        }
+      });
 
-function SchoolSearchScreen() {
-  const navigation = useNavigation<NavigationProp<SettingStackParamList>>();
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredSchools, setFilteredSchools] = useState<School[]>(schools);
-
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-    if (query === "") {
-      setFilteredSchools(schools);
-    } else {
-      setFilteredSchools(schools.filter((school) => school.name.toLowerCase().includes(query.toLowerCase())));
+      setSchoolList(response.data);
     }
-  };
 
-  const handleSchoolSelect = (school: string) => {
-    navigation.navigate("ProfileEditScreen", { school });
-  };
+    fetchSchool();
+  }, []);
+
+  // 학교 목록 조회
+  async function handleSearchSchool(text: string) {
+    setEnteredText(text);
+    const response = await axios.get("https://b-site.site/school-dataset/schools", {
+      params: {
+        count: 100,
+        page: 0,
+        name: text
+      },
+      headers: {
+        Accept: "application/json"
+      }
+    });
+    setSchoolList(response.data);
+  }
 
   return (
     <SafeAreaView style={{ backgroundColor: Theme.colors.White, flex: 1 }}>
-      <Container>
-        <SearchContainer>
-          <SearchInput placeholder="검색" value={searchQuery} onChangeText={handleSearchChange} />
-        </SearchContainer>
-        <FlatList
-          data={filteredSchools}
-          keyExtractor={(item) => item.name}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => handleSchoolSelect(item.name)}>
-              <SchoolContainer>
-                <SchoolName>{item.name}</SchoolName>
-                <SchoolAddress>{item.address}</SchoolAddress>
-              </SchoolContainer>
-            </TouchableOpacity>
-          )}
-        />
-      </Container>
+      <RootContainer>
+        <InputContainer>
+          <StyledImg source={require("../../assets/images/image.png")} />
+          <TextInput onChangeText={handleSearchSchool} value={enteredText} placeholder="Place holder" />
+        </InputContainer>
+        <SchoolList items={schoolList.list} onChangeSchoolId={changeSchoolId} />
+      </RootContainer>
     </SafeAreaView>
   );
 }
 
-export default SchoolSearchScreen;
-
-const Container = styled.View`
+const RootContainer = styled.View`
   flex: 1;
   padding: 16px;
 `;
 
-const SearchContainer = styled.View`
-  background-color: ${Theme.colors.Gray200};
-  border-radius: 12px;
+const InputContainer = styled.View`
+  width: 100%;
   height: 40px;
+  display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 0px 16px;
-  margin-bottom: 16px;
-`;
-
-const SearchInput = styled.TextInput`
-  height: 100%;
-  flex: 1;
-  font-size: 16px;
-`;
-
-const SchoolContainer = styled.View`
-  padding: 16px;
-  background-color: ${Theme.colors.Gray200};
-  gap: 8px;
   border-radius: 12px;
-  margin-bottom: 8px;
+  padding: 0px 16px;
+  background-color: ${Theme.colors.Gray100};
+  gap: 12px;
 `;
 
-const SchoolName = styled.Text`
-  font-size: 18px;
-  font-weight: 500;
-  color: ${Theme.colors.Gray600};
-`;
-
-const SchoolAddress = styled.Text`
-  font-size: 16px;
-  color: ${Theme.colors.Gray600};
+const StyledImg = styled.Image`
+  width: 20px;
+  height: 20px;
 `;
