@@ -15,11 +15,11 @@ import DatePicker from "react-native-date-picker";
 import RNPickerSelect from "react-native-picker-select";
 import DropDownPicker from "react-native-dropdown-picker";
 import styled from "@emotion/native";
-import { VectorLeft, DropDownDown } from "../../assets/assets";
+import { VectorLeft, DropDownDown, Hamburger } from "../../assets/assets";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import axios from "axios";
-import useUserStore from "../../store/UserStore";
+import useAuthStore from "../../store/UserAuthStore";
 
 type Subject = {
   label: string;
@@ -29,15 +29,15 @@ function EditMemoScreen({ navigation, route }: any) {
   const [subjectList, setSubjectList] = useState<Subject[]>([]);
   const [subjectName, setSubjectName] = useState(route.params?.subjectName || "");
   const [date, setDate] = useState<Date>(route.params?.datetime ? new Date(route.params.datetime) : new Date());
-  const [title, setTitle] = useState(route.params?.title || "");
-  const [content, setContent] = useState(route.params?.content || "");
+  const [title, setTitle] = useState<any>(route.params?.title || "");
+  const [content, setContent] = useState<any>(route.params?.memo || "");
   const [open, setOpen] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(true);
   const [warningMessage, setWarningMessage] = useState<string>("");
   const [memoId, setMemoId] = useState<number | undefined>(route.params?.id);
   const [loading, setLoading] = useState(false);
-  const { accessToken } = useUserStore((state) => state);
+  const { token } = useAuthStore();
 
   useEffect(() => {
     getSubjectList();
@@ -77,24 +77,23 @@ function EditMemoScreen({ navigation, route }: any) {
   };
 
   const createMemo = async () => {
+    const params: any = {
+      subjectName: subjectName,
+      datetime: "2024-09-18 00:00:00",
+      title: title,
+      memo: content
+    };
+    console.log(params);
     try {
-      const response = await axios.post(
-        "https://b-site.site/subject-memo",
-        {
-          subjectName: subjectName,
-          datetime: date.toISOString(), // ISOString으로 변환
-          title: title,
-          content: content
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`
-          }
+      const response = await axios.post("https://b-site.site/subject-memo", params, {
+        headers: {
+          accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
         }
-      );
+      });
 
-      console.log(response.data);
+      console.log(response.data, "메모 생성");
     } catch (error: any) {
       console.error(error.response ? error.response.data : error.message);
     }
@@ -108,14 +107,14 @@ function EditMemoScreen({ navigation, route }: any) {
         `https://b-site.site/subject-memo/${memoId}`,
         {
           title: title,
-          content: content,
+          memo: content,
           datetime: date.toISOString() // ISOString으로 변환
         },
         {
           headers: {
             accept: "application/json",
             "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`
+            Authorization: `Bearer ${token}`
           }
         }
       );
@@ -133,23 +132,48 @@ function EditMemoScreen({ navigation, route }: any) {
     await goMemoScreen();
   };
 
+  const [showDeleteOption, setShowDeleteOption] = useState(false);
+  const deleteMemo = async () => {
+    setLoading(true);
+    if (showDeleteOption) await setShowDeleteOption(false);
+    else await setShowDeleteOption(true);
+
+    setLoading(false);
+  };
+  const handleDelete = async () => {
+    try {
+      // API 요청을 통해 친구 삭제
+      await axios.delete(`https://b-site.site/subject-memo/${memoId}`, {
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${token}` // 실제 토큰으로 교체
+        }
+      });
+      // 추가적인 상태 업데이트나 페이지 리로드를 수행할 수 있습니다.
+    } catch (error) {
+      console.error("Error deleting memo:", error);
+    } finally {
+      setShowDeleteOption(false);
+      goMemoScreen();
+    }
+  };
+
   const getSubjectList = async () => {
     try {
       setLoading(true);
       const response = await axios.get(
         // PUT 메서드 사용
-        `https://b-site.site/timetable?date=2024-08-28`,
+        `https://b-site.site/timetable/subjects`,
 
         {
           headers: {
             accept: "application/json",
-            Authorization: `Bearer ${accessToken}`
+            Authorization: `Bearer ${token}`
           }
         }
       );
-      response.data.list.map((subject: any) => {
-        console.log("print response datalist");
-        subjectList.push({ label: subject.subject, value: subject.subject });
+      response.data.map((subject: any) => {
+        subjectList.push({ label: subject, value: subject });
       });
       setLoading(false);
     } catch (error: any) {
@@ -158,6 +182,17 @@ function EditMemoScreen({ navigation, route }: any) {
   };
   const formattedDate = format(date, "yyyy년 M월 d일(eee) HH:mm", { locale: ko });
 
+  const formatDate = () => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // 1월이 0부터 시작하므로 +1 필요
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    return formattedDateTime;
+  };
   return (
     <Container>
       <InnerContainer>
@@ -167,10 +202,39 @@ function EditMemoScreen({ navigation, route }: any) {
           </LoadingContainer>
         )}
         <Header>
-          <BackButton onPress={() => navigation.goBack()}>
-            <BackIcon source={VectorLeft} />
-          </BackButton>
+          <HeaderButton onPress={() => navigation.goBack()}>
+            <HeaderIcon source={VectorLeft} />
+          </HeaderButton>
           {memoId ? <Title>{subjectName} 메모</Title> : <Title>메모 추가</Title>}
+          <TouchableOpacity onPress={deleteMemo}>
+            <Image
+              source={Hamburger}
+              style={{
+                width: 20,
+                height: 20
+              }}
+            />
+            {showDeleteOption && (
+              <TouchableOpacity
+                onPress={handleDelete} // 삭제 클릭 시 API 호출
+                style={{
+                  backgroundColor: "#fff",
+                  borderWidth: 0.5,
+                  borderRadius: 4,
+                  position: "absolute",
+                  width: 120,
+                  height: 40,
+                  top: 25,
+                  left: -100,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  zIndex: 100
+                }}
+              >
+                <Text style={{ fontSize: 16, lineHeight: 22 }}>삭제하기</Text>
+              </TouchableOpacity>
+            )}
+          </TouchableOpacity>
         </Header>
         {memoId ? (
           <></>
@@ -276,18 +340,17 @@ const InnerContainer = styled(View)`
 `;
 
 const Header = styled(View)`
-  padding-right: 32px;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
 `;
 
-const BackButton = styled(TouchableOpacity)`
+const HeaderButton = styled(TouchableOpacity)`
   padding: 10px;
 `;
 
-const BackIcon = styled(Image)`
+const HeaderIcon = styled(Image)`
   width: 7.5px;
   height: 13.5px;
 `;

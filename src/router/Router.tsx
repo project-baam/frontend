@@ -5,12 +5,11 @@ import React, { useEffect, useState } from "react";
 import styled from "@emotion/native";
 import FriendListScreen from "../pages/friends/FriendListScreen";
 import CalendarStackRouter from "./CalendarStackRouter";
+import MemoStackRouter from "./MemoStackRouter";
 import SettingStackRouter from "./SettingStackRouter";
 import { HomeIcon, PinIcon, FriendsIcon, CalendarIcon, SettingIcon } from "../assets/assets";
 import { Image, StyleSheet, View } from "react-native";
-import EditMemoScreen from "../pages/memo/EditMemoScreen";
 import FriendProfile from "../pages/friends/FriendProfile";
-import MemoScreen from "../pages/memo/MemoScreen";
 import SignUpStackRouter from "./SignUpStackRouter";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import useAuthStore from "../store/UserAuthStore";
@@ -80,10 +79,10 @@ export const MyTabs = () => {
       }}
     >
       <Tab.Screen name="Home" component={HomeStackRouter} />
-      <Tab.Screen name="Memo" component={MemoScreen} />
+      <Tab.Screen name="Memo" component={MemoStackRouter} />
       <Tab.Screen name="Friends" component={FriendListScreen} />
       <Tab.Screen name="Calendar" component={CalendarStackRouter} />
-      <Tab.Screen name="Setting" component={SettingStackRouter} />
+      <Tab.Screen name="Setting" component={SettingStackRouter} options={{ unmountOnBlur: true }} />
     </Tab.Navigator>
   );
 };
@@ -181,9 +180,6 @@ export function AuthenticatedStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="BottomTab" component={MyTabs} />
-      <Stack.Screen name="SettingScreen" component={SettingStackRouter} />
-      <Stack.Screen name="CalendarScreen" component={CalendarStackRouter} />
-      <Stack.Screen name="EditMemoScreen" component={EditMemoScreen} />
       <Stack.Screen name="FriendProfile" component={FriendProfile} />
     </Stack.Navigator>
   );

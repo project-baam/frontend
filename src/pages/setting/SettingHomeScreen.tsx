@@ -1,30 +1,63 @@
 import styled from "@emotion/native";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Image, SafeAreaView } from "react-native";
+import { Image, SafeAreaView, Text, TouchableOpacity, View, ActivityIndicator } from "react-native";
 import BtnRight from "../../assets/images/btn_right.svg";
 import Dialog from "../../components/common/Dialog";
 import Switch from "../../components/common/Switch";
-import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
 import useAuthStore from "../../store/UserAuthStore";
-import useUserStore from "../../store/UserStore";
 import { Theme } from "../../styles/theme";
+import { VectorLeft } from "../../assets/assets";
+import { StackScreenProps } from "@react-navigation/stack";
+import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
+type SettingHomeScreenProps = StackScreenProps<SettingStackParamList, "SettingHomeScreen">;
 
-interface SettingHomeScreenProps {}
-
-function SettingHomeScreen({}: SettingHomeScreenProps) {
-  const [isSwitchOn, setIsSwitchOn] = useState(false);
+type User = {
+  id: number;
+  status: string;
+  provider: string;
+  schooId: number;
+  schoolName: string;
+  grade: number;
+  className: string;
+  fullName: string;
+  profileImageUrl?: string;
+  backgroundImageUrl?: string;
+  isTimetablePublic: boolean;
+  isClassPublic: boolean;
+  notificationsEnabled: boolean;
+};
+function SettingHomeScreen({ navigation, route }: SettingHomeScreenProps) {
   const [isDialogVisible, setIsDialogVisible] = useState(false);
-  const navigation = useNavigation<NavigationProp<SettingStackParamList>>();
-  const [schoolName, setSchoolName] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [profileImage, setProfileImage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [noti, setNoti] = useState<boolean>(false);
+  const [userInfo, setUserInfo] = useState<User>();
+  const [dummyState, setDummyState] = useState(false);
+
   // const { schoolName, grade, className, fullName, profileImage, backgroundImage, isClassPublic } = useUserStore();
   const { token } = useAuthStore();
 
-  const handleToggleSwitch = () => {
-    setIsSwitchOn((previousState) => !previousState);
+  const handleToggleSwitch = async () => {
+    try {
+      // 쿼리 파라미터로 enabled 값 전달
+      const enabledValue = noti ? "false" : "true"; // noti 값에 따라 true 또는 false
+      const url = `https://b-site.site/notifications-setting?enabled=${enabledValue}`;
+
+      await axios.patch(
+        url, // 쿼리 파라미터 포함된 URL
+        {}, // PATCH 요청 시 body가 필요 없으므로 빈 객체
+        {
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${token}` // 실제 토큰으로 교체
+          }
+        }
+      );
+
+      setNoti(!noti); // 알림 설정 상태 토글
+    } catch (error: any) {
+      console.error("Error alarm setting:", error.response ? error.response.data : error.message);
+    }
   };
 
   const handleShowDialog = () => {
@@ -42,22 +75,23 @@ function SettingHomeScreen({}: SettingHomeScreenProps) {
   useEffect(() => {
     const getUserProfile = async () => {
       try {
+        setLoading(true);
         const response = await axios.get("https://b-site.site/user", {
           headers: {
             "Content-Type": "application/json", // JSON 형식으로 데이터를 보낼 것을 명시
             Authorization: `Bearer ${token}` // 필요시, Authorization 헤더에 토큰 포함
           }
         });
-        setSchoolName(response.data.schoolName);
-        setFullName(response.data.fullName);
-        setProfileImage(response.data.profileImageUrl);
+        setUserInfo(response.data);
+        setNoti(response.data.notificationsEnabled);
       } catch (error: any) {
         console.error(error.response ? error.response.data : error.message); // 오류 처리
+      } finally {
+        setLoading(false);
       }
     };
     getUserProfile();
   }, []);
-
   const customerServiceOptions = [
     {
       label: "서비스약관",
@@ -70,18 +104,64 @@ function SettingHomeScreen({}: SettingHomeScreenProps) {
   ];
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Container>
-        <ProfileButton onPress={() => navigation.navigate("ProfileScreen")}>
+    <Container>
+      {loading && ( // 로딩 상태면 인디케이터 표시
+        <LoadingContainer>
+          <ActivityIndicator size="large" color="#898989" />
+        </LoadingContainer>
+      )}
+      <Header style={{ zIndex: 2 }}>
+        <BackButton onPress={() => navigation.goBack()}>
+          <BackIcon source={VectorLeft} />
+        </BackButton>
+        <Text
+          style={{
+            fontSize: 18,
+            lineHeight: 26,
+            fontWeight: "600",
+            fontFamily: "Pretendard",
+            color: "#262626",
+            textAlign: "center",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 272,
+            height: 28
+          }}
+        >
+          설정
+        </Text>
+        <View style={{ width: 24, height: 24 }} />
+      </Header>
+
+      <View>
+        <ProfileButton
+          style={{ paddingHorizontal: 16 }}
+          onPress={() =>
+            navigation.navigate("ProfileScreen", {
+              fullName: userInfo?.fullName,
+              schoolName: userInfo?.schoolName,
+              schoolId: userInfo?.schooId,
+              grade: userInfo?.grade,
+              className: userInfo?.className,
+              isTimetablePublic: userInfo?.isTimetablePublic,
+              isClassPublic: userInfo?.isClassPublic,
+              profileImageUrl: userInfo?.profileImageUrl,
+              backgroundImageUrl: userInfo?.backgroundImageUrl
+            })
+          }
+        >
           <Image
-            source={profileImage ? { uri: profileImage } : require("../../assets/images/dummyprofile.png")}
-            width={48}
-            height={48}
+            source={
+              userInfo?.profileImageUrl
+                ? { uri: userInfo.profileImageUrl }
+                : require("../../assets/images/dummyprofile.png")
+            }
             style={{ width: 48, height: 48, borderRadius: 24 }}
           />
           <UserInfo>
-            <NameText>{fullName}</NameText>
-            <SchoolText>{schoolName}</SchoolText>
+            <NameText>{userInfo?.fullName}</NameText>
+            <SchoolText>{userInfo?.schoolName}</SchoolText>
           </UserInfo>
           <BtnRight style={{ marginLeft: "auto" }} />
         </ProfileButton>
@@ -93,7 +173,7 @@ function SettingHomeScreen({}: SettingHomeScreenProps) {
               <AlertText>알림</AlertText>
               <AlertDescription>Baam에서 제공하는 알림에 동의합니다.</AlertDescription>
             </AlertInnerContainer>
-            <Switch isSwitchOn={isSwitchOn} onToggle={handleToggleSwitch} />
+            <Switch isSwitchOn={noti} onToggle={handleToggleSwitch} />
           </AlertContainer>
         </SectionContainer>
         <Divider />
@@ -108,7 +188,7 @@ function SettingHomeScreen({}: SettingHomeScreenProps) {
             ))}
           </CustomerContainer>
         </SectionContainer>
-      </Container>
+      </View>
       {isDialogVisible && (
         <Dialog
           isVisible={isDialogVisible}
@@ -118,16 +198,15 @@ function SettingHomeScreen({}: SettingHomeScreenProps) {
           onCancel={handleHideDialog}
         />
       )}
-    </SafeAreaView>
+    </Container>
   );
 }
 
 export default SettingHomeScreen;
 
-const Container = styled.View`
-  gap: 12px;
-  background-color: ${Theme.colors.White};
-  height: 100%;
+const Container = styled(SafeAreaView)`
+  flex: 1;
+  background-color: #fff;
 `;
 
 const ProfileButton = styled.Pressable`
@@ -152,7 +231,7 @@ const SchoolText = styled.Text`
 `;
 
 const Divider = styled.View`
-  height: 12px;
+  height: 8px;
   background-color: ${Theme.colors.Gray100};
 `;
 
@@ -201,4 +280,30 @@ const StyledPressable = styled.Pressable`
 const ButtonText = styled.Text`
   font-size: 16px;
   font-weight: 500;
+`;
+const Header = styled(View)`
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-vertical: 10px;
+  padding-horizontal: 16px;
+`;
+const BackButton = styled(TouchableOpacity)`
+  padding: 10px;
+`;
+
+const BackIcon = styled(Image)`
+  width: 8.5px;
+  height: 15px;
+`;
+const LoadingContainer = styled(View)`
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  align-items: "center";
+  justify-content: "center";
+  background-color: "rgba(0, 0, 0, 0.5)";
+  z-index: 1000;
 `;
