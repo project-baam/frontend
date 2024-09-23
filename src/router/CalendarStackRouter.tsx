@@ -16,7 +16,7 @@ const CalendarStackRouter = () => {
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: Theme.colors.Gray100
+          backgroundColor: Theme.colors.White
         },
         headerTitleStyle: {
           fontFamily: "YourCustomFont",
@@ -37,7 +37,12 @@ const CalendarStackRouter = () => {
         name="CalendarAddScreen"
         component={CalendarAddScreen}
         options={{
-          headerTitle: "일정 추가"
+          headerTitle: "일정 추가",
+          headerRight: () => (
+            <Pressable onPress={() => console.log("메모 삭제하기")}>
+              <CustomImage source={require("../assets/images/hamburger.png")} />
+            </Pressable>
+          )
         }}
       />
     </Stack.Navigator>
@@ -47,6 +52,6 @@ const CalendarStackRouter = () => {
 export default CalendarStackRouter;
 
 const CustomImage = styled(Image)`
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
 `;
