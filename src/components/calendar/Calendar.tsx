@@ -1,11 +1,13 @@
 import styled from "@emotion/native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
-import React, { useCallback, useRef } from "react";
+import axios from "axios";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet } from "react-native";
 import { AgendaList, CalendarProvider, ExpandableCalendar, LocaleConfig, WeekCalendar } from "react-native-calendars";
 import IconGear from "../../assets/images/icon_gear.svg";
+import { CalendarStackParamList } from "../../navigations/CalendarStackNavigation";
+import useAuthStore from "../../store/UserAuthStore";
 import { Theme } from "../../styles/theme";
-import { CalendarStackParamList } from "../../types/navigation";
 import AgendaItem from "./AgendaItem";
 import { getTheme } from "./calendarTheme";
 import { agendaItems, getMarkedDates } from "./mocks/agendaItems";
@@ -23,6 +25,18 @@ const ITEMS: any[] = agendaItems;
 interface Props {
   weekView?: boolean;
 }
+interface ListItem {
+  datetime: string;
+  id: number;
+  memo: string | null;
+  title: string;
+  type: string;
+}
+
+interface GroupedItem {
+  title: number;
+  data: ListItem[];
+}
 
 function Calendar({ weekView = false }: Props) {
   const navigation = useNavigation<NavigationProp<CalendarStackParamList>>();
@@ -38,6 +52,47 @@ function Calendar({ weekView = false }: Props) {
     const uniqueKey = `${item.date}_${item.hour}_${index}`;
 
     return <AgendaItem key={uniqueKey} item={item} isFirst={isFirst} isLast={isLast} />;
+  }, []);
+
+  const { token } = useAuthStore();
+  const [item, setItem] = useState<GroupedItem[]>([]);
+
+  useEffect(() => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth();
+
+    // 이벤트 가져오기
+    async function fetchData() {
+      const response = await axios.get(`https://b-site.site/calendar/${year}/${month}`, {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      // 일정을 날짜별로 그룹화
+      const groupedData = response.data.list.reduce((acc: { [key: string]: ListItem[] }, currentItem: ListItem) => {
+        if (currentItem.datetime) {
+          const date = currentItem.datetime.split(" ")[0];
+
+          if (!acc[date]) {
+            acc[date] = [];
+          }
+          acc[date].push(currentItem);
+        }
+
+        return acc;
+      }, {});
+
+      const formattedData = Object.keys(groupedData).map((date, index) => ({
+        title: index + 1,
+        data: groupedData[date]
+      }));
+
+      setItem(formattedData);
+    }
+    fetchData();
   }, []);
 
   return (
@@ -58,7 +113,7 @@ function Calendar({ weekView = false }: Props) {
         )}
         <AgendaContainer>
           <AgendaList
-            sections={ITEMS}
+            sections={item}
             renderSectionHeader={() => <></>}
             renderItem={renderItem}
             sectionStyle={styles.section}
