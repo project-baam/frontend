@@ -35,10 +35,7 @@ function AgendaItem(props: ItemProps) {
 
   return (
     <ItemContainer onPress={itemPressed} isToday={isToday(item.date)} isFirst={isFirst} isLast={isLast}>
-      <ItemDateContainer borderColor={item.color || "green"}>
-        <ItemDateText>{item.date.split("-")[2]}</ItemDateText>
-        <ItemDayOfWeekText>{item.dayOfWeek}</ItemDayOfWeekText>
-      </ItemDateContainer>
+      <ItemDateContainer borderColor={item.color || "green"}></ItemDateContainer>
       <ItemTextContainer>
         <ItemTitleText>{item.title}</ItemTitleText>
         <ItemHourText>{item.hour}</ItemHourText>
