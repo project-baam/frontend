@@ -3,13 +3,13 @@ import { NavigationProp, useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet } from "react-native";
-import { AgendaList, CalendarProvider, ExpandableCalendar, LocaleConfig, WeekCalendar } from "react-native-calendars";
+import { AgendaList, CalendarProvider, ExpandableCalendar, LocaleConfig } from "react-native-calendars";
+import { Positions } from "react-native-calendars/src/expandableCalendar";
 import IconGear from "../../assets/images/icon_gear.svg";
 import { CalendarStackParamList } from "../../navigations/CalendarStackNavigation";
 import useAuthStore from "../../store/UserAuthStore";
 import { Theme } from "../../styles/theme";
 import AgendaItem from "./AgendaItem";
-import { getTheme } from "./calendarTheme";
 import { agendaItems, getMarkedDates } from "./mocks/agendaItems";
 
 LocaleConfig.locales["kr"] = {
@@ -22,9 +22,6 @@ LocaleConfig.defaultLocale = "kr";
 
 const ITEMS: any[] = agendaItems;
 
-interface Props {
-  weekView?: boolean;
-}
 interface ListItem {
   datetime: string;
   id: number;
@@ -32,19 +29,14 @@ interface ListItem {
   title: string;
   type: string;
 }
-
 interface GroupedItem {
   title: number;
   data: ListItem[];
 }
 
-function Calendar({ weekView = false }: Props) {
+function CustomCalendar() {
   const navigation = useNavigation<NavigationProp<CalendarStackParamList>>();
   const marked = useRef(getMarkedDates());
-  const theme = useRef(getTheme());
-  const todayBtnTheme = useRef({
-    todayButtonTextColor: "#0e0909"
-  });
 
   const renderItem = useCallback(({ item, index, section }: { item: any; index: number; section: any }) => {
     const isFirst = index === 0;
@@ -61,7 +53,6 @@ function Calendar({ weekView = false }: Props) {
     const date = new Date();
     const year = date.getFullYear();
     const month = date.getMonth();
-
     // 이벤트 가져오기
     async function fetchData() {
       const response = await axios.get(`https://b-site.site/calendar/${year}/${month}`, {
@@ -94,26 +85,60 @@ function Calendar({ weekView = false }: Props) {
     }
     fetchData();
   }, []);
+  const [selectedDate, setSelectedDate] = useState<string>("2024-09-24");
+
+  const items: any[] = [
+    {
+      date: "2024-09-24",
+      data: [
+        {
+          id: "1",
+          key: "school",
+          hour: "09:00",
+          duration: "1h",
+          title: "1학기 중간고사",
+          color: "#E199F0",
+          memo: "중간고사 준비물 챙기기"
+        }
+      ]
+    }
+  ];
+
+  const filteredItems = items.filter((item) => item.date === selectedDate);
 
   return (
-    <CalendarProvider date={ITEMS[1]?.title} showTodayButton theme={todayBtnTheme.current}>
-      <StyledView>
-        {weekView ? (
-          <WeekCalendar markingType="multi-dot" theme={theme.current} firstDay={0} markedDates={marked.current} />
-        ) : (
-          <ExpandableCalendar
-            markingType="multi-dot"
-            theme={{ ...theme.current }}
-            firstDay={0}
-            markedDates={marked.current}
-            closeOnDayPress={false}
-            showSixWeeks
-            monthFormat={"yyyy년 M월"}
-          />
-        )}
+    <StyledView>
+      <CalendarProvider date={new Date().toISOString().split("T")[0]}>
+        <ExpandableCalendar
+          markingType="multi-dot"
+          theme={{
+            selectedDayTextColor: Theme.colors.White,
+            selectedDayBackgroundColor: Theme.colors.Gray900,
+            todayTextColor: Theme.colors.Gray900,
+            dayTextColor: Theme.colors.Gray900,
+            textDisabledColor: "#d9e1e8",
+            arrowColor: Theme.colors.Black,
+            textDayFontFamily: "Pretendard-Medium",
+            textMonthFontFamily: "EsaManruMedium",
+            textDayHeaderFontFamily: "EsaManruMedium",
+            monthTextColor: Theme.colors.Black
+          }}
+          firstDay={0}
+          markedDates={marked.current}
+          closeOnDayPress={false}
+          showSixWeeks
+          monthFormat={"M월"}
+          initialPosition={Positions.OPEN}
+          disablePan
+          hideKnob
+          style={{
+            paddingBottom: 50
+          }}
+          onDayPress={(day) => setSelectedDate(day.dateString)}
+        />
         <AgendaContainer>
           <AgendaList
-            sections={item}
+            sections={filteredItems}
             renderSectionHeader={() => <></>}
             renderItem={renderItem}
             sectionStyle={styles.section}
@@ -126,12 +151,12 @@ function Calendar({ weekView = false }: Props) {
             <IconGear />
           </AddButton>
         </AgendaContainer>
-      </StyledView>
-    </CalendarProvider>
+      </CalendarProvider>
+    </StyledView>
   );
 }
 
-export default Calendar;
+export default CustomCalendar;
 
 const styles = StyleSheet.create({
   section: {
@@ -145,12 +170,15 @@ const styles = StyleSheet.create({
 
 const StyledView = styled.View`
   flex: 1;
+  background-color: white;
 `;
 
 const AgendaContainer = styled.View`
   background-color: white;
   flex: 1;
-  padding: 16px;
+  padding: 20px 16px;
+  border-top-width: 2px;
+  border-top-color: ${Theme.colors.Gray200};
 `;
 
 const AddButton = styled.Pressable`
