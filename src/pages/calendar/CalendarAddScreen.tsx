@@ -1,23 +1,27 @@
 import styled from "@emotion/native";
 import { useRoute } from "@react-navigation/native";
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Chip from "../../components/common/Chip";
 import { CalendarAddScreenRouteProp } from "../../navigations/CalendarStackNavigation";
+import useAuthStore from "../../store/UserAuthStore";
 import { Theme } from "../../styles/theme";
 
 interface CalendarAddScreenProps {}
 
 function CalendarAddScreen({}: CalendarAddScreenProps) {
+  const { token } = useAuthStore();
   const route = useRoute<CalendarAddScreenRouteProp>();
   const { item } = route.params || {};
 
   const [formData, setFormData] = useState({
+    subjectName: "",
     title: "",
     date: new Date(),
     memo: "",
-    selectedChip: null as "학교 일정" | "수업별 일정" | "개별 일정" | null
+    selectedChip: null as "school" | "class" | "personal" | null
   });
 
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
@@ -30,16 +34,16 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
       initialDate.setMinutes(parseInt(minutes));
 
       setFormData({
+        subjectName: item.subjectName || "",
         title: item.title || "",
         date: initialDate,
         memo: item.memo || "",
-        selectedChip:
-          item.key === "school_event" ? "학교 일정" : item.key === "class_schedule" ? "수업별 일정" : "개별 일정"
+        selectedChip: item.type === "school" ? "school" : item.type === "class" ? "class" : "personal"
       });
     }
   }, [item]);
 
-  const handleChipPress = (chip: "학교 일정" | "수업별 일정" | "개별 일정") => {
+  const handleChipPress = (chip: "school" | "class" | "personal") => {
     setFormData((prev) => ({
       ...prev,
       selectedChip: chip === formData.selectedChip ? null : chip
@@ -84,53 +88,80 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
     return `${year}년 ${month}월 ${day}일 (${weekday}) ${ampm} ${adjustedHours}:${formattedMinutes}`;
   };
 
+  // 일정 생성
+  const handleSubmit = async () => {
+    try {
+      await axios.post(
+        "https://b-site.site/calendar/event",
+        {
+          datetime: formData.date,
+          title: formData.title,
+          type: formData.selectedChip,
+          memo: formData.memo,
+          subjectName: formData.subjectName
+        },
+        {
+          headers: {
+            accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Container>
       <ChipRow>
-        <TouchableOpacity
-          onPress={() => handleChipPress("학교 일정")}
-          style={{ opacity: formData.selectedChip === "학교 일정" ? 1 : 0.2 }}
-        >
+        <TouchableOpacity onPress={() => handleChipPress("school")}>
           <Chip
-            size="small"
-            backGroundColor="#E199F0"
-            borderColor="#E199F0"
-            textColor={Theme.colors.White}
-            borderRadius="circle"
+            size="medium"
+            backGroundColor={formData.selectedChip === "school" ? "#E6ECF5" : "#F8F8F8"}
+            borderColor={formData.selectedChip === "school" ? "#E6ECF5" : "#F8F8F8"}
+            textColor={formData.selectedChip === "school" ? "#327CEA" : "#7B7B7BB2"}
+            borderRadiusType="circle"
           >
             학교 일정
           </Chip>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handleChipPress("수업별 일정")}
-          style={{ opacity: formData.selectedChip === "수업별 일정" ? 1 : 0.2 }}
-        >
+        <TouchableOpacity onPress={() => handleChipPress("class")}>
           <Chip
-            size="small"
-            backGroundColor="#8A7EFF"
-            borderColor="#8A7EFF"
-            textColor={Theme.colors.White}
-            borderRadius="circle"
+            size="medium"
+            backGroundColor={formData.selectedChip === "class" ? "#F5E0E0" : "#F8F8F8"}
+            borderColor={formData.selectedChip === "class" ? "#F5E0E0" : "#F8F8F8"}
+            textColor={formData.selectedChip === "class" ? "#F92626B2" : "#7B7B7BB2"}
+            borderRadiusType="circle"
           >
             수업별 일정
           </Chip>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handleChipPress("개별 일정")}
-          style={{ opacity: formData.selectedChip === "개별 일정" ? 1 : 0.2 }}
-        >
+        <TouchableOpacity onPress={() => handleChipPress("personal")}>
           <Chip
-            size="small"
-            backGroundColor="#A6E7DF"
-            borderColor="#A6E7DF"
-            textColor={Theme.colors.White}
-            borderRadius="circle"
+            size="medium"
+            backGroundColor={formData.selectedChip === "personal" ? "#DFF2E1" : "#F8F8F8"}
+            borderColor={formData.selectedChip === "personal" ? "#DFF2E1" : "#F8F8F8"}
+            textColor={formData.selectedChip === "personal" ? "#27B560" : "#7B7B7BB2"}
+            borderRadiusType="circle"
           >
             개별 일정
           </Chip>
         </TouchableOpacity>
       </ChipRow>
       <View style={{ gap: 12 }}>
+        {formData.selectedChip === "class" && (
+          <InputWrapper>
+            <LabelContainer>
+              <Label>과목</Label>
+              <StyledTextInput
+                value={formData.subjectName}
+                onChangeText={(text) => handleInputChange("subjectName", text)}
+              />
+            </LabelContainer>
+          </InputWrapper>
+        )}
         <InputWrapper>
           <LabelContainer>
             <Label>제목</Label>
@@ -154,7 +185,11 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
           multiline
           numberOfLines={10}
         />
-        <Button>
+        <Button
+          onPress={() => {
+            handleSubmit();
+          }}
+        >
           <ButtonText>작성 완료</ButtonText>
         </Button>
         <DateTimePickerModal
@@ -174,7 +209,7 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
 
 const Container = styled.View`
   flex: 1;
-  background-color: ${Theme.colors.Gray100};
+  background-color: ${Theme.colors.White};
   padding: 16px;
   gap: 16px;
 `;
