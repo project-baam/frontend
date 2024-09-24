@@ -1,17 +1,18 @@
 import styled from "@emotion/native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import axios from "axios";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import { AgendaList, CalendarProvider, ExpandableCalendar, LocaleConfig } from "react-native-calendars";
 import { Positions } from "react-native-calendars/src/expandableCalendar";
+import { MarkedDates } from "react-native-calendars/src/types";
 import IconGear from "../../assets/images/icon_gear.svg";
 import { CalendarStackParamList } from "../../navigations/CalendarStackNavigation";
 import useAuthStore from "../../store/UserAuthStore";
 import { Theme } from "../../styles/theme";
 import AgendaItem from "./AgendaItem";
-import { agendaItems, getMarkedDates } from "./mocks/agendaItems";
 
+// 달력 설정
 LocaleConfig.locales["kr"] = {
   monthNames: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
   monthNamesShort: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
@@ -20,8 +21,6 @@ LocaleConfig.locales["kr"] = {
 };
 LocaleConfig.defaultLocale = "kr";
 
-const ITEMS: any[] = agendaItems;
-
 interface ListItem {
   datetime: string;
   id: number;
@@ -29,31 +28,44 @@ interface ListItem {
   title: string;
   type: string;
 }
-interface GroupedItem {
-  title: number;
-  data: ListItem[];
+
+interface FormattedItem {
+  title: string;
+  data: {
+    id: number;
+    memo: string | null;
+    title: string;
+    type: string;
+    dayOfWeek: string;
+    time: string;
+  }[];
 }
 
 function CustomCalendar() {
-  const navigation = useNavigation<NavigationProp<CalendarStackParamList>>();
-  const marked = useRef(getMarkedDates());
+  // state
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [item, setItem] = useState<ListItem[]>([]);
+  const [marked, setMarked] = useState<MarkedDates>({});
+  const [formattedData, setFormattedData] = useState<FormattedItem[]>([]);
 
-  const renderItem = useCallback(({ item, index, section }: { item: any; index: number; section: any }) => {
+  // store
+  const { token } = useAuthStore();
+
+  const navigation = useNavigation<NavigationProp<CalendarStackParamList>>();
+
+  const renderItem = useCallback(({ item, index }: { item: any; index: number }) => {
     const isFirst = index === 0;
-    const isLast = index === section.data.length - 1;
     const uniqueKey = `${item.date}_${item.hour}_${index}`;
 
-    return <AgendaItem key={uniqueKey} item={item} isFirst={isFirst} isLast={isLast} />;
+    return <AgendaItem key={uniqueKey} item={item} showDate={isFirst} />;
   }, []);
 
-  const { token } = useAuthStore();
-  const [item, setItem] = useState<GroupedItem[]>([]);
-
   useEffect(() => {
+    // 이벤트 가져오기
     const date = new Date();
     const year = date.getFullYear();
     const month = date.getMonth();
-    // 이벤트 가져오기
+
     async function fetchData() {
       const response = await axios.get(`https://b-site.site/calendar/${year}/${month}`, {
         headers: {
@@ -62,49 +74,93 @@ function CustomCalendar() {
         }
       });
 
-      // 일정을 날짜별로 그룹화
-      const groupedData = response.data.list.reduce((acc: { [key: string]: ListItem[] }, currentItem: ListItem) => {
-        if (currentItem.datetime) {
-          const date = currentItem.datetime.split(" ")[0];
+      setItem(response.data.list);
+    }
+    fetchData();
+  }, [token]);
 
-          if (!acc[date]) {
-            acc[date] = [];
-          }
-          acc[date].push(currentItem);
+  useEffect(() => {
+    // item 데이터가 업데이트된 후 formattedData 설정
+    if (item.length > 0) {
+      const newFormattedData: FormattedItem[] = item.reduce((acc: FormattedItem[], currentItem: ListItem) => {
+        const [title, time] = currentItem.datetime.split(" ");
+        const existingDateTime = acc.find((item) => item.title === title);
+
+        // 요일 구하기
+        function getDayOfWeek(dateString: string) {
+          const daysOfWeek = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+          const date = new Date(dateString);
+          return daysOfWeek[date.getDay()];
+        }
+
+        const newDateItem = {
+          id: currentItem.id,
+          memo: currentItem.memo,
+          title: currentItem.title,
+          type: currentItem.type,
+          dayOfWeek: getDayOfWeek(title),
+          date: title,
+          time
+        };
+
+        if (existingDateTime) {
+          existingDateTime.data.push(newDateItem);
+        } else {
+          acc.push({
+            title,
+            data: [newDateItem]
+          });
         }
 
         return acc;
-      }, {});
+      }, []);
 
-      const formattedData = Object.keys(groupedData).map((date, index) => ({
-        title: index + 1,
-        data: groupedData[date]
-      }));
-
-      setItem(formattedData);
+      setFormattedData(newFormattedData); // formattedData 상태 업데이트
     }
-    fetchData();
-  }, []);
-  const [selectedDate, setSelectedDate] = useState<string>("2024-09-24");
+  }, [item]); // item이 변경될 때마다 실행
 
-  const items: any[] = [
-    {
-      date: "2024-09-24",
-      data: [
-        {
-          id: "1",
-          key: "school",
-          hour: "09:00",
-          duration: "1h",
-          title: "1학기 중간고사",
-          color: "#E199F0",
-          memo: "중간고사 준비물 챙기기"
-        }
-      ]
+  const filteredItems = formattedData.filter((item) => item.title === selectedDate);
+
+  useEffect(() => {
+    // formattedData가 준비된 후 marked 설정
+    if (formattedData.length > 0) {
+      const markedDates = getMarkedDates(formattedData);
+      setMarked(markedDates); // marked 상태 업데이트
     }
-  ];
+  }, [formattedData]); // formattedData가 변경될 때마다 실행
 
-  const filteredItems = items.filter((item) => item.date === selectedDate);
+  function getMarkedDates(data: FormattedItem[]): MarkedDates {
+    const marked: MarkedDates = {};
+    data.forEach((item) => {
+      const dots = item.data.map((event) => {
+        return { key: event.type, color: getDotColor(event.type) };
+      });
+
+      if (item.data.length > 0) {
+        marked[item.title] = {
+          marked: true,
+          dots: dots.slice(0, 3)
+        };
+      } else {
+        marked[item.title] = { disabled: true };
+      }
+    });
+
+    return marked;
+  }
+
+  function getDotColor(key: string) {
+    switch (key) {
+      case "school":
+        return "#327CEA";
+      case "class":
+        return "#F92626";
+      case "personal":
+        return "#27B560";
+      default:
+        return "grey";
+    }
+  }
 
   return (
     <StyledView>
@@ -124,7 +180,7 @@ function CustomCalendar() {
             monthTextColor: Theme.colors.Black
           }}
           firstDay={0}
-          markedDates={marked.current}
+          markedDates={marked}
           closeOnDayPress={false}
           showSixWeeks
           monthFormat={"M월"}
@@ -139,10 +195,8 @@ function CustomCalendar() {
         <AgendaContainer>
           <AgendaList
             sections={filteredItems}
-            renderSectionHeader={() => <></>}
             renderItem={renderItem}
             sectionStyle={styles.section}
-            keyExtractor={(item, index) => item.id + index.toString()}
             initialNumToRender={10}
             maxToRenderPerBatch={5}
             windowSize={5}
