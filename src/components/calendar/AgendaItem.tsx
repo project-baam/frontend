@@ -8,8 +8,7 @@ import { CalendarAddScreenNavigationProp } from "../../navigations/CalendarStack
 
 interface ItemProps {
   item: Agenda;
-  isFirst: boolean;
-  isLast: boolean;
+  showDate: boolean;
 }
 
 const isEmpty = (obj: any) => {
@@ -17,7 +16,7 @@ const isEmpty = (obj: any) => {
 };
 
 function AgendaItem(props: ItemProps) {
-  const { item, isFirst, isLast } = props;
+  const { item, showDate } = props;
   const navigation = useNavigation<CalendarAddScreenNavigationProp>();
 
   const itemPressed = useCallback(() => {
@@ -34,59 +33,84 @@ function AgendaItem(props: ItemProps) {
   }
 
   return (
-    <ItemContainer onPress={itemPressed} isToday={isToday(item.date)} isFirst={isFirst} isLast={isLast}>
-      <ItemDateContainer borderColor={item.color || "green"}></ItemDateContainer>
-      <ItemTextContainer>
-        <ItemTitleText>{item.title}</ItemTitleText>
-        <ItemHourText>{item.hour}</ItemHourText>
-      </ItemTextContainer>
-    </ItemContainer>
+    <RootContainer>
+      {showDate && (
+        <DateContainer>
+          <StyledDOM>{item.date.split("-")[2]}</StyledDOM>
+          <StyledDOW>{item.dayOfWeek}</StyledDOW>
+        </DateContainer>
+      )}
+      <ItemContainer type={item.type} onPress={itemPressed} isToday={isToday(item.date)}>
+        <TextContainer>
+          <StyledTitle>{item.title}</StyledTitle>
+          <StyledTime></StyledTime>
+        </TextContainer>
+        {/* <ItemDateContainer type={item.type}>
+          <ItemDateText>{item.date.split("-")[2]}</ItemDateText>
+          <ItemDayOfWeekText>{item.dayOfWeek}</ItemDayOfWeekText>
+        </ItemDateContainer>
+        <ItemTextContainer>
+          <ItemTitleText>{item.title}</ItemTitleText>
+          <ItemHourText>{item.hour}</ItemHourText>
+        </ItemTextContainer> */}
+      </ItemContainer>
+    </RootContainer>
   );
 }
 
-const ItemContainer = styled(Pressable)<{ isToday: boolean; isFirst: boolean; isLast: boolean }>`
+const RootContainer = styled.View`
+  flex: 1;
   padding: 12px 16px;
   background-color: #ffffff;
-  flex-direction: row;
   gap: 16px;
-  background-color: ${(props) => (props.isToday ? Theme.colors.Gray100 : "#ffffff")};
-  border-top-left-radius: ${(props) => (props.isFirst ? "8px" : "0")};
-  border-top-right-radius: ${(props) => (props.isFirst ? "8px" : "0")};
-  border-bottom-left-radius: ${(props) => (props.isLast ? "8px" : "0")};
-  border-bottom-right-radius: ${(props) => (props.isLast ? "8px" : "0")};
 `;
 
-const ItemDateContainer = styled(View)<{ borderColor: string }>`
-  border-right-width: 2px;
-  border-right-color: ${(props) => props.borderColor};
-  padding-right: 20px;
+const DateContainer = styled.View`
+  flex-direction: row;
   align-items: center;
-  gap: 2px;
+  gap: 8px;
 `;
 
-const ItemDateText = styled(Text)`
+const StyledDOM = styled.Text`
+  color: ${Theme.colors.Gray900};
+  font-family: "Pretendard-Bold";
   font-size: 24px;
   font-weight: 600;
 `;
 
-const ItemDayOfWeekText = styled(Text)`
-  font-size: 14px;
-  font-weight: 500;
-  color: grey;
-`;
-
-const ItemHourText = styled(Text)`
-  color: grey;
-`;
-
-const ItemTitleText = styled(Text)`
-  color: black;
-  font-weight: bold;
+const StyledDOW = styled.Text`
+  color: ${Theme.colors.Gray500};
+  font-family: "Pretendard-Regular";
   font-size: 16px;
+  font-weight: 500;
 `;
 
-const ItemTextContainer = styled(View)`
+const ItemContainer = styled(Pressable)<{ type: string; isToday: boolean }>`
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #ffffff;
+  flex-direction: row;
+  gap: 12px;
+  background-color: ${(props) => (props.isToday ? Theme.colors.Gray100 : "#ffffff")};
+  border-left-width: 2px;
+  border-left-color: ${(props) => (props.type === "school" ? "#327CEA" : "class" ? "#F92626" : "#27B560")};
+`;
+
+const TextContainer = styled.View`
   gap: 8px;
+`;
+
+const StyledTitle = styled.Text`
+${Theme.typo.Body_04_Bold};
+color: ${Theme.colors.Gray800};
+}
+`;
+
+const StyledTime = styled.Text`
+  font-family: "Pretendard";
+  font-weight: 400;
+  font-size: 16px;
+  color: ${Theme.colors.Gray500};
 `;
 
 export default AgendaItem;
