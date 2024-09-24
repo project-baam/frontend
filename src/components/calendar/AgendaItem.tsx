@@ -1,10 +1,11 @@
 import styled from "@emotion/native";
 import { useNavigation } from "@react-navigation/native";
 import React, { useCallback } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Rect, Svg } from "react-native-svg";
+import { CalendarAddScreenNavigationProp } from "../../navigations/CalendarStackNavigation";
 import { Theme } from "../../styles/theme";
 import { Agenda } from "../../types/agenda";
-import { CalendarAddScreenNavigationProp } from "../../navigations/CalendarStackNavigation";
 
 interface ItemProps {
   item: Agenda;
@@ -33,42 +34,39 @@ function AgendaItem(props: ItemProps) {
   }
 
   return (
-    <RootContainer>
+    <>
       {showDate && (
         <DateContainer>
           <StyledDOM>{item.date.split("-")[2]}</StyledDOM>
           <StyledDOW>{item.dayOfWeek}</StyledDOW>
         </DateContainer>
       )}
-      <ItemContainer type={item.type} onPress={itemPressed} isToday={isToday(item.date)}>
+      <ItemContainer onPress={itemPressed}>
+        <View>
+          <Svg width="4" height="45" viewBox="0 0 4 45" fill="none">
+            <Rect
+              y="0.5"
+              width="4"
+              height="44"
+              rx="2"
+              fill={item.type === "school" ? "#327CEA" : "class" ? "#F92626" : "#27B560"}
+            />
+          </Svg>
+        </View>
         <TextContainer>
           <StyledTitle>{item.title}</StyledTitle>
-          <StyledTime></StyledTime>
+          <StyledTime>{item.time}</StyledTime>
         </TextContainer>
-        {/* <ItemDateContainer type={item.type}>
-          <ItemDateText>{item.date.split("-")[2]}</ItemDateText>
-          <ItemDayOfWeekText>{item.dayOfWeek}</ItemDayOfWeekText>
-        </ItemDateContainer>
-        <ItemTextContainer>
-          <ItemTitleText>{item.title}</ItemTitleText>
-          <ItemHourText>{item.hour}</ItemHourText>
-        </ItemTextContainer> */}
       </ItemContainer>
-    </RootContainer>
+    </>
   );
 }
-
-const RootContainer = styled.View`
-  flex: 1;
-  padding: 12px 16px;
-  background-color: #ffffff;
-  gap: 16px;
-`;
 
 const DateContainer = styled.View`
   flex-direction: row;
   align-items: center;
   gap: 8px;
+  margin-bottom: 16px;
 `;
 
 const StyledDOM = styled.Text`
@@ -80,20 +78,18 @@ const StyledDOM = styled.Text`
 
 const StyledDOW = styled.Text`
   color: ${Theme.colors.Gray500};
-  font-family: "Pretendard-Regular";
+  font-family: "Pretendard-Medium";
   font-size: 16px;
   font-weight: 500;
 `;
 
-const ItemContainer = styled(Pressable)<{ type: string; isToday: boolean }>`
+const ItemContainer = styled(Pressable)`
   width: 100%;
-  padding: 12px 16px;
   background-color: #ffffff;
   flex-direction: row;
+  align-items: center;
   gap: 12px;
-  background-color: ${(props) => (props.isToday ? Theme.colors.Gray100 : "#ffffff")};
-  border-left-width: 2px;
-  border-left-color: ${(props) => (props.type === "school" ? "#327CEA" : "class" ? "#F92626" : "#27B560")};
+  margin-bottom: 16px;
 `;
 
 const TextContainer = styled.View`
