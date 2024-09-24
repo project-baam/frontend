@@ -9,4 +9,5 @@ export type Agenda = {
   type: "school" | "class" | "personal";
   title: string;
   subjectName: string;
+  time: string;
 };
