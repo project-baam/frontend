@@ -8,6 +8,7 @@ import { Positions } from "react-native-calendars/src/expandableCalendar";
 import { MarkedDates } from "react-native-calendars/src/types";
 import IconGear from "../../assets/images/icon_gear.svg";
 import { CalendarStackParamList } from "../../navigations/CalendarStackNavigation";
+import useCalendarStore from "../../store/calendar/UserCalendarStore";
 import useAuthStore from "../../store/UserAuthStore";
 import { Theme } from "../../styles/theme";
 import AgendaItem from "./AgendaItem";
@@ -21,16 +22,17 @@ LocaleConfig.locales["kr"] = {
 };
 LocaleConfig.defaultLocale = "kr";
 
-interface ListItem {
+interface Agenda {
   datetime: string;
   id: number;
   memo: string | null;
   title: string;
   type: string;
+  subjectname: string | null;
 }
 
 interface FormattedItem {
-  title: string;
+  date: string;
   data: {
     id: number;
     memo: string | null;
@@ -44,12 +46,12 @@ interface FormattedItem {
 function CustomCalendar() {
   // state
   const [selectedDate, setSelectedDate] = useState<string>("");
-  const [item, setItem] = useState<ListItem[]>([]);
   const [marked, setMarked] = useState<MarkedDates>({});
   const [formattedData, setFormattedData] = useState<FormattedItem[]>([]);
 
   // store
   const { token } = useAuthStore();
+  const { agenda, setAgenda } = useCalendarStore();
 
   const navigation = useNavigation<NavigationProp<CalendarStackParamList>>();
 
@@ -60,8 +62,8 @@ function CustomCalendar() {
     return <AgendaItem key={uniqueKey} item={item} showDate={isFirst} />;
   }, []);
 
+  // 1) 일정 가져오기
   useEffect(() => {
-    // 이벤트 가져오기
     const date = new Date();
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -74,17 +76,19 @@ function CustomCalendar() {
         }
       });
 
-      setItem(response.data.list);
+      // 2) Store에 저장
+      setAgenda(response.data.list);
     }
     fetchData();
-  }, [token]);
+  }, []);
 
+  // 3) Store에 저장된 일정 재가공
   useEffect(() => {
-    // item 데이터가 업데이트된 후 formattedData 설정
-    if (item.length > 0) {
-      const newFormattedData: FormattedItem[] = item.reduce((acc: FormattedItem[], currentItem: ListItem) => {
-        const [title, time] = currentItem.datetime.split(" ");
-        const existingDateTime = acc.find((item) => item.title === title);
+    console.log("Updated agenda in useEffect:", agenda);
+    if (agenda.length > 0) {
+      const newFormattedData: FormattedItem[] = agenda.reduce((acc: FormattedItem[], currentItem: Agenda) => {
+        const [date, time] = currentItem.datetime.split(" ");
+        const existingDateTime = acc.find((item) => item.date === date);
 
         // 요일 구하기
         function getDayOfWeek(dateString: string) {
@@ -98,16 +102,17 @@ function CustomCalendar() {
           memo: currentItem.memo,
           title: currentItem.title,
           type: currentItem.type,
-          dayOfWeek: getDayOfWeek(title),
-          date: title,
-          time
+          subjectName: currentItem.subjectname || null,
+          dayOfWeek: getDayOfWeek(date),
+          date,
+          time: time.substring(0, 5)
         };
 
         if (existingDateTime) {
           existingDateTime.data.push(newDateItem);
         } else {
           acc.push({
-            title,
+            date,
             data: [newDateItem]
           });
         }
@@ -117,9 +122,9 @@ function CustomCalendar() {
 
       setFormattedData(newFormattedData); // formattedData 상태 업데이트
     }
-  }, [item]); // item이 변경될 때마다 실행
+  }, [agenda]);
 
-  const filteredItems = formattedData.filter((item) => item.title === selectedDate);
+  const filteredItems = formattedData.filter((item) => item.date === selectedDate);
 
   useEffect(() => {
     // formattedData가 준비된 후 marked 설정
@@ -137,12 +142,12 @@ function CustomCalendar() {
       });
 
       if (item.data.length > 0) {
-        marked[item.title] = {
+        marked[item.date] = {
           marked: true,
           dots: dots.slice(0, 3)
         };
       } else {
-        marked[item.title] = { disabled: true };
+        marked[item.date] = { disabled: true };
       }
     });
 
@@ -200,6 +205,7 @@ function CustomCalendar() {
             initialNumToRender={10}
             maxToRenderPerBatch={5}
             windowSize={5}
+            renderSectionHeader={() => <></>}
           />
           <AddButton onPress={() => navigation.navigate("CalendarAddScreen", {})}>
             <IconGear />
@@ -230,9 +236,7 @@ const StyledView = styled.View`
 const AgendaContainer = styled.View`
   background-color: white;
   flex: 1;
-  padding: 20px 16px;
-  border-top-width: 2px;
-  border-top-color: ${Theme.colors.Gray200};
+  margin: 20px 16px;
 `;
 
 const AddButton = styled.Pressable`

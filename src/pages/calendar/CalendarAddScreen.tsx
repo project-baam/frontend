@@ -1,20 +1,27 @@
 import styled from "@emotion/native";
-import { useRoute } from "@react-navigation/native";
+import { NavigationProp, useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Chip from "../../components/common/Chip";
-import { CalendarAddScreenRouteProp } from "../../navigations/CalendarStackNavigation";
+import { CalendarAddScreenRouteProp, CalendarStackParamList } from "../../navigations/CalendarStackNavigation";
+import useCalendarStore from "../../store/calendar/UserCalendarStore";
 import useAuthStore from "../../store/UserAuthStore";
 import { Theme } from "../../styles/theme";
 
 interface CalendarAddScreenProps {}
 
 function CalendarAddScreen({}: CalendarAddScreenProps) {
+  // store
   const { token } = useAuthStore();
+  const { setAgenda } = useCalendarStore();
   const route = useRoute<CalendarAddScreenRouteProp>();
   const { item } = route.params || {};
+
+  console.log(item);
+
+  const navigation = useNavigation<NavigationProp<CalendarStackParamList>>();
 
   const [formData, setFormData] = useState({
     subjectName: "",
@@ -28,7 +35,7 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
 
   useEffect(() => {
     if (item) {
-      const [hours, minutes] = item.hour.split(":");
+      const [hours, minutes] = item.time.split(":");
       const initialDate = new Date(item.date);
       initialDate.setHours(parseInt(hours));
       initialDate.setMinutes(parseInt(minutes));
@@ -108,6 +115,17 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
           }
         }
       );
+      setAgenda([
+        {
+          datetime: "2024-09-30 04:12:00",
+          id: 20324,
+          memo: formData.memo,
+          title: formData.title,
+          type: "test",
+          subjectname: null
+        }
+      ]);
+      navigation.goBack();
     } catch (error) {
       console.log(error);
     }
