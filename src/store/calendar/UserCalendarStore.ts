@@ -6,7 +6,7 @@ type Agenda = {
   memo: string | null;
   title: string;
   type: string;
-  subjectname: string | null;
+  subjectName: string | null;
 };
 
 interface CalendarStore {
