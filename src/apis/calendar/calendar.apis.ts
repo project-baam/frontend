@@ -12,3 +12,9 @@ export const addAgenda = async (data: AddAgendaData) => {
   const response = await customAxios.post("/calendar/event", data);
   return response.data;
 };
+
+// 일정 삭제 API
+export const deleteAgenda = async (id: string) => {
+  const response = await customAxios.delete(`/calendar/${id}`);
+  return response.data;
+};

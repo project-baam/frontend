@@ -1,25 +1,23 @@
 import styled from "@emotion/native";
 import { NavigationProp, useNavigation, useRoute } from "@react-navigation/native";
-import axios from "axios";
+import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { useAddAgenda, useDeleteAgenda } from "../../apis/calendar/calendar.queries";
+import { AddAgendaData } from "../../apis/calendar/calendar.type";
 import Chip from "../../components/common/Chip";
 import { CalendarAddScreenRouteProp, CalendarStackParamList } from "../../navigations/CalendarStackNavigation";
-import useCalendarStore from "../../store/calendar/UserCalendarStore";
-import useAuthStore from "../../store/UserAuthStore";
 import { Theme } from "../../styles/theme";
-import { useAddAgenda } from "../../apis/calendar/calendar.queries";
-import { AddAgendaData } from "../../apis/calendar/calendar.type";
 
 interface CalendarAddScreenProps {}
 
 function CalendarAddScreen({}: CalendarAddScreenProps) {
-  const { mutate: addAgenda } = useAddAgenda();
+  const queryClient = useQueryClient();
+  const { mutateAsync: addAgenda } = useAddAgenda();
+  const { mutateAsync: deleteAgenda } = useDeleteAgenda();
 
   // store
-  const { token } = useAuthStore();
-  const { setAgenda } = useCalendarStore();
   const route = useRoute<CalendarAddScreenRouteProp>();
   const { item } = route.params || {};
 
@@ -32,7 +30,7 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
     title: "",
     date: new Date(),
     memo: "",
-    selectedChip: null as "school" | "class" | "personal" | null
+    selectedChip: "school" as "school" | "class" | "personal"
   });
 
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
@@ -57,7 +55,7 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
   const handleChipPress = (chip: "school" | "class" | "personal") => {
     setFormData((prev) => ({
       ...prev,
-      selectedChip: chip === formData.selectedChip ? null : chip
+      selectedChip: chip
     }));
   };
 
@@ -99,65 +97,36 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
     return `${year}년 ${month}월 ${day}일 (${weekday}) ${ampm} ${adjustedHours}:${formattedMinutes}`;
   };
 
-  const handleSubmt = () => {
+  const handleSubmit = () => {
     const params: AddAgendaData = {
-      datetime: formData.date,
+      datetime: formData.date.toISOString(),
       title: formData.title,
       type: formData.selectedChip,
       memo: formData.memo,
       subjectName: formData.subjectName
     };
-    addAgenda(params);
+
+    addAgenda(params, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["agenda"] });
+        navigation.goBack();
+      },
+      onError: (error) => {
+        console.log(error.message);
+      }
+    });
   };
 
-  // // 일정 생성
-  // const handleSubmit = async () => {
-  //   try {
-  //     const response = await axios.post(
-  //       "https://b-site.site/calendar/event",
-  //       {
-  //         datetime: formData.date,
-  //         title: formData.title,
-  //         type: formData.selectedChip,
-  //         memo: formData.memo,
-  //         subjectName: formData.subjectName
-  //       },
-  //       {
-  //         headers: {
-  //           accept: "application/json",
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`
-  //         }
-  //       }
-  //     );
-  //     setAgenda([
-  //       {
-  //         datetime: response.data.datatime,
-  //         id: response.data.id,
-  //         memo: response.data.memo,
-  //         title: response.data.title,
-  //         type: response.data.type,
-  //         subjectName: response.data.subjectName || null
-  //       }
-  //     ]);
-  //     navigation.goBack();
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
-  // 일정 삭제
-  const handleDelete = async () => {
-    try {
-      await axios.delete(`https://b-site.site/calendar/${id}`, {
-        headers: {
-          acceept: "application/json",
-          Authorization: `Bearer ${token}`
+  const handleDelete = () => {
+    if (id) {
+      deleteAgenda(id, {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["agenda"] });
+          setTimeout(() => {
+            navigation.goBack();
+          }, 800);
         }
       });
-      navigation.goBack();
-    } catch (err) {
-      console.log(err);
     }
   };
 

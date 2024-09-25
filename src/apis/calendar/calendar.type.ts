@@ -4,7 +4,7 @@ export interface AgendaData {
 }
 
 export interface AddAgendaData {
-  subjectName: string | null;
+  subjectName: string;
   type: "school" | "class" | "personal";
   datetime: string;
   title: string;
