@@ -12,6 +12,8 @@ import useCalendarStore from "../../store/calendar/UserCalendarStore";
 import useAuthStore from "../../store/UserAuthStore";
 import { Theme } from "../../styles/theme";
 import AgendaItem from "./AgendaItem";
+import { useQuery } from "@tanstack/react-query";
+import { useGetAgenda } from "../../apis/calendar/calendar.queries";
 
 // 달력 설정
 LocaleConfig.locales["kr"] = {
@@ -28,7 +30,7 @@ interface Agenda {
   memo: string | null;
   title: string;
   type: string;
-  subjectname: string | null;
+  subjectName: string | null;
 }
 
 interface FormattedItem {
@@ -51,7 +53,7 @@ function CustomCalendar() {
 
   // store
   const { token } = useAuthStore();
-  const { agenda, setAgenda } = useCalendarStore();
+  // const { agenda, setAgenda } = useCalendarStore();
 
   const navigation = useNavigation<NavigationProp<CalendarStackParamList>>();
 
@@ -62,31 +64,37 @@ function CustomCalendar() {
     return <AgendaItem key={uniqueKey} item={item} showDate={isFirst} />;
   }, []);
 
-  // 1) 일정 가져오기
-  useEffect(() => {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = date.getMonth();
+  // react-query
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = date.getMonth();
 
-    async function fetchData() {
-      const response = await axios.get(`https://b-site.site/calendar/${year}/${month}`, {
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`
-        }
-      });
+  const { data: agendas } = useGetAgenda({ year, month });
 
-      // 2) Store에 저장
-      setAgenda(response.data.list);
-    }
-    fetchData();
-  }, []);
+  // // 1) 일정 가져오기
+  // useEffect(() => {
+  //   const date = new Date();
+  //   const year = date.getFullYear();
+  //   const month = date.getMonth();
+
+  //   async function fetchData() {
+  //     const response = await axios.get(`https://b-site.site/calendar/${year}/${month}`, {
+  //       headers: {
+  //         Accept: "application/json",
+  //         Authorization: `Bearer ${token}`
+  //       }
+  //     });
+
+  //     // 2) Store에 저장
+  //     setAgenda(response.data.list);
+  //   }
+  //   fetchData();
+  // }, []);
 
   // 3) Store에 저장된 일정 재가공
   useEffect(() => {
-    console.log("Updated agenda in useEffect:", agenda);
-    if (agenda.length > 0) {
-      const newFormattedData: FormattedItem[] = agenda.reduce((acc: FormattedItem[], currentItem: Agenda) => {
+    if (agendas && agendas.length > 0) {
+      const newFormattedData: FormattedItem[] = agendas.reduce((acc: FormattedItem[], currentItem: Agenda) => {
         const [date, time] = currentItem.datetime.split(" ");
         const existingDateTime = acc.find((item) => item.date === date);
 
@@ -102,7 +110,7 @@ function CustomCalendar() {
           memo: currentItem.memo,
           title: currentItem.title,
           type: currentItem.type,
-          subjectName: currentItem.subjectname || null,
+          subjectName: currentItem.subjectName || null,
           dayOfWeek: getDayOfWeek(date),
           date,
           time: time.substring(0, 5)
@@ -122,7 +130,7 @@ function CustomCalendar() {
 
       setFormattedData(newFormattedData); // formattedData 상태 업데이트
     }
-  }, [agenda]);
+  }, [agendas]);
 
   const filteredItems = formattedData.filter((item) => item.date === selectedDate);
 

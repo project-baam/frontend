@@ -9,17 +9,21 @@ import { CalendarAddScreenRouteProp, CalendarStackParamList } from "../../naviga
 import useCalendarStore from "../../store/calendar/UserCalendarStore";
 import useAuthStore from "../../store/UserAuthStore";
 import { Theme } from "../../styles/theme";
+import { useAddAgenda } from "../../apis/calendar/calendar.queries";
+import { AddAgendaData } from "../../apis/calendar/calendar.type";
 
 interface CalendarAddScreenProps {}
 
 function CalendarAddScreen({}: CalendarAddScreenProps) {
+  const { mutate: addAgenda } = useAddAgenda();
+
   // store
   const { token } = useAuthStore();
   const { setAgenda } = useCalendarStore();
   const route = useRoute<CalendarAddScreenRouteProp>();
   const { item } = route.params || {};
 
-  console.log(item);
+  const id = item?.id;
 
   const navigation = useNavigation<NavigationProp<CalendarStackParamList>>();
 
@@ -95,39 +99,65 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
     return `${year}년 ${month}월 ${day}일 (${weekday}) ${ampm} ${adjustedHours}:${formattedMinutes}`;
   };
 
-  // 일정 생성
-  const handleSubmit = async () => {
+  const handleSubmt = () => {
+    const params: AddAgendaData = {
+      datetime: formData.date,
+      title: formData.title,
+      type: formData.selectedChip,
+      memo: formData.memo,
+      subjectName: formData.subjectName
+    };
+    addAgenda(params);
+  };
+
+  // // 일정 생성
+  // const handleSubmit = async () => {
+  //   try {
+  //     const response = await axios.post(
+  //       "https://b-site.site/calendar/event",
+  //       {
+  //         datetime: formData.date,
+  //         title: formData.title,
+  //         type: formData.selectedChip,
+  //         memo: formData.memo,
+  //         subjectName: formData.subjectName
+  //       },
+  //       {
+  //         headers: {
+  //           accept: "application/json",
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`
+  //         }
+  //       }
+  //     );
+  //     setAgenda([
+  //       {
+  //         datetime: response.data.datatime,
+  //         id: response.data.id,
+  //         memo: response.data.memo,
+  //         title: response.data.title,
+  //         type: response.data.type,
+  //         subjectName: response.data.subjectName || null
+  //       }
+  //     ]);
+  //     navigation.goBack();
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  // 일정 삭제
+  const handleDelete = async () => {
     try {
-      await axios.post(
-        "https://b-site.site/calendar/event",
-        {
-          datetime: formData.date,
-          title: formData.title,
-          type: formData.selectedChip,
-          memo: formData.memo,
-          subjectName: formData.subjectName
-        },
-        {
-          headers: {
-            accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
+      await axios.delete(`https://b-site.site/calendar/${id}`, {
+        headers: {
+          acceept: "application/json",
+          Authorization: `Bearer ${token}`
         }
-      );
-      setAgenda([
-        {
-          datetime: "2024-09-30 04:12:00",
-          id: 20324,
-          memo: formData.memo,
-          title: formData.title,
-          type: "test",
-          subjectname: null
-        }
-      ]);
+      });
       navigation.goBack();
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -209,6 +239,13 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
           }}
         >
           <ButtonText>작성 완료</ButtonText>
+        </Button>
+        <Button
+          onPress={() => {
+            handleDelete();
+          }}
+        >
+          <ButtonText>삭제</ButtonText>
         </Button>
         <DateTimePickerModal
           isVisible={isDatePickerVisible}
