@@ -1,7 +1,7 @@
 module.exports = {
   presets: ["module:@react-native/babel-preset"],
   plugins: [
-    ["react-native-reanimated/plugin"],
+    "react-native-reanimated/plugin",
     [
       "module:react-native-dotenv",
       {
@@ -14,7 +14,16 @@ module.exports = {
         whitelist: null,
         safe: false,
         allowUndefined: true,
-        verbose: false
+        verbose: false,
+      }
+    ],
+    [
+      "module-resolver",
+      {
+        root: ["./src"],
+        alias: {
+          "@": "./src", // @ 경로 별칭 설정
+        }
       }
     ]
   ]
