@@ -1,19 +1,16 @@
 import styled from "@emotion/native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
-import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { AgendaList, CalendarProvider, ExpandableCalendar, LocaleConfig } from "react-native-calendars";
 import { Positions } from "react-native-calendars/src/expandableCalendar";
 import { MarkedDates } from "react-native-calendars/src/types";
-import IconGear from "../../assets/images/icon_gear.svg";
+import { Path, Svg } from "react-native-svg";
+import { useGetAgenda } from "../../apis/calendar/calendar.queries";
 import { CalendarStackParamList } from "../../navigations/CalendarStackNavigation";
-import useCalendarStore from "../../store/calendar/UserCalendarStore";
 import useAuthStore from "../../store/UserAuthStore";
 import { Theme } from "../../styles/theme";
 import AgendaItem from "./AgendaItem";
-import { useQuery } from "@tanstack/react-query";
-import { useGetAgenda } from "../../apis/calendar/calendar.queries";
 
 // 달력 설정
 LocaleConfig.locales["kr"] = {
@@ -71,27 +68,6 @@ function CustomCalendar() {
 
   const { data: agendas } = useGetAgenda({ year, month });
 
-  // // 1) 일정 가져오기
-  // useEffect(() => {
-  //   const date = new Date();
-  //   const year = date.getFullYear();
-  //   const month = date.getMonth();
-
-  //   async function fetchData() {
-  //     const response = await axios.get(`https://b-site.site/calendar/${year}/${month}`, {
-  //       headers: {
-  //         Accept: "application/json",
-  //         Authorization: `Bearer ${token}`
-  //       }
-  //     });
-
-  //     // 2) Store에 저장
-  //     setAgenda(response.data.list);
-  //   }
-  //   fetchData();
-  // }, []);
-
-  // 3) Store에 저장된 일정 재가공
   useEffect(() => {
     if (agendas && agendas.length > 0) {
       const newFormattedData: FormattedItem[] = agendas.reduce((acc: FormattedItem[], currentItem: Agenda) => {
@@ -215,9 +191,23 @@ function CustomCalendar() {
             windowSize={5}
             renderSectionHeader={() => <></>}
           />
-          <AddButton onPress={() => navigation.navigate("CalendarAddScreen", {})}>
-            <IconGear />
-          </AddButton>
+          <ButtonContainer>
+            <Pressable onPress={() => navigation.navigate("CalendarAddScreen", {})}>
+              <Svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                <Path
+                  d="M0 28C0 12.536 12.536 0 28 0C43.464 0 56 12.536 56 28C56 43.464 43.464 56 28 56C12.536 56 0 43.464 0 28Z"
+                  fill="#262626"
+                />
+                <Path
+                  d="M36 25.3333L30.6667 20M15.3333 40.6667L19.8458 40.1653C20.3971 40.104 20.6728 40.0734 20.9304 39.99C21.159 39.916 21.3766 39.8114 21.5771 39.6791C21.8032 39.5301 21.9994 39.3339 22.3916 38.9417L40 21.3333C41.4728 19.8606 41.4728 17.4727 40 16C38.5272 14.5272 36.1394 14.5272 34.6667 16L17.0583 33.6084C16.666 34.0006 16.4699 34.1967 16.3208 34.4228C16.1885 34.6234 16.084 34.8409 16.01 35.0695C15.9266 35.3272 15.8959 35.6028 15.8347 36.1542L15.3333 40.6667Z"
+                  stroke="white"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </Svg>
+            </Pressable>
+          </ButtonContainer>
         </AgendaContainer>
       </CalendarProvider>
     </StyledView>
@@ -247,16 +237,10 @@ const AgendaContainer = styled.View`
   margin: 20px 16px;
 `;
 
-const AddButton = styled.Pressable`
-  width: 48px;
-  height: 48px;
+const ButtonContainer = styled.View`
+  width: 56px;
+  height: 56px;
   position: absolute;
-  bottom: 72px;
   right: 16px;
-  background-color: ${Theme.colors.Primary};
-  padding: 16px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  margin-top: 16px;
+  bottom: 16px;
 `;

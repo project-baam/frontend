@@ -49,7 +49,7 @@ function AgendaItem(props: ItemProps) {
               width="4"
               height="44"
               rx="2"
-              fill={item.type === "school" ? "#327CEA" : "class" ? "#F92626" : "#27B560"}
+              fill={item.type === "school" ? "#327CEA" : item.type === "class" ? "#F92626" : "#27B560"}
             />
           </Svg>
         </View>
