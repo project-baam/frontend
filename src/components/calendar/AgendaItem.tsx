@@ -1,15 +1,15 @@
 import styled from "@emotion/native";
 import { useNavigation } from "@react-navigation/native";
 import React, { useCallback } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Rect, Svg } from "react-native-svg";
+import { CalendarAddScreenNavigationProp } from "../../navigations/CalendarStackNavigation";
 import { Theme } from "../../styles/theme";
 import { Agenda } from "../../types/agenda";
-import { CalendarAddScreenNavigationProp } from "../../types/navigation";
 
 interface ItemProps {
   item: Agenda;
-  isFirst: boolean;
-  isLast: boolean;
+  showDate: boolean;
 }
 
 const isEmpty = (obj: any) => {
@@ -17,7 +17,7 @@ const isEmpty = (obj: any) => {
 };
 
 function AgendaItem(props: ItemProps) {
-  const { item, isFirst, isLast } = props;
+  const { item, showDate } = props;
   const navigation = useNavigation<CalendarAddScreenNavigationProp>();
 
   const itemPressed = useCallback(() => {
@@ -34,62 +34,79 @@ function AgendaItem(props: ItemProps) {
   }
 
   return (
-    <ItemContainer onPress={itemPressed} isToday={isToday(item.date)} isFirst={isFirst} isLast={isLast}>
-      <ItemDateContainer borderColor={item.color || "green"}>
-        <ItemDateText>{item.date.split("-")[2]}</ItemDateText>
-        <ItemDayOfWeekText>{item.dayOfWeek}</ItemDayOfWeekText>
-      </ItemDateContainer>
-      <ItemTextContainer>
-        <ItemTitleText>{item.title}</ItemTitleText>
-        <ItemHourText>{item.hour}</ItemHourText>
-      </ItemTextContainer>
-    </ItemContainer>
+    <>
+      {showDate && (
+        <DateContainer>
+          <StyledDOM>{item.date.split("-")[2]}</StyledDOM>
+          <StyledDOW>{item.dayOfWeek}</StyledDOW>
+        </DateContainer>
+      )}
+      <ItemContainer onPress={itemPressed}>
+        <View>
+          <Svg width="4" height="45" viewBox="0 0 4 45" fill="none">
+            <Rect
+              y="0.5"
+              width="4"
+              height="44"
+              rx="2"
+              fill={item.type === "school" ? "#327CEA" : item.type === "class" ? "#F92626" : "#27B560"}
+            />
+          </Svg>
+        </View>
+        <TextContainer>
+          <StyledTitle>{item.title}</StyledTitle>
+          <StyledTime>{item.time}</StyledTime>
+        </TextContainer>
+      </ItemContainer>
+    </>
   );
 }
 
-const ItemContainer = styled(Pressable)<{ isToday: boolean; isFirst: boolean; isLast: boolean }>`
-  padding: 12px 16px;
-  background-color: #ffffff;
+const DateContainer = styled.View`
   flex-direction: row;
-  gap: 16px;
-  background-color: ${(props) => (props.isToday ? Theme.colors.Gray100 : "#ffffff")};
-  border-top-left-radius: ${(props) => (props.isFirst ? "8px" : "0")};
-  border-top-right-radius: ${(props) => (props.isFirst ? "8px" : "0")};
-  border-bottom-left-radius: ${(props) => (props.isLast ? "8px" : "0")};
-  border-bottom-right-radius: ${(props) => (props.isLast ? "8px" : "0")};
-`;
-
-const ItemDateContainer = styled(View)<{ borderColor: string }>`
-  border-right-width: 2px;
-  border-right-color: ${(props) => props.borderColor};
-  padding-right: 20px;
   align-items: center;
-  gap: 2px;
+  gap: 8px;
+  margin-bottom: 16px;
 `;
 
-const ItemDateText = styled(Text)`
+const StyledDOM = styled.Text`
+  color: ${Theme.colors.Gray900};
+  font-family: "Pretendard-Bold";
   font-size: 24px;
   font-weight: 600;
 `;
 
-const ItemDayOfWeekText = styled(Text)`
-  font-size: 14px;
-  font-weight: 500;
-  color: grey;
-`;
-
-const ItemHourText = styled(Text)`
-  color: grey;
-`;
-
-const ItemTitleText = styled(Text)`
-  color: black;
-  font-weight: bold;
+const StyledDOW = styled.Text`
+  color: ${Theme.colors.Gray500};
+  font-family: "Pretendard-Medium";
   font-size: 16px;
+  font-weight: 500;
 `;
 
-const ItemTextContainer = styled(View)`
+const ItemContainer = styled(Pressable)`
+  width: 100%;
+  background-color: #ffffff;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+`;
+
+const TextContainer = styled.View`
   gap: 8px;
+`;
+
+const StyledTitle = styled.Text`
+${Theme.typo.Body_04_Bold};
+color: ${Theme.colors.Gray800};
+}
+`;
+
+const StyledTime = styled.Text`
+  font-family: "Pretendard";
+  font-weight: 400;
+  font-size: 16px;
+  color: ${Theme.colors.Gray500};
 `;
 
 export default AgendaItem;

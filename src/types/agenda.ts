@@ -6,6 +6,8 @@ export type Agenda = {
   dayOfWeek: string;
   duration: string;
   hour: string;
-  key: "school_event" | "class_schedule" | "personal_event";
+  type: "school" | "class" | "personal";
   title: string;
+  subjectName: string;
+  time: string;
 };

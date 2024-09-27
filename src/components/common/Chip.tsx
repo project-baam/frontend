@@ -13,7 +13,7 @@ interface ChipProps extends ViewProps {
   textColor?: string;
   borderColor?: string;
   children: ReactNode;
-  borderRadius: "square" | "round" | "circle";
+  borderRadiusType: "square" | "round" | "circle";
   LeftIcon?: ReactNode;
   RightIcon?: ReactNode;
 }
@@ -24,7 +24,7 @@ function Chip({
   textColor = Theme.colors.Gray600,
   borderColor = "#F8F8F8",
   children,
-  borderRadius = "square",
+  borderRadiusType = "square",
   LeftIcon,
   RightIcon,
   ...props
@@ -34,7 +34,7 @@ function Chip({
       size={size}
       borderColor={borderColor}
       backgroundColor={backGroundColor}
-      borderRadius={borderRadius}
+      borderRadiusType={borderRadiusType}
       {...props}
     >
       {LeftIcon && <IconWrapper style={{ marginRight: 4 }}>{LeftIcon}</IconWrapper>}
@@ -63,10 +63,10 @@ function getBorderRadius(borderRadius: "square" | "round" | "circle") {
 const ChipView = styled.View<{
   backgroundColor: string;
   borderColor?: string;
-  borderRadius: "square" | "round" | "circle";
+  borderRadiusType: "square" | "round" | "circle";
   size: "small" | "medium";
 }>`
-  border-radius: ${({ borderRadius }) => `${getBorderRadius(borderRadius)}px`};
+  border-radius: ${({ borderRadiusType }) => `${getBorderRadius(borderRadiusType)}px`};
   background-color: ${({ backgroundColor }) => backgroundColor};
   flex-direction: row;
   align-items: center;
