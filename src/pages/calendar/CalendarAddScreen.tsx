@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { useAddAgenda, useDeleteAgenda } from "../../apis/calendar/calendar.queries";
+import { useAddAgenda, useDeleteAgenda, useUpdateAgenda } from "../../apis/calendar/calendar.queries";
 import { AddAgendaData } from "../../apis/calendar/calendar.type";
 import Chip from "../../components/common/Chip";
 import { CalendarAddScreenRouteProp, CalendarStackParamList } from "../../navigations/CalendarStackNavigation";
@@ -14,7 +14,14 @@ interface CalendarAddScreenProps {}
 
 function CalendarAddScreen({}: CalendarAddScreenProps) {
   const queryClient = useQueryClient();
+
+  // 일정 추가
   const { mutateAsync: addAgenda } = useAddAgenda();
+
+  // 일정 수정
+  const { mutateAsync: updateAgenda } = useUpdateAgenda();
+
+  // 일정 삭제
   const { mutateAsync: deleteAgenda } = useDeleteAgenda();
 
   // store
@@ -53,10 +60,16 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
   }, [item]);
 
   const handleChipPress = (chip: "school" | "class" | "personal") => {
-    setFormData((prev) => ({
-      ...prev,
+    const updatedFormData = {
+      ...formData,
       selectedChip: chip
-    }));
+    };
+
+    if (chip !== "class") {
+      updatedFormData.subjectName = "";
+    }
+
+    setFormData(updatedFormData);
   };
 
   const showDatePicker = () => {
@@ -98,36 +111,49 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
   };
 
   const handleSubmit = () => {
-    const params: AddAgendaData = {
-      datetime: formData.date.toISOString(),
-      title: formData.title,
-      type: formData.selectedChip,
-      memo: formData.memo,
-      subjectName: formData.subjectName
+    const params = createAgendaParams(formData);
+
+    const handleSuccess = () => {
+      invalidateAndNavigate();
     };
 
-    addAgenda(params, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["agenda"] });
-        navigation.goBack();
-      },
-      onError: (error) => {
-        console.log(error.message);
-      }
-    });
-  };
+    const handleError = (error: any) => {
+      console.log(error.message);
+    };
 
-  const handleDelete = () => {
     if (id) {
-      deleteAgenda(id, {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ["agenda"] });
-          setTimeout(() => {
-            navigation.goBack();
-          }, 800);
+      // 기존 일정 수정
+      updateAgenda(
+        { id: id, data: params },
+        {
+          onSuccess: handleSuccess,
+          onError: handleError
         }
+      );
+    } else {
+      // 일정 신규 생성
+      addAgenda(params, {
+        onSuccess: handleSuccess,
+        onError: handleError
       });
     }
+  };
+
+  // 파라미터 생성 함수
+  const createAgendaParams = (data: any): AddAgendaData => ({
+    datetime: data.date.toISOString(),
+    title: data.title,
+    type: data.selectedChip,
+    memo: data.memo,
+    subjectName: data.subjectName
+  });
+
+  // 쿼리 무효화 및 네비게이션 함수
+  const invalidateAndNavigate = () => {
+    queryClient.invalidateQueries({ queryKey: ["agenda"] });
+    setTimeout(() => {
+      navigation.goBack();
+    }, 800);
   };
 
   return (
@@ -208,13 +234,6 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
           }}
         >
           <ButtonText>작성 완료</ButtonText>
-        </Button>
-        <Button
-          onPress={() => {
-            handleDelete();
-          }}
-        >
-          <ButtonText>삭제</ButtonText>
         </Button>
         <DateTimePickerModal
           isVisible={isDatePickerVisible}
