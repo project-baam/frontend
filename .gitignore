@@ -78,4 +78,5 @@ yarn-error.log
 /src/pages/ChatScreen.tsx
 /src/components/ChatHeader.tsx
 /src/components/ChatMessageInput.tsx
+.history
 .env.local
