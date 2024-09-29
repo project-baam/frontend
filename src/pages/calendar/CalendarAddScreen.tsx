@@ -1,30 +1,59 @@
 import styled from "@emotion/native";
-import { useRoute } from "@react-navigation/native";
+import { NavigationProp, useNavigation, useRoute } from "@react-navigation/native";
+import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { Keyboard, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { useAddAgenda, useDeleteAgenda, useGetSubject, useUpdateAgenda } from "../../apis/calendar/calendar.queries";
+import { AddAgendaData } from "../../apis/calendar/calendar.type";
 import Chip from "../../components/common/Chip";
-import { CalendarAddScreenRouteProp } from "../../navigations/CalendarStackNavigation";
+import { CalendarAddScreenRouteProp, CalendarStackParamList } from "../../navigations/CalendarStackNavigation";
 import { Theme } from "../../styles/theme";
 
 interface CalendarAddScreenProps {}
 
 function CalendarAddScreen({}: CalendarAddScreenProps) {
+  const queryClient = useQueryClient();
+
+  // 일정 추가
+  const { mutateAsync: addAgenda } = useAddAgenda();
+
+  // 일정 수정
+  const { mutateAsync: updateAgenda } = useUpdateAgenda();
+
+  // 일정 삭제
+  const { mutateAsync: deleteAgenda } = useDeleteAgenda();
+
+  // 수강 과목 조회
+  const { data: subjects } = useGetSubject();
+
+  const subjectItems = subjects?.map((subject: string) => ({ label: subject, value: subject }));
+
+  // 과목 Dropdown 관련 state
+  const [openSubject, setOpenSubject] = useState(false);
+
+  // store
   const route = useRoute<CalendarAddScreenRouteProp>();
   const { item } = route.params || {};
+  const [localSubject, setLocalSubject] = useState<string>(item ? item.subjectName : "");
+
+  const id = item?.id;
+
+  const navigation = useNavigation<NavigationProp<CalendarStackParamList>>();
 
   const [formData, setFormData] = useState({
     title: "",
     date: new Date(),
     memo: "",
-    selectedChip: null as "학교 일정" | "수업별 일정" | "개별 일정" | null
+    selectedChip: "school" as "school" | "class" | "personal"
   });
 
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
 
   useEffect(() => {
     if (item) {
-      const [hours, minutes] = item.hour.split(":");
+      const [hours, minutes] = item.time.split(":");
       const initialDate = new Date(item.date);
       initialDate.setHours(parseInt(hours));
       initialDate.setMinutes(parseInt(minutes));
@@ -33,17 +62,18 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
         title: item.title || "",
         date: initialDate,
         memo: item.memo || "",
-        selectedChip:
-          item.key === "school_event" ? "학교 일정" : item.key === "class_schedule" ? "수업별 일정" : "개별 일정"
+        selectedChip: item.type === "school" ? "school" : item.type === "class" ? "class" : "personal"
       });
     }
   }, [item]);
 
-  const handleChipPress = (chip: "학교 일정" | "수업별 일정" | "개별 일정") => {
-    setFormData((prev) => ({
-      ...prev,
-      selectedChip: chip === formData.selectedChip ? null : chip
-    }));
+  const handleChipPress = (chip: "school" | "class" | "personal") => {
+    const updatedFormData = {
+      ...formData,
+      selectedChip: chip
+    };
+
+    setFormData(updatedFormData);
   };
 
   const showDatePicker = () => {
@@ -84,77 +114,150 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
     return `${year}년 ${month}월 ${day}일 (${weekday}) ${ampm} ${adjustedHours}:${formattedMinutes}`;
   };
 
+  const handleSubmit = () => {
+    const params = createAgendaParams(formData);
+
+    console.log(params);
+
+    const handleSuccess = () => {
+      invalidateAndNavigate();
+    };
+
+    const handleError = (error: any) => {
+      console.log(error.message);
+    };
+
+    if (id) {
+      // 기존 일정 수정
+      updateAgenda(
+        { id: id, data: params },
+        {
+          onSuccess: handleSuccess,
+          onError: handleError
+        }
+      );
+    } else {
+      // 일정 신규 생성
+      addAgenda(params, {
+        onSuccess: handleSuccess,
+        onError: handleError
+      });
+    }
+  };
+
+  // 파라미터 생성 함수
+  const createAgendaParams = (data: any): AddAgendaData => ({
+    datetime: data.date.toISOString(),
+    title: data.title,
+    type: data.selectedChip,
+    memo: data.memo,
+    ...(data.selectedChip === "class" && { subjectName: localSubject })
+  });
+
+  // 쿼리 무효화 및 네비게이션 함수
+  const invalidateAndNavigate = () => {
+    queryClient.invalidateQueries({ queryKey: ["agenda"] });
+    setTimeout(() => {
+      navigation.goBack();
+    }, 800);
+  };
+
   return (
     <Container>
       <ChipRow>
-        <TouchableOpacity
-          onPress={() => handleChipPress("학교 일정")}
-          style={{ opacity: formData.selectedChip === "학교 일정" ? 1 : 0.2 }}
-        >
+        <TouchableOpacity onPress={() => handleChipPress("school")}>
           <Chip
-            size="small"
-            backGroundColor="#E199F0"
-            borderColor="#E199F0"
-            textColor={Theme.colors.White}
-            borderRadius="circle"
+            size="medium"
+            backGroundColor={formData.selectedChip === "school" ? "#E6ECF5" : "#F8F8F8"}
+            borderColor={formData.selectedChip === "school" ? "#E6ECF5" : "#F8F8F8"}
+            textColor={formData.selectedChip === "school" ? "#327CEA" : "#7B7B7BB2"}
+            borderRadiusType="circle"
           >
             학교 일정
           </Chip>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handleChipPress("수업별 일정")}
-          style={{ opacity: formData.selectedChip === "수업별 일정" ? 1 : 0.2 }}
-        >
+        <TouchableOpacity onPress={() => handleChipPress("class")}>
           <Chip
-            size="small"
-            backGroundColor="#8A7EFF"
-            borderColor="#8A7EFF"
-            textColor={Theme.colors.White}
-            borderRadius="circle"
+            size="medium"
+            backGroundColor={formData.selectedChip === "class" ? "#F5E0E0" : "#F8F8F8"}
+            borderColor={formData.selectedChip === "class" ? "#F5E0E0" : "#F8F8F8"}
+            textColor={formData.selectedChip === "class" ? "#F92626B2" : "#7B7B7BB2"}
+            borderRadiusType="circle"
           >
             수업별 일정
           </Chip>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handleChipPress("개별 일정")}
-          style={{ opacity: formData.selectedChip === "개별 일정" ? 1 : 0.2 }}
-        >
+        <TouchableOpacity onPress={() => handleChipPress("personal")}>
           <Chip
-            size="small"
-            backGroundColor="#A6E7DF"
-            borderColor="#A6E7DF"
-            textColor={Theme.colors.White}
-            borderRadius="circle"
+            size="medium"
+            backGroundColor={formData.selectedChip === "personal" ? "#DFF2E1" : "#F8F8F8"}
+            borderColor={formData.selectedChip === "personal" ? "#DFF2E1" : "#F8F8F8"}
+            textColor={formData.selectedChip === "personal" ? "#27B560" : "#7B7B7BB2"}
+            borderRadiusType="circle"
           >
             개별 일정
           </Chip>
         </TouchableOpacity>
       </ChipRow>
       <View style={{ gap: 12 }}>
-        <InputWrapper>
-          <LabelContainer>
-            <Label>제목</Label>
-            <StyledTextInput value={formData.title} onChangeText={(text) => handleInputChange("title", text)} />
-          </LabelContainer>
-        </InputWrapper>
-        <TouchableOpacity onPress={showDatePicker}>
-          <InputWrapper>
-            <LabelContainer>
-              <Label>날짜</Label>
-              <InputContainer>
-                <DateText>{formatDateToKorean(formData.date)}</DateText>
-              </InputContainer>
-            </LabelContainer>
-          </InputWrapper>
-        </TouchableOpacity>
-        <StyledMemoInput
-          placeholder="메모"
-          value={formData.memo}
-          onChangeText={(text) => handleInputChange("memo", text)}
-          multiline
-          numberOfLines={10}
-        />
-        <Button>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{ gap: 12 }}>
+            {formData.selectedChip === "class" && (
+              <PickerContainer>
+                <LabelContainer>
+                  <DropDownPicker
+                    items={subjectItems}
+                    value={localSubject}
+                    open={openSubject}
+                    setValue={setLocalSubject}
+                    setOpen={setOpenSubject}
+                    placeholder="선택 필요"
+                    style={pickerStyle}
+                    labelStyle={{
+                      fontSize: 16
+                    }}
+                    dropDownContainerStyle={{
+                      borderColor: Theme.colors.Gray300
+                    }}
+                    closeAfterSelecting={true}
+                    listMode="SCROLLVIEW"
+                    scrollViewProps={{
+                      nestedScrollEnabled: true
+                    }}
+                  />
+                </LabelContainer>
+              </PickerContainer>
+            )}
+            <InputWrapper>
+              <LabelContainer>
+                <Label>제목</Label>
+                <StyledTextInput value={formData.title} onChangeText={(text) => handleInputChange("title", text)} />
+              </LabelContainer>
+            </InputWrapper>
+            <TouchableOpacity onPress={showDatePicker}>
+              <InputWrapper>
+                <LabelContainer>
+                  <Label>날짜</Label>
+                  <InputContainer>
+                    <DateText>{formatDateToKorean(formData.date)}</DateText>
+                  </InputContainer>
+                </LabelContainer>
+              </InputWrapper>
+            </TouchableOpacity>
+            <StyledMemoInput
+              placeholder="메모"
+              value={formData.memo}
+              onChangeText={(text) => handleInputChange("memo", text)}
+              multiline
+              numberOfLines={10}
+            />
+          </View>
+        </TouchableWithoutFeedback>
+        <Button
+          onPress={() => {
+            handleSubmit();
+          }}
+        >
           <ButtonText>작성 완료</ButtonText>
         </Button>
         <DateTimePickerModal
@@ -172,9 +275,14 @@ function CalendarAddScreen({}: CalendarAddScreenProps) {
   );
 }
 
+const pickerStyle = {
+  paddingHorizontal: 12,
+  borderColor: Theme.colors.Gray300
+};
+
 const Container = styled.View`
   flex: 1;
-  background-color: ${Theme.colors.Gray100};
+  background-color: ${Theme.colors.White};
   padding: 16px;
   gap: 16px;
 `;
@@ -191,6 +299,11 @@ const InputWrapper = styled.View`
   padding: 0 16px;
   justify-content: center;
   height: 51px;
+`;
+
+const PickerContainer = styled.View`
+  height: 51px;
+  z-index: 100;
 `;
 
 const LabelContainer = styled.View`

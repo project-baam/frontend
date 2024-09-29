@@ -79,3 +79,4 @@ yarn-error.log
 /src/components/ChatHeader.tsx
 /src/components/ChatMessageInput.tsx
 .history
+.env.local
