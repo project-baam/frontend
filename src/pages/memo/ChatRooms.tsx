@@ -275,7 +275,13 @@ const ChatRooms = ({ navigation }: { navigation: any }) => {
                 <Text style={[styles.text2, styles.textTypo]}>{room.participantsCount}</Text>
               </View>
               <View style={[styles.group, styles.groupFlexBox]}>
-                <Text style={[styles.text3, styles.textClr]}>{room.lastMessage}</Text>
+                <Text
+                  numberOfLines={1} // 한 줄로 표시
+                  ellipsizeMode="tail" // 끝부분에 '...'을 표시
+                  style={[styles.text3, styles.textClr]}
+                >
+                  {room.lastMessage}
+                </Text>
                 <Text style={[styles.text4, styles.textClr]}>{room.timeAgo}</Text>
               </View>
             </View>
