@@ -72,21 +72,6 @@ function FriendListScreen() {
 
   const [selectedFilter, setSelectedFilter] = useState("전체");
 
-  async function handleSearchSchoolmate(text: string) {
-    setEnteredText(text);
-    // fetchSchoolMates(0, );
-    // const response = await axios.get("https://b-site.site/schoolmates", {
-    //   params: {
-    //     count: 10,
-    //     page: 0,
-    //     name: text
-    //   },
-    //   headers: {
-    //     Accept: "application/json",
-    //     Authorization: `Bearer ${token}`
-    //   }
-    // });
-  }
   useEffect(() => {
     console.log("friendlistscreen.tsx");
   }, []);
