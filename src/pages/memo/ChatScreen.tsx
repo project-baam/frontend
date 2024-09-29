@@ -9,12 +9,14 @@ import {
   Image,
   StyleSheet,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform
 } from "react-native";
 import useAuthStore from "../../store/UserAuthStore";
 import { io, Socket } from "socket.io-client";
 import axios from "axios";
-import { VectorLeft } from "../../assets/assets";
+import { VectorLeft, FriendsIcon, IconPlus, SendIcon } from "../../assets/assets";
 
 const MessageItem = ({ message, isOwnMessage }: any) => {
   if (!message) return null;
@@ -164,6 +166,7 @@ function ChatScreen({ navigation, route }: any) {
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isTextState, setIsTextState] = useState(true);
   const connectSocket = useCallback(() => {
     console.log("Attempting to connect socket with token:", token);
 
@@ -324,7 +327,7 @@ function ChatScreen({ navigation, route }: any) {
   }, []);
 
   return (
-    <SafeAreaView style={{ marginHorizontal: 16, flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }}>
       {loading && ( // 로딩 상태면 인디케이터 표시
         <LoadingContainer>
           <View
@@ -345,29 +348,35 @@ function ChatScreen({ navigation, route }: any) {
         <BackButton onPress={() => navigation.goBack()}>
           <BackIcon source={VectorLeft} />
         </BackButton>
-        <Text
-          style={{
-            fontSize: 18,
-            lineHeight: 26,
-            fontWeight: "600",
-            fontFamily: "Pretendard",
-            color: "#262626",
-            textAlign: "center",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 272,
-            height: 28
-          }}
-        >
-          {route.params.roomName}
-          {route.params.roomCount}
-        </Text>
+
+        <View style={{ flexDirection: "column", alignItems: "center" }}>
+          <Text
+            style={{
+              fontSize: 18,
+              lineHeight: 26,
+              fontWeight: "600",
+              fontFamily: "Pretendard",
+              color: "#262626",
+              textAlign: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 272,
+              height: 28
+            }}
+          >
+            {route.params.roomName}
+          </Text>
+          <View style={{ flexDirection: "row" }}>
+            <Image source={FriendsIcon} style={{ width: 20, height: 20 }} />
+            <Text>{route.params.roomCount}</Text>
+          </View>
+        </View>
         <View style={{ width: 24, height: 24 }} />
       </Header>
       {/* <Text>Current Room: {route.params.roomId}</Text> */}
       {/* <Button title="join room" onPress={() => joinRoom(route.params.roomId)}></Button> */}
-      <Button title="해당 채팅방 나가기" color="red" onPress={leaveRoom} />
+      {/* <Button title="해당 채팅방 나가기" color="red" onPress={leaveRoom} /> */}
       <View style={styles.messageContainer}>
         <FlatList
           data={messages}
@@ -377,43 +386,53 @@ function ChatScreen({ navigation, route }: any) {
           )}
         />
       </View>
-      <View
-        style={{
-          borderRadius: 20,
-          backgroundColor: "#fff",
-          borderColor: "#e9e9e9",
-          borderWidth: 1,
-          flexDirection: "row",
-          paddingHorizontal: 12,
-          paddingVertical: 8,
-          gap: 8
-        }}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+        style={{ flex: 1, justifyContent: "flex-end" }} // 하단에 고정
       >
-        <TextInput
+        <View
           style={{
-            borderRadius: 20,
-            backgroundColor: "purple",
-            borderColor: "#e9e9e9",
-            borderWidth: 1,
+            backgroundColor: "#fff",
             flexDirection: "row",
             paddingHorizontal: 12,
             paddingVertical: 8,
-            gap: 8
+            borderTopWidth: 1, // 위쪽에만 border 추가
+            borderTopColor: "#e9e9e9"
           }}
-          placeholder="메시지 보내기"
-          value={inputMessage}
-          onChangeText={(text) => setInputMessage(text)}
-        />
-        <Button
-          title="파일 선택"
-          //   onPress={pickFile}
-        />
-        {file && <Text>선택된 파일: {file.name}</Text>}
-        <View>
-          <Button title="Text 타입 메시지 전송" onPress={sendTextMessage} color="blue" />
-          <Button title="File 타입 메시지 전송" onPress={sendFileMessage} color="blue" />
+        >
+          <TouchableOpacity style={{ justifyContent: "center", paddingRight: 16 }}>
+            {/* 파일 추가 */}
+            <Image style={{ width: 24, height: 24 }} source={IconPlus} />
+          </TouchableOpacity>
+          <View
+            style={{
+              borderRadius: 20,
+              borderColor: "#e9e9e9",
+              borderWidth: 1,
+              flexDirection: "row",
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              gap: 8,
+              width: "90%",
+              justifyContent: "space-between"
+            }}
+          >
+            <TextInput placeholder="메시지 보내기" value={inputMessage} onChangeText={setInputMessage} />
+
+            {file && <Text>선택된 파일: {file.name}</Text>}
+            <TouchableOpacity
+              style={{ justifyContent: "center", alignContent: "flex-end" }}
+              onPress={() => {
+                if (isTextState) sendTextMessage();
+                else sendFileMessage();
+              }}
+            >
+              <Image source={SendIcon} style={{ width: 28, height: 28 }} />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -516,14 +535,13 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     marginBottom: 10,
-    alignItems: "flex-end",
-    height: "70%"
+    alignItems: "flex-end"
   },
   avatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    marginRight: 8
+    marginLeft: 8
   },
   messageBubble: {
     borderRadius: 16,
@@ -531,7 +549,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 8
+    paddingVertical: 8,
+    marginHorizontal: 8
   },
   senderName: {
     fontSize: 14,
@@ -539,7 +558,8 @@ const styles = StyleSheet.create({
     fontFamily: "Pretendard",
     color: "#555",
     textAlign: "left",
-    marginBottom: 8
+    marginBottom: 8,
+    marginHorizontal: 8
   },
   messageContent: {
     fontSize: 16
