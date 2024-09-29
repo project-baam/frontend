@@ -85,18 +85,20 @@ export default function FriendsList() {
 
   const handleSearchFriends = async (text: string) => {
     setEnteredText(text);
-    // fetchSchoolMates(0, );
-    // const response = await axios.get("https://b-site.site/schoolmates", {
-    //   params: {
-    //     count: 10,
-    //     page: 0,
-    //     name: text
-    //   },
-    //   headers: {
-    //     Accept: "application/json",
-    //     Authorization: `Bearer ${token}`
-    //   }
-    // });
+    const response = await axios.get("https://b-site.site/friends", {
+      params: {
+        count: 1000,
+        page: 0,
+        name: text
+      },
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`
+      }
+    });
+    console.log("검색결과", text, response.data.all);
+    setFriends({ list: response.data.all });
+    setFavoriteFriends({ list: response.data.favaorites });
   };
 
   const getRandomColor = (itemIndex: number): string => {
@@ -108,11 +110,11 @@ export default function FriendsList() {
   useEffect(() => {
     fetchFavoriteFriends();
     fetchFriends(0);
-    console.log("friendslist.tsx");
+    // console.log("friendslist.tsx");
   }, []);
-  useEffect(() => {
-    console.log("??", favoriteFriends.list);
-  }, [favoriteFriends]);
+  // useEffect(() => {
+  //   console.log("??", favoriteFriends.list);
+  // }, [favoriteFriends]);
 
   return (
     <View style={{ flex: 1 }}>

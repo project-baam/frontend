@@ -62,6 +62,7 @@ export default function SchoolFriends() {
 
   const fetchSchoolMates = async (page: number, filter: string) => {
     setLoading(true); // 로딩 시작
+    console.log("fetchschoolmates");
     const params: any = {
       count: 10,
       page: page
@@ -80,6 +81,7 @@ export default function SchoolFriends() {
       });
 
       const newSchoolmates = response.data.list;
+      console.log("new", newSchoolmates);
       setSchoolFriends((prev) => ({
         list: page === 0 ? newSchoolmates : [...prev.list, ...newSchoolmates]
       }));
@@ -110,18 +112,19 @@ export default function SchoolFriends() {
 
   const handleSearchSchoolmate = async (text: string) => {
     setEnteredText(text);
-    // fetchSchoolMates(0, );
-    // const response = await axios.get("https://b-site.site/schoolmates", {
-    //   params: {
-    //     count: 10,
-    //     page: 0,
-    //     name: text
-    //   },
-    //   headers: {
-    //     Accept: "application/json",
-    //     Authorization: `Bearer ${token}`
-    //   }
-    // });
+    setSelectedFilter("전체");
+    const response = await axios.get("https://b-site.site/schoolmates", {
+      params: {
+        count: 1000,
+        page: 0,
+        name: text
+      },
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`
+      }
+    });
+    setSchoolFriends({ list: response.data.list });
   };
 
   const handleFilterSelect = (filter: string) => {
@@ -144,9 +147,6 @@ export default function SchoolFriends() {
     }
   }, [selectedFilter]);
 
-  useEffect(() => {
-    console.log("schoolmateList.tsx");
-  }, []);
   return (
     <View style={{ flex: 1 }}>
       <SearchContainer>
