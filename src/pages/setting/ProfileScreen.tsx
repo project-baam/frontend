@@ -36,101 +36,80 @@ function ProfileScreen({ navigation, route }: ProfileScreenProps) {
   } = route.params;
   const { token } = useAuthStore();
   const getPhotos = async (chooseType: string) => {
-    ImagePicker.openPicker({
-      width: 300,
-      height: 400,
-      cropping: true,
-      cropperCircleOverlay: true,
-      includeBase64: true
-    }).then((image) => {
-      console.log("이미지", image);
-      // const image_bytes = Buffer.from(image.path, "base64");
-      if (chooseType === "profile") {
-        setLocalProfileImage(image.path);
-        updateUserProfileImages(image.path, undefined);
-      } else {
-        setLocalBackgroundImage(image.path);
-        updateUserProfileImages(undefined, image.path);
-      }
-    });
-  };
-  const handleChoosePhoto = async (chooseType: string) => {
-    try {
-      const response = await launchImageLibrary({ mediaType: "photo" });
-      if (response.didCancel) {
-        console.log("User cancelled image picker");
-      } else if (response.errorCode) {
-        console.error("ImagePicker Error: ", response.errorCode);
-      } else if (response.assets && response.assets.length > 0) {
-        const asset = response.assets[0];
-        console.log("에셋 : ", response.assets);
-        if (asset.uri) {
-          console.log("Image URI: ", asset.uri);
-          if (chooseType === "profile") {
-            setLocalProfileImage(asset.uri);
-            await updateUserProfileImages(asset.uri, undefined);
-          } else {
-            setLocalBackgroundImage(asset.uri);
-            await updateUserProfileImages(undefined, asset.uri);
-          }
+    launchImageLibrary(
+      {
+        mediaType: "photo",
+        includeBase64: true,
+        maxHeight: 400,
+        maxWidth: 400
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log("cancled");
+        } else if (response.errorCode) {
+          console.log(response.errorMessage);
         } else {
-          console.error("Image URI is undefined");
+          console.log("여기 ", response.assets?.[0]);
+          setLocalProfileImage(response.assets?.[0].uri ? response.assets?.[0].uri : "");
+          uploadImage(response.assets?.[0]);
         }
-      } else {
-        console.log("No image selected");
       }
-    } catch (error) {
-      console.error("Error choosing photo:", error);
-    }
+    );
   };
 
+  const uploadImage = async (imagePath: any) => {
+    console.log("이거", token);
+    try {
+      // const base64String = imagePath.base64;
+      // const mimeType = imagePath.type || "image/jpeg";
+      // const blob = await fetch(`data:${mimeType};base64,${base64String}`).then((response) => response.blob());
+      // const file = new File([blob], imagePath.fileName || "image.jpeg", { type: mimeType });
+      const isAndroid = Platform.OS === "android";
+      let photoUri = imagePath.uri;
+      console.log("이거", imagePath);
+
+      var photo = {
+        uri: photoUri,
+        type: "multipart/form-data",
+        name: imagePath.fileName || "image.jpeg"
+      };
+      // console.log("토큰", token, schoolId);
+      // const formData = {
+      //   schoolId: schoolId,
+      //   grade: grade,
+      //   className: className,
+      //   fullName: fullName,
+      //   isClassPublic: isClassPublic,
+      //   isTimetablePublic: isTimetablePublic,
+      //   profileImage: file,
+      //   backgroundImage: null
+      // };
+      const formData = new FormData();
+      formData.append("schoolId", schoolId);
+      formData.append("grade", grade);
+      formData.append("className", className);
+      formData.append("fullName", fullName);
+      formData.append("isClassPublic", isClassPublic);
+      formData.append("isTimetablePublic", isTimetablePublic);
+      formData.append("profileImage", photo);
+      console.log("form", photo.uri);
+      const response = await axios.patch("https://b-site.site/user", formData, {
+        headers: {
+          accept: "application/json",
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`
+        }
+      });
+    } catch (error) {
+      console.error("Upload error:", error);
+    }
+  };
   const profileInfo = [
     { label: "이름", value: fullName },
     { label: "학교", value: schoolName },
     { label: "학년 반", value: `${grade}학년 ${className}반` }
   ];
 
-  const updateUserProfileImages = async (profileImage?: any, backgroundImage?: any) => {
-    // console.log("update 진입", profileImage, "   ", backgroundImage);
-
-    // 이미지를 Base64로 변환하는 함수
-    // const convertToBase64 = async (uri: string) => {
-    //   const newUri = uri.replace("file:", "");
-    //   try {
-    //     const base64Data = await RNFetchBlob.fs.readFile(newUri, "base64");
-    //     return base64Data; // 변환된 Base64 문자열 반환
-    //   } catch (error) {
-    //     console.error("Error reading file: ", error);
-    //   }
-    // };
-
-    // 이미지 파일 추가
-    let payload: any = {};
-
-    if (profileImage) {
-      const base64ProfileImage = await profileImage;
-      payload.profileImage = base64ProfileImage; // Base64 문자열 추가
-    }
-
-    if (backgroundImage) {
-      const base64BackgroundImage = await backgroundImage;
-      payload.backgroundImage = base64BackgroundImage; // Base64 문자열 추가
-    }
-
-    try {
-      console.log("payload", payload);
-      const response = await axios.patch("https://b-site.site/user", payload, {
-        headers: {
-          accept: "application/json",
-          Authorization: `Bearer ${token}` // 실제 토큰으로 교체
-        }
-      });
-
-      console.log("Profile images updated successfully:", response.data);
-    } catch (error: any) {
-      console.error("Error updating profile images:", error.response ? error.response.data : error.message);
-    }
-  };
   const handleImagePress = () => {
     navigation.navigate("ImagePickerScreen");
   };
