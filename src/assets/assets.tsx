@@ -32,5 +32,6 @@ export const English = require("../assets/images/English.png");
 export const Korean = require("../assets/images/Korean.png");
 export const Physics = require("../assets/images/Physics.png");
 export const Earth = require("../assets/images/Earth.png");
+export const SendIcon = require("../assets/images/send_icon.png");
 //test
 export const DummyProfile = require("../assets/images/dummyprofile.png");
