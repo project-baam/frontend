@@ -39,6 +39,7 @@ interface FormattedItem {
     type: string;
     dayOfWeek: string;
     time: string;
+    subjectName: string | null;
   }[];
 }
 

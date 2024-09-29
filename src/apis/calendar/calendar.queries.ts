@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { addAgenda, deleteAgenda, getAgenda, updateAgenda } from "./calendar.apis";
+import { addAgenda, deleteAgenda, getAgenda, getSubject, updateAgenda } from "./calendar.apis";
 import { AddAgendaData, AgendaData } from "./calendar.type";
 
 export const useGetAgenda = ({ year, month }: AgendaData) => {
@@ -24,5 +24,12 @@ export const useUpdateAgenda = () => {
 export const useDeleteAgenda = () => {
   return useMutation({
     mutationFn: (data: string) => deleteAgenda(data)
+  });
+};
+
+export const useGetSubject = () => {
+  return useQuery({
+    queryKey: ["getSubject"],
+    queryFn: () => getSubject()
   });
 };

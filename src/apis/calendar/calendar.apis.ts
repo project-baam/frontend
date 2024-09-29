@@ -24,3 +24,9 @@ export const deleteAgenda = async (id: string) => {
   const response = await customAxios.delete(`/calendar/${id}`);
   return response.data;
 };
+
+// 수강 과목 조회 API
+export const getSubject = async () => {
+  const response = await customAxios.get("timetable/subjects");
+  return response.data;
+};
