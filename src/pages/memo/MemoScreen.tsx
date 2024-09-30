@@ -3,7 +3,8 @@ import { View, Text, ScrollView, SafeAreaView, Image, TouchableOpacity } from "r
 import styled from "@emotion/native";
 import axios from "axios";
 import { AddMemoIcon, TodayTodoImg, ChevronRight } from "../../assets/assets";
-import { subjectList } from "../../store/subjectList";
+import { subjectList } from "../../utils/SubjectUtil";
+import { getSubjectColorType } from "../../utils/SubjectUtil";
 import useAuthStore from "../../store/UserAuthStore";
 import ChatRooms from "./ChatRooms";
 
@@ -19,24 +20,7 @@ type SubjectMemos = {
   subjectName: string;
   memos: Memo[];
 };
-function getSubjectColor(subject: string): string {
-  const subjectColor: { [key: string]: string } = {
-    국어: "rgba(207, 186, 240, 0.1)",
-    수학: "rgba(126, 183, 251, 0.1)",
-    영어: "rgba(85, 196, 224, 0.1)",
-    과학: "rgba(181, 197, 255, 0.1)",
-    사회: "rgba(81, 202, 129, 0.1)",
-    "체육﹒예술": "rgba(249, 136, 136, 0.1)",
-    제2외국어: "rgba(247, 217, 120, 0.1)",
-    기타: "rgba(246, 199, 167, 0.1)",
-    "그 외": "rgba(255, 186, 190, 0.1)"
-  };
-  return subjectColor[subject];
-}
-function getSubjectType(sj: string) {
-  const subject = subjectList[sj];
-  return getSubjectColor(subject);
-}
+
 function formatDate() {
   const today = new Date();
 
@@ -135,7 +119,7 @@ function MemoScreen({ navigation, route }: any) {
 
         {/* 과목별 메모 */}
         {subjectMemos.map((subjectMemo, index) => (
-          <MemoSection bgColor={getSubjectType(subjectMemo.subjectName)} key={index}>
+          <MemoSection bgColor={getSubjectColorType(subjectMemo.subjectName)} key={index}>
             <SectionTitle>{subjectMemo.subjectName}</SectionTitle>
             <HorizontalScrollView horizontal showsHorizontalScrollIndicator={false}>
               {subjectMemo.memos.map((memo) => (
