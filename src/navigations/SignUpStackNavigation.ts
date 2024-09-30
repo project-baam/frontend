@@ -2,7 +2,7 @@ export type SignUpStackParamList = {
   LoginPage: undefined;
   KakaoLoginPage: undefined;
   KakaoLoginRedirect: {
-    token: string;
+    code: string;
   };
   SelectSchool: undefined;
   SchoolInfoForm: undefined;

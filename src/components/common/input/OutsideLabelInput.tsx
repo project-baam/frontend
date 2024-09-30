@@ -9,6 +9,8 @@ interface OutSideLabelInputProps extends TextInputProps {
   value: any;
   onUpdateValue?: (text: any) => void;
   onClear?: () => void;
+  error: boolean;
+  msg?: string;
 }
 
 export default function OutSideLabelInput({
@@ -17,13 +19,21 @@ export default function OutSideLabelInput({
   value,
   onUpdateValue,
   onClear,
+  error = false,
+  msg,
   ...props
 }: OutSideLabelInputProps) {
   return (
     <S.RootContainer>
       <S.StyledLabel>{label}</S.StyledLabel>
       <S.InnerContainer>
-        <S.StyledTextInput placeholder={placeholder} value={value} onChangeText={onUpdateValue} {...props} />
+        <S.StyledTextInput
+          placeholder={placeholder}
+          value={value}
+          onChangeText={onUpdateValue}
+          error={error}
+          {...props}
+        />
         {value.length > 0 && onClear && (
           <S.ButtonContainer>
             <IconButton
@@ -46,6 +56,11 @@ export default function OutSideLabelInput({
           </S.ButtonContainer>
         )}
       </S.InnerContainer>
+      {error && (
+        <S.CaptionContainer>
+          <S.Caption>{msg}</S.Caption>
+        </S.CaptionContainer>
+      )}
     </S.RootContainer>
   );
 }

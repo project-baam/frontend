@@ -139,6 +139,8 @@ function Router() {
             const refreshToken = response.data.refreshToken;
             AsyncStorage.setItem("refreshToken", refreshToken);
             AsyncStorage.setItem("accessToken", accessToken);
+
+            setRefreshToken(refreshToken);
             setToken(accessToken);
             setIsAuthenticated(true);
           })

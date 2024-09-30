@@ -1,15 +1,18 @@
 import styled from "@emotion/native";
 import { Theme } from "../../styles/theme";
 import OutSideLabelInput from "../../components/common/input/OutsideLabelInput";
-import { Pressable, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { StackScreenProps } from "@react-navigation/stack";
 import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
 import useUserStore from "../../store/UserStore";
+import { useState } from "react";
 
 type UserNameFormProps = StackScreenProps<SignUpStackParamList, "UserNameForm">;
 
 export default function UserNameForm({ navigation }: UserNameFormProps) {
   const { fullName, setFullName } = useUserStore((state) => state);
+
+  const [validate, setValidate] = useState(true);
 
   let active = false;
 
@@ -17,12 +20,24 @@ export default function UserNameForm({ navigation }: UserNameFormProps) {
     active = true;
   }
 
+  const submitHandler = () => {
+    // 유효성 검사
+    const regex = /^[가-힣a-zA-Z]{1,10}$/;
+
+    if (!regex.test(fullName)) {
+      setValidate(false);
+      return;
+    } else {
+      setValidate(true);
+      navigation.navigate("UserProfileForm");
+    }
+  };
+
   return (
     <RootContainer>
       <TextContainer>
-        <Title>실명을 입력해주세요.</Title>
-        <SubTitle style={{ marginTop: 8 }}>실명을 입력하지 않을 경우</SubTitle>
-        <SubTitle>서비스 이용에 제한이 있을 수 있어요.</SubTitle>
+        <Title>이름을 알려줄래?</Title>
+        <SubTitle style={{ marginTop: 8 }}>친구들이 나를 쉽게 찾을 수 있게 도와줘!</SubTitle>
       </TextContainer>
       <OutSideLabelInput
         placeholder="실명"
@@ -31,11 +46,13 @@ export default function UserNameForm({ navigation }: UserNameFormProps) {
           setFullName("");
         }}
         onUpdateValue={setFullName}
+        error={!validate}
+        msg={"이름을 다시 입력해주세요!"}
       />
       <ButtonContainer active={active}>
         <Pressable
           onPress={() => {
-            navigation.navigate("UserProfileForm");
+            submitHandler();
           }}
           disabled={!active}
         >

@@ -8,7 +8,7 @@ import useAuthStore from "../../store/UserAuthStore";
 type KakaoLoginRedirectProps = StackScreenProps<SignUpStackParamList, "KakaoLoginRedirect">;
 
 export default function KakaoLoginRedirect({ navigation, route }: KakaoLoginRedirectProps) {
-  const code = route.params.token;
+  const code = route.params.code;
 
   const { setAccessToken } = useUserStore((state) => state);
   const { setToken, setRefreshToken } = useAuthStore();
