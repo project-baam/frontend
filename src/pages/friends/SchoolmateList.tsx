@@ -8,7 +8,10 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import Chip from "../../components/common/Chip";
 import useAuthStore from "../../store/UserAuthStore";
+
 import { IconSearch } from "../../assets/assets";
+
+import { getSubjectType } from "@/utils/SubjectUtil";
 type NavigationProps = StackNavigationProp<FriendsStackParamList, "FriendProfile">;
 const filterList = [
   {
@@ -37,12 +40,14 @@ const filterList = [
     isSelected: false
   }
 ];
+
 interface schoolmate {
   userId: number;
   fullName: string;
   profileImage: string;
   grade: number;
   isFavorite: boolean;
+  activeClassNow: string;
 }
 interface schoolmateList {
   list: schoolmate[];
@@ -160,7 +165,7 @@ export default function SchoolFriends() {
       >
         <TouchableOpacity>
           <Chip
-            borderRadius="circle"
+            borderRadiusType="circle"
             children="필터"
             textColor="#7b7b7b"
             size="medium"
@@ -170,7 +175,7 @@ export default function SchoolFriends() {
         {filterList.map((filter) => (
           <TouchableOpacity key={filter.id} onPress={() => handleFilterSelect(filter.grade)}>
             <Chip
-              borderRadius="circle"
+              borderRadiusType="circle"
               children={filter.grade}
               backGroundColor={selectedFilter === filter.grade ? "#8A7EFF33" : "#f0f0f0"}
               textColor={selectedFilter === filter.grade ? "#8A7EFF" : "#7b7b7b"}
@@ -193,7 +198,48 @@ export default function SchoolFriends() {
               }
             >
               {item.profileImage ? (
-                <Avatar source={{ uri: item.profileImage }} />
+                <>
+                  {/* <Image source={getSubjectType(item.activeClassNow)} style={{ width: 40, height: 40 }} /> */}
+
+                  <Avatar source={{ uri: item.profileImage }} />
+
+                  <View
+                    style={{
+                      position: "absolute",
+                      left: 32,
+                      top: -2,
+                      width: 24,
+                      height: 24,
+                      zIndex: 900,
+                      borderColor: "#E9E9E9",
+                      borderWidth: 1,
+                      borderRadius: 25,
+                      backgroundColor: "#fff",
+                      justifyContent: "center",
+                      alignItems: "center"
+                    }}
+                  >
+                    {item.activeClassNow ? (
+                      <Image
+                        source={getSubjectType(item.activeClassNow)}
+                        style={{
+                          width: 16,
+                          height: 16,
+                          zIndex: 1000
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        source={getSubjectType("기타")}
+                        style={{
+                          width: 16,
+                          height: 16,
+                          zIndex: 1000
+                        }}
+                      />
+                    )}
+                  </View>
+                </>
               ) : (
                 <View
                   style={{
@@ -205,6 +251,42 @@ export default function SchoolFriends() {
                     borderWidth: 2
                   }}
                 >
+                  <View
+                    style={{
+                      position: "absolute",
+                      right: -10,
+                      top: -10,
+                      width: 24,
+                      height: 24,
+                      zIndex: 900,
+                      borderColor: "#E9E9E9",
+                      borderWidth: 1,
+                      borderRadius: 25,
+                      backgroundColor: "#fff",
+                      justifyContent: "center",
+                      alignItems: "center"
+                    }}
+                  >
+                    {item.activeClassNow ? (
+                      <Image
+                        source={getSubjectType(item.activeClassNow)}
+                        style={{
+                          width: 16,
+                          height: 16,
+                          zIndex: 1000
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        source={getSubjectType("기타")}
+                        style={{
+                          width: 16,
+                          height: 16,
+                          zIndex: 1000
+                        }}
+                      />
+                    )}
+                  </View>
                   <Text
                     style={{
                       position: "absolute",
