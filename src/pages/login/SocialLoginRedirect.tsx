@@ -4,10 +4,12 @@ import { useEffect } from "react";
 import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
 import useUserStore from "../../store/UserStore";
 import useAuthStore from "../../store/UserAuthStore";
+import { jwtDecode } from "jwt-decode";
 
-type KakaoLoginRedirectProps = StackScreenProps<SignUpStackParamList, "KakaoLoginRedirect">;
+type SocialLoginRedirectProps = StackScreenProps<SignUpStackParamList, "SocialLoginRedirect">;
 
-export default function KakaoLoginRedirect({ navigation, route }: KakaoLoginRedirectProps) {
+export default function SocialLoginRedirect({ navigation, route }: SocialLoginRedirectProps) {
+  const provider = route.params.provider;
   const code = route.params.code;
 
   const { setAccessToken } = useUserStore((state) => state);
@@ -15,7 +17,7 @@ export default function KakaoLoginRedirect({ navigation, route }: KakaoLoginRedi
   useEffect(() => {
     const requestBody = {
       code: code,
-      provider: "kakao"
+      provider: provider
     };
 
     fetch(`https://b-site.site/authentication`, {

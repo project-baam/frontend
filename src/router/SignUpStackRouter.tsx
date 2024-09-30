@@ -3,7 +3,7 @@ import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { SignUpStackParamList } from "../navigations/SignUpStackNavigation";
 import LoginPage from "../pages/login/LoginPage";
 import KakaoLoginPage from "../pages/login/KakaoLoginPage";
-import KakaoLoginRedirect from "../pages/login/KakaoLoginRedirect";
+import KakaoLoginRedirect from "../pages/login/SocialLoginRedirect";
 import SelectSchool from "../pages/login/SelectSchool";
 import { Theme } from "../styles/theme";
 import { Pressable } from "react-native";
@@ -11,6 +11,7 @@ import styled from "@emotion/native";
 import SchoolInfoForm from "../pages/login/SchoolInfoForm";
 import UserProfileForm from "../pages/login/UserProfileForm";
 import UserNameForm from "../pages/login/UserNameForm";
+import SocialLoginRedirect from "../pages/login/SocialLoginRedirect";
 
 const Stack = createNativeStackNavigator<SignUpStackParamList>();
 
@@ -36,7 +37,7 @@ export default function SignUpStackRouter() {
     >
       <Stack.Screen name="LoginPage" component={LoginPage} options={{ headerShown: false }} />
       <Stack.Screen name="KakaoLoginPage" component={KakaoLoginPage} options={{ headerShown: false }} />
-      <Stack.Screen name="KakaoLoginRedirect" component={KakaoLoginRedirect} options={{ headerShown: false }} />
+      <Stack.Screen name="SocialLoginRedirect" component={SocialLoginRedirect} options={{ headerShown: false }} />
       <Stack.Screen
         name="SelectSchool"
         component={SelectSchool}

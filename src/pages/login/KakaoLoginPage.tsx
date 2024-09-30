@@ -17,7 +17,7 @@ export default function KakaoLoginPage({ navigation }: KakaoLoginPageProps) {
           if (!navState.loading && navState.url.includes("authentication/kakao/callback")) {
             const code = navState.url.split("code=")[1];
             if (code) {
-              navigation.navigate("KakaoLoginRedirect", { code });
+              navigation.navigate("SocialLoginRedirect", { code: code, provider: "kakao" });
             } else {
               console.log("Code not found in URL.");
             }

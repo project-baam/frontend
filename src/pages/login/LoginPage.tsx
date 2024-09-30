@@ -1,4 +1,4 @@
-import { Image, Pressable } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import * as S from "./styles";
 import { AnimatedLogoImage, AppleImg, KakaoImg } from "../../assets/assets";
 import { StackScreenProps } from "@react-navigation/stack";
@@ -8,12 +8,56 @@ import appleAuth from "@invertase/react-native-apple-authentication";
 import useAuthStore from "@/store/UserAuthStore";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LoadingOverlay from "@/components/common/ui/LoadingOverlay";
 
 type LoginPageProps = StackScreenProps<SignUpStackParamList, "LoginPage">;
 
 export default function LoginPage({ navigation }: LoginPageProps) {
+  let user: any = null;
+
+  const [credentialStateForUser, updateCredentialStateForUser] = useState<any>(-1);
+
+  async function fetchAndUpdateCredentialState(updateCredentialStateForUser: any) {
+    if (user === null) {
+      updateCredentialStateForUser("N/A");
+    } else {
+      const credentialState = await appleAuth.getCredentialStateForUser(user);
+      if (credentialState === appleAuth.State.AUTHORIZED) {
+        updateCredentialStateForUser("AUTHORIZED");
+      } else {
+        updateCredentialStateForUser(credentialState);
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (!appleAuth.isSupported) return;
+
+    fetchAndUpdateCredentialState(updateCredentialStateForUser).catch((error) =>
+      updateCredentialStateForUser(`Error: ${error.code}`)
+    );
+  }, []);
+
+  useEffect(() => {
+    if (!appleAuth.isSupported) return;
+
+    return appleAuth.onCredentialRevoked(async () => {
+      console.warn("Credential Revoked");
+      fetchAndUpdateCredentialState(updateCredentialStateForUser).catch((error) =>
+        updateCredentialStateForUser(`Error: ${error.code}`)
+      );
+    });
+  }, []);
+
+  if (!appleAuth.isSupported) {
+    return (
+      <View style={[styles.container, styles.horizontal]}>
+        <Text>Apple Authentication is not supported on this device.</Text>
+      </View>
+    );
+  }
+
   const { setRefreshToken, setToken, setIsAuthenticated } = useAuthStore();
 
   const [isTryingLogin, setIsTryingLogin] = useState(false);
@@ -61,21 +105,43 @@ export default function LoginPage({ navigation }: LoginPageProps) {
     return <LoadingOverlay />;
   }
 
-  async function handleSignInApple() {
-    console.log("click");
-    // performs login request
-    const appleAuthRequestResponse = await appleAuth.performRequest({
-      requestedOperation: appleAuth.Operation.LOGIN,
-      // Note: it appears putting FULL_NAME first is important, see issue #293
-      requestedScopes: [appleAuth.Scope.FULL_NAME, appleAuth.Scope.EMAIL]
-    });
-    // get current authentication state for user
-    // /!\ This method must be tested on a real device. On the iOS simulator it always throws an error.
-    const credentialState = await appleAuth.getCredentialStateForUser(appleAuthRequestResponse.user);
-    console.log(credentialState);
+  async function handleSignInApple(updateCredentialStateForUser: any) {
+    console.warn("Beginning Apple Authentication");
 
-    // use credentialState response to ensure the user is authenticated
-    if (credentialState === appleAuth.State.AUTHORIZED) {
+    // start a login request
+    try {
+      const appleAuthRequestResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME]
+      });
+
+      console.log("appleAuthRequestResponse", appleAuthRequestResponse);
+
+      const { user: newUser, email, nonce, identityToken, realUserStatus /* etc */ } = appleAuthRequestResponse;
+
+      user = newUser;
+
+      fetchAndUpdateCredentialState(updateCredentialStateForUser).catch((error) =>
+        updateCredentialStateForUser(`Error: ${error.code}`)
+      );
+
+      if (identityToken) {
+        navigation.navigate("SocialLoginRedirect", { code: identityToken, provider: "apple" });
+      } else {
+        // no token - failed sign-in?
+      }
+
+      if (realUserStatus === appleAuth.UserStatus.LIKELY_REAL) {
+        console.log("I'm a real person!");
+      }
+
+      console.warn(`Apple Authentication Completed, ${user}, ${email}`);
+    } catch (error: any) {
+      if (error.code === appleAuth.Error.CANCELED) {
+        console.warn("User canceled Apple Sign in.");
+      } else {
+        console.error(error);
+      }
     }
   }
 
@@ -100,7 +166,11 @@ export default function LoginPage({ navigation }: LoginPageProps) {
             <S.PrimaryButtonText>카카오로 로그인</S.PrimaryButtonText>
           </S.PrimaryButtonContainer>
         </Pressable>
-        <Pressable onPress={handleSignInApple}>
+        <Pressable
+          onPress={() => {
+            handleSignInApple(updateCredentialStateForUser);
+          }}
+        >
           <S.SecondaryButtonContainer>
             <Image source={AppleImg} style={{ width: 20, height: 24 }} />
             <S.SecondaryButtonText>애플로 로그인</S.SecondaryButtonText>
@@ -110,3 +180,28 @@ export default function LoginPage({ navigation }: LoginPageProps) {
     </S.RootContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  appleButton: {
+    width: 200,
+    height: 60,
+    margin: 10
+  },
+  header: {
+    margin: 10,
+    marginTop: 30,
+    fontSize: 18,
+    fontWeight: "600"
+  },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "pink"
+  },
+  horizontal: {
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10
+  }
+});
