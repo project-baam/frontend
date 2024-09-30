@@ -20,11 +20,14 @@ export default function UserNameForm({ navigation }: UserNameFormProps) {
     active = true;
   }
 
+  const koreanRegex = new RegExp(`^[가-힣\\s]{1,10}$`);
+  const englishRegex = new RegExp(`^[a-zA-Z\\s]{1,20}$`);
+
   const submitHandler = () => {
     // 유효성 검사
     const regex = /^[가-힣a-zA-Z]{1,10}$/;
 
-    if (!regex.test(fullName)) {
+    if (!koreanRegex.test(fullName) && !englishRegex.test(fullName)) {
       setValidate(false);
       return;
     } else {
