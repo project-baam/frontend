@@ -23,7 +23,7 @@ export const StyledLabel = styled.Text`
   ${Theme.typo.Label_01};
 `;
 
-export const StyledTextInput = styled.TextInput`
+export const StyledTextInput = styled.TextInput<{ error: boolean }>`
   width: 100%;
   height: 50px;
   background-color: ${Theme.colors.Gray100};
@@ -31,6 +31,7 @@ export const StyledTextInput = styled.TextInput`
   color: ${Theme.colors.Gray900};
   border-radius: 12px;
   ${Theme.typo.Body_03_Regular};
+  border: ${({ error }) => error && "1px solid #F92626"};
 `;
 
 export const IRootContainer = styled.View`
@@ -59,4 +60,10 @@ export const IStyledTextInput = styled.TextInput`
 export const IButtonContainer = styled.View`
   position: absolute;
   left: 90%;
+`;
+
+export const CaptionContainer = styled.View``;
+export const Caption = styled.Text`
+  ${Theme.typo.Caption_01};
+  color: #f92626;
 `;
