@@ -2,25 +2,11 @@ import React, { useEffect, useState } from "react";
 import styled from "@emotion/native";
 import { View, Text, Image, ScrollView, SafeAreaView, TouchableOpacity, ImageBackground } from "react-native";
 import { VectorLeft } from "../../assets/assets";
-import { Star01, Star02, Hamburger, White, Math, Korean, English, Physics, Earth } from "../../assets/assets";
+import { Star01, Star02, Hamburger, White } from "../../assets/assets";
 import axios from "axios";
 import useUserStore from "../../store/UserStore";
 import useAuthStore from "../../store/UserAuthStore";
-import { subjectList } from "../../store/subjectList";
-function getSubjectIcon(subject: string): string {
-  const subjectIcon: { [key: string]: string } = {
-    국어: Korean,
-    수학: Math,
-    영어: English,
-    과학: Physics,
-    사회: Earth
-  };
-  return subjectIcon[subject];
-}
-function getSubjectType(sj: string) {
-  const subject = subjectList[sj];
-  return getSubjectIcon(subject);
-}
+import { getSubjectType } from "@/utils/SubjectUtil";
 
 interface timetable {
   day: number;
