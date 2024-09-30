@@ -4,9 +4,14 @@ import { HomeStackParamList } from "../../navigations/HomeStackNavigation";
 import { Theme } from "../../styles/theme";
 import styled from "@emotion/native";
 import DateCarousel from "../../components/home/DateCarousel";
+import useUserStore from "@/store/UserStore";
+import { useMeal } from "@/hooks/useMeals";
+import MealInfo from "@/components/home/MealInfo";
 
 function HomeScreen() {
   const navigation = useNavigation<NavigationProp<HomeStackParamList>>();
+  const { schoolId } = useUserStore();
+  const { meals, isLoading, error } = useMeal(schoolId, new Date().toISOString().split("T")[0]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -32,7 +37,6 @@ function HomeScreen() {
             </AddTimeTableButton>
           </EmptyTimeTableBox>
         </Section>
-
         <Section>
           <SectionHeader>
             <SectionHeaderTitle>친한 친구들</SectionHeaderTitle>
@@ -68,24 +72,27 @@ function HomeScreen() {
           </FriendList>
           {/* <EmptyFriendsLabel>친한 친구들을 추가해보세요!</EmptyFriendsLabel> */}
         </Section>
-
-        <Section>
-          <SectionHeader>
-            <SectionHeaderTitle>오늘의 급식</SectionHeaderTitle>
-            <Pressable>
-              <CustomImage
-                source={require("../../assets/images/btn_left.png")}
-                style={{ transform: [{ scaleX: -1 }] }}
-              />
-            </Pressable>
-          </SectionHeader>
-        </Section>
+        {schoolId !== null ? (
+          <Section>
+            <SectionHeader>
+              <SectionHeaderTitle>오늘의 급식</SectionHeaderTitle>
+            </SectionHeader>
+            <MealInfo meals={meals} isLoading={isLoading} error={error} />
+          </Section>
+        ) : (
+          <Section>
+            <SectionHeader>
+              <SectionHeaderTitle>오늘의 급식</SectionHeaderTitle>
+            </SectionHeader>
+            <EmptyMealLabel>학교 정보가 없습니다.</EmptyMealLabel>
+          </Section>
+        )}
       </Container>
     </SafeAreaView>
   );
 }
 
-const Container = styled(View)`
+export const Container = styled(View)`
   flex: 1;
   align-items: center;
   gap: 20px;
@@ -98,14 +105,14 @@ const Section = styled(View)`
   align-items: center;
 `;
 
-const SectionHeader = styled(View)`
+export const SectionHeader = styled(View)`
   width: 100%;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
 `;
 
-const SectionHeaderTitle = styled(Text)`
+export const SectionHeaderTitle = styled(Text)`
   font-style: ${Theme.typo.Body_04};
 `;
 
@@ -144,7 +151,7 @@ const EmptyFriendsLabel = styled(Text)`
   padding: 20px 0;
 `;
 
-const CustomImage = styled(Image)`
+export const CustomImage = styled(Image)`
   width: 32px;
   height: 32px;
 `;
@@ -168,6 +175,12 @@ const Avatar = styled.View`
 const AvatarText = styled.Text`
   font-style: ${Theme.typo.Body_04_Bold};
   color: ${Theme.colors.Gray700};
+`;
+
+const EmptyMealLabel = styled(Text)`
+  font-style: ${Theme.typo.Body_04};
+  color: ${Theme.colors.Gray600};
+  padding: 20px 0;
 `;
 
 export default HomeScreen;
