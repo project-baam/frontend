@@ -7,6 +7,8 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import useAuthStore from "../../store/UserAuthStore";
 import { IconSearch } from "../../assets/assets";
+
+import { getSubjectType } from "@/utils/SubjectUtil";
 type NavigationProps = StackNavigationProp<FriendsStackParamList, "FriendProfile">;
 
 interface schoolmate {
@@ -135,7 +137,45 @@ export default function FriendsList() {
               }
             >
               {friend.profileImage ? (
-                <Avatar source={{ uri: friend.profileImage }} />
+                <>
+                  <Avatar source={{ uri: friend.profileImage }} />
+                  <View
+                    style={{
+                      position: "absolute",
+                      left: 32,
+                      top: -2,
+                      width: 24,
+                      height: 24,
+                      zIndex: 900,
+                      borderColor: "#E9E9E9",
+                      borderWidth: 1,
+                      borderRadius: 25,
+                      backgroundColor: "#fff",
+                      justifyContent: "center",
+                      alignItems: "center"
+                    }}
+                  >
+                    {friend.activeClassNow ? (
+                      <Image
+                        source={getSubjectType(friend.activeClassNow)}
+                        style={{
+                          width: 16,
+                          height: 16,
+                          zIndex: 1000
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        source={getSubjectType("기타")}
+                        style={{
+                          width: 16,
+                          height: 16,
+                          zIndex: 1000
+                        }}
+                      />
+                    )}
+                  </View>
+                </>
               ) : (
                 <View
                   style={{
@@ -147,6 +187,42 @@ export default function FriendsList() {
                     borderWidth: 2
                   }}
                 >
+                  <View
+                    style={{
+                      position: "absolute",
+                      right: -10,
+                      top: -10,
+                      width: 24,
+                      height: 24,
+                      zIndex: 900,
+                      borderColor: "#E9E9E9",
+                      borderWidth: 1,
+                      borderRadius: 25,
+                      backgroundColor: "#fff",
+                      justifyContent: "center",
+                      alignItems: "center"
+                    }}
+                  >
+                    {friend.activeClassNow ? (
+                      <Image
+                        source={getSubjectType(friend.activeClassNow)}
+                        style={{
+                          width: 16,
+                          height: 16,
+                          zIndex: 1000
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        source={getSubjectType("기타")}
+                        style={{
+                          width: 16,
+                          height: 16,
+                          zIndex: 1000
+                        }}
+                      />
+                    )}
+                  </View>
                   <Text
                     style={{
                       position: "absolute",
@@ -173,56 +249,6 @@ export default function FriendsList() {
           <Text>No friends found</Text>
         )}
         <SectionTitle>전체</SectionTitle>
-        {/* <FlatList
-          data={friends.list}
-          renderItem={({ item }) => (
-            <FriendItem
-              onPress={() =>
-                navigation.navigate("FriendProfile", {
-                  userId: item.userId
-                })
-              }
-            >
-              {item.profileImage ? (
-                <Avatar source={{ uri: item.profileImage }} />
-              ) : (
-                <View
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 25,
-                    marginRight: 12,
-                    borderColor: getRandomColor(item.userId),
-                    borderWidth: 2
-                  }}
-                >
-                  <Text
-                    style={{
-                      position: "absolute",
-                      top: "30%",
-                      left: "20%",
-                      fontSize: 16,
-                      lineHeight: 20,
-                      fontWeight: "500",
-                      fontFamily: "Esamanru OTF",
-                      color: getRandomColor(item.userId)
-                    }}
-                  >
-                    {item.fullName.slice(-2)}
-                  </Text>
-                </View>
-              )}
-              <FriendInfo>
-                <FriendName>{item.fullName}</FriendName>
-                 <FriendGrade>{item.grade}학년</FriendGrade>
-              </FriendInfo>
-            </FriendItem>
-          )}
-          keyExtractor={(item) => item.userId.toString()}
-          onEndReached={handleEndReached}
-          onEndReachedThreshold={0.5} // 스크롤이 리스트의 50% 지점에 도달했을 때 fetchMoreData 호출
-          ListFooterComponent={loading ? <Text>Loading...</Text> : null}
-        /> */}
         {friends.list && friends.list.length > 0 ? (
           friends.list.map((friend) => (
             <FriendItem
@@ -234,7 +260,45 @@ export default function FriendsList() {
               }
             >
               {friend.profileImage ? (
-                <Avatar source={{ uri: friend.profileImage }} />
+                <>
+                  <Avatar source={{ uri: friend.profileImage }} />
+                  <View
+                    style={{
+                      position: "absolute",
+                      left: 32,
+                      top: -2,
+                      width: 24,
+                      height: 24,
+                      zIndex: 900,
+                      borderColor: "#E9E9E9",
+                      borderWidth: 1,
+                      borderRadius: 25,
+                      backgroundColor: "#fff",
+                      justifyContent: "center",
+                      alignItems: "center"
+                    }}
+                  >
+                    {friend.activeClassNow ? (
+                      <Image
+                        source={getSubjectType(friend.activeClassNow)}
+                        style={{
+                          width: 16,
+                          height: 16,
+                          zIndex: 1000
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        source={getSubjectType("기타")}
+                        style={{
+                          width: 16,
+                          height: 16,
+                          zIndex: 1000
+                        }}
+                      />
+                    )}
+                  </View>
+                </>
               ) : (
                 <View
                   style={{
@@ -246,6 +310,42 @@ export default function FriendsList() {
                     borderWidth: 2
                   }}
                 >
+                  <View
+                    style={{
+                      position: "absolute",
+                      right: -10,
+                      top: -10,
+                      width: 24,
+                      height: 24,
+                      zIndex: 900,
+                      borderColor: "#E9E9E9",
+                      borderWidth: 1,
+                      borderRadius: 25,
+                      backgroundColor: "#fff",
+                      justifyContent: "center",
+                      alignItems: "center"
+                    }}
+                  >
+                    {friend.activeClassNow ? (
+                      <Image
+                        source={getSubjectType(friend.activeClassNow)}
+                        style={{
+                          width: 16,
+                          height: 16,
+                          zIndex: 1000
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        source={getSubjectType("기타")}
+                        style={{
+                          width: 16,
+                          height: 16,
+                          zIndex: 1000
+                        }}
+                      />
+                    )}
+                  </View>
                   <Text
                     style={{
                       position: "absolute",
