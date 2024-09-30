@@ -27,11 +27,39 @@ export const TodayTodoImg = require("../assets/images/today_todo.png");
 export const ChevronRight = require("../assets/images/chevron-right.png");
 export const Hamburger = require("../assets/images/hamburger.png");
 export const White = require("../assets/images/white_wallpaper.jpg");
-export const Math = require("../assets/images/Math.png");
+export const SendIcon = require("../assets/images/send_icon.png");
+
+//과목
+
+export const MathIcon = require("../assets/images/Math.png");
 export const English = require("../assets/images/English.png");
 export const Korean = require("../assets/images/Korean.png");
+
 export const Physics = require("../assets/images/Physics.png");
-export const Earth = require("../assets/images/Earth.png");
-export const SendIcon = require("../assets/images/send_icon.png");
+export const Geoscience = require("../assets/images/Geoscience.png");
+export const Chemistry = require("../assets/images/Chemistry.png");
+export const Biological = require("../assets/images/Biological.png");
+export const Science = require("../assets/images/Science.png");
+
+export const Geography = require("../assets/images/Geography.png");
+export const Economy = require("../assets/images/Economy.png");
+export const Law = require("../assets/images/Law.png");
+export const Society = require("../assets/images/Society.png");
+
+export const PE = require("../assets/images/PhysicalEducation.png");
+export const Music = require("../assets/images/Music.png");
+export const Art = require("../assets/images/Art.png");
+
+export const Chinese = require("../assets/images/Chinese.png");
+export const Japanese = require("../assets/images/Japanese.png");
+export const German = require("../assets/images/German.png");
+export const French = require("../assets/images/French.png");
+export const Spanish = require("../assets/images/Spanish.png");
+export const Russian = require("../assets/images/Russian.png");
+export const Arabic = require("../assets/images/Arabic.png");
+export const Vietnamese = require("../assets/images/Vietnamese.png");
+
+export const ETC = require("../assets/images/etc.png");
+
 //test
 export const DummyProfile = require("../assets/images/dummyprofile.png");
