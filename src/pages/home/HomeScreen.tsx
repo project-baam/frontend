@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { SafeAreaView, Pressable, ScrollView, View, Text, Image } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import styled from "@emotion/native";
 import { useMeal } from "@/hooks/useMeals";
 import MealInfo from "@/components/home/MealInfo";
@@ -27,13 +27,6 @@ const HomeScreen: React.FC = () => {
 
   const navigateToFriendsList = () => {
     navigation.navigate("Friends", { screen: "FriendListScreen" });
-  };
-
-  const navigateToFriendProfile = (userId: number) => {
-    navigation.navigate("Friends", {
-      screen: "FriendProfile",
-      params: { userId }
-    });
   };
 
   const {
@@ -67,10 +60,12 @@ const HomeScreen: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    getUserProfile();
-    refetchFriends();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getUserProfile();
+      refetchFriends(); // 화면에 돌아올 때마다 친구 목록을 다시 불러옴
+    }, [getUserProfile, refetchFriends])
+  );
 
   useEffect(() => {
     refetchMeals();
@@ -109,7 +104,6 @@ const HomeScreen: React.FC = () => {
               error={friendsError}
               onLoadMore={loadMoreFriends}
               hasMore={hasMoreFriends}
-              onNavigateToFriendProfile={navigateToFriendProfile}
               totalCount={totalFavoriteFriends}
             />
           </Section>

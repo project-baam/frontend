@@ -1,9 +1,11 @@
 import React, { useCallback, useState } from "react";
-import { View, Text, Image, Pressable, ScrollView, FlatList, ImageProps } from "react-native";
+import { View, Text, Image, Pressable, FlatList, ImageProps } from "react-native";
 import styled from "@emotion/native";
 import { Theme } from "@/styles/theme";
 import { FavoriteFriend } from "@/apis/favorite-friends/favorite-friends.type";
 import { getSubjectType } from "@/utils/SubjectUtil";
+import { useNavigation } from "@react-navigation/native";
+import { RootNavigationProp } from "@/navigations/RootNavigation";
 
 interface FavoriteFriendsProps {
   friends: FavoriteFriend[];
@@ -12,7 +14,6 @@ interface FavoriteFriendsProps {
   onLoadMore: () => void;
   hasMore: boolean;
   totalCount: number;
-  onNavigateToFriendProfile: (userId: number) => void;
 }
 
 const FavoriteFriends: React.FC<FavoriteFriendsProps> = ({
@@ -21,14 +22,19 @@ const FavoriteFriends: React.FC<FavoriteFriendsProps> = ({
   error,
   onLoadMore,
   hasMore,
-  totalCount,
-  onNavigateToFriendProfile
+  totalCount
 }) => {
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const navigation = useNavigation<RootNavigationProp>();
+  const navigateToFriendProfile = (userId: number) => {
+    navigation.navigate("Friends", {
+      screen: "FriendProfile",
+      params: { userId }
+    });
+  };
 
   const renderFriendItem = useCallback(
-    ({ item, index }: { item: FavoriteFriend; index: number }) => (
-      <FriendItem onPress={() => onNavigateToFriendProfile(item.userId)}>
+    ({ item }: { item: FavoriteFriend }) => (
+      <FriendItem onPress={() => navigateToFriendProfile(item.userId)}>
         {item.profileImage ? (
           <AvatarContainer>
             <Avatar source={{ uri: item.profileImage }} />
@@ -52,16 +58,15 @@ const FavoriteFriends: React.FC<FavoriteFriendsProps> = ({
         )}
       </FriendItem>
     ),
-    [onNavigateToFriendProfile]
+    [navigateToFriendProfile]
   );
 
   const handleLoadMore = useCallback(() => {
-    if (!loading && hasMore && !isLoadingMore) {
-      setIsLoadingMore(true);
+    console.log("handleLoadMore");
+    if (!loading && hasMore) {
       onLoadMore();
-      setIsLoadingMore(false);
     }
-  }, [loading, hasMore, isLoadingMore, onLoadMore]);
+  }, [loading, hasMore, onLoadMore]);
 
   if (loading && friends.length === 0) return <LoadingText>친구 목록을 불러오는 중...</LoadingText>;
   if (error) return <ErrorText>친구 목록을 불러오는데 실패했습니다.</ErrorText>;
@@ -76,9 +81,12 @@ const FavoriteFriends: React.FC<FavoriteFriendsProps> = ({
         horizontal
         showsHorizontalScrollIndicator={false}
         onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={() => (isLoadingMore ? <LoadingText>로딩 중...</LoadingText> : null)}
+        onEndReachedThreshold={0.1} // 스크롤의 10% 지점에서 다음 페이지 로딩
+        ListFooterComponent={() =>
+          hasMore && friends.length < totalCount ? <LoadingText>로딩 중...</LoadingText> : null
+        }
       />
+      {/* {totalCount > 0 && <TotalCountText>전체 친구 수: {totalCount}명</TotalCountText>} */}
     </Container>
   );
 };
@@ -119,7 +127,7 @@ const DefaultAvatarText = styled(Text)`
   color: ${Theme.colors.Gray500};
   font-family: Esamanru OTF;
   font-style: normal;
-  line-height: var(--Line-Height-Default-Head-Head-01, 20px); /* 125% */
+  line-height: 20px;
 `;
 
 const SubjectIcon = styled(View)`
@@ -154,6 +162,7 @@ const EmptyText = styled(Text)`
 const TotalCountText = styled.Text`
   font-style: ${Theme.typo.Body_04};
   color: ${Theme.colors.Gray600};
-  margin-bottom: 8px;
+  margin-top: 8px;
 `;
+
 export default FavoriteFriends;

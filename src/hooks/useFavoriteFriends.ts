@@ -17,6 +17,7 @@ export const useFavoriteFriends = (initialCount: number) => {
       setLoading(true);
       try {
         const { list, total } = await getFavoriteFriends({ count: initialCount, page: pageNum });
+
         setTotalCount(total);
 
         if (pageNum === 0) {
@@ -25,7 +26,8 @@ export const useFavoriteFriends = (initialCount: number) => {
           setFriends((prev) => [...prev, ...list]);
         }
 
-        setHasMore(friends.length + list.length < total);
+        setHasMore((prev) => (pageNum === 0 ? list.length < total : prev));
+        setPage((prevPage) => prevPage + 1);
       } catch (err: any) {
         console.error(err.message);
         console.error(err.stack);
@@ -34,18 +36,18 @@ export const useFavoriteFriends = (initialCount: number) => {
         setLoading(false);
       }
     },
-    [initialCount, friends.length]
+    [initialCount]
   );
 
   const loadMore = useCallback(() => {
-    if (!loading && hasMore) {
-      fetchFriends(page + 1);
+    if (!loading && hasMore && friends.length < totalCount) {
+      fetchFriends(page);
     }
-  }, [loading, hasMore, page, fetchFriends]);
+  }, [loading, hasMore, friends.length, totalCount, fetchFriends]);
 
   useEffect(() => {
     fetchFriends(0);
-  }, []);
+  }, [fetchFriends]);
 
   const refetch = useCallback(() => {
     setHasMore(true);
