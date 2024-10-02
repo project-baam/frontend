@@ -8,7 +8,6 @@ const customAxios: AxiosInstance = axios.create({
     accept: "application/json",
     "Content-Type": "application/json"
   },
-  timeout: 10000,
 });
 
 // AsyncStorage.getItem 함수: 비동기 > 요청 인터셉터로 토큰을 동적 추가

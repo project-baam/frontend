@@ -4,14 +4,16 @@ import { Theme } from "../../styles/theme";
 import styled from "@emotion/native";
 import { MealData } from "@/types/meal";
 import { BtnLeft } from "@/assets/assets";
+import moment, { Moment } from "moment";
 
 interface MealInfoProps {
   meals: MealData[];
   isLoading: boolean;
   error: Error | null;
+  date: Moment;
 }
 
-const MealInfo: React.FC<MealInfoProps> = ({ meals, isLoading, error }) => {
+const MealInfo: React.FC<MealInfoProps> = ({ meals, isLoading, error, date }) => {
   const [currentMealIndex, setCurrentMealIndex] = useState<number>(0);
 
   useEffect(() => {
@@ -45,7 +47,7 @@ const MealInfo: React.FC<MealInfoProps> = ({ meals, isLoading, error }) => {
           <CustomImage source={BtnLeft} style={{ transform: [{ scaleX: -1 }, { rotateY: "180deg" }] }} />
         </ArrowButton>
         <MealContent>
-          <MealTitle>{`${new Date().toLocaleDateString("en-US", {
+          <MealTitle>{`${moment(date).toDate().toLocaleDateString("en-US", {
             month: "2-digit",
             day: "2-digit"
           })} ${currentMeal?.type || mealTypes[currentMealIndex]}`}</MealTitle>

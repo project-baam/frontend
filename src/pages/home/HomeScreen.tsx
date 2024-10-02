@@ -1,12 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { SafeAreaView, Pressable, ScrollView } from "react-native";
-import { NavigationProp, useNavigation, useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useEffect, useState } from "react";
+import { SafeAreaView, Pressable, ScrollView, View, Text, Image } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import styled from "@emotion/native";
 import { useMeal } from "@/hooks/useMeals";
 import MealInfo from "@/components/home/MealInfo";
 import { BtnLeft, ChevronRight } from "@/assets/assets";
 import DateCarousel from "@/components/home/DateCarousel";
-import { HomeStackParamList } from "@/navigations/HomeStackNavigation";
 import { Theme } from "@/styles/theme";
 import { customAxios } from "@/apis/instance";
 import { User } from "../memo/ChatScreen";
@@ -14,11 +13,17 @@ import { useFavoriteFriends } from "@/hooks/useFavoriteFriends";
 import FavoriteFriends from "@/components/home/FavoriteFriends";
 import { HOME_SCREEN } from "@/constants";
 import { RootNavigationProp } from "@/navigations/RootNavigation";
+import moment from "moment";
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<RootNavigationProp>();
   const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<User | null>(null);
+  const [selectedDate, setSelectedDate] = useState(moment());
+
+  const handleDateChange = (date: moment.Moment) => {
+    setSelectedDate(date);
+  };
 
   const navigateToFriendsList = () => {
     navigation.navigate("Friends", { screen: "FriendListScreen" });
@@ -36,7 +41,7 @@ const HomeScreen: React.FC = () => {
     isLoading: mealsLoading,
     error: mealsError,
     refetch: refetchMeals
-  } = useMeal(userInfo?.schoolId || null, new Date().toISOString().split("T")[0]);
+  } = useMeal(userInfo?.schoolId || null, selectedDate);
 
   const {
     friends,
@@ -62,19 +67,19 @@ const HomeScreen: React.FC = () => {
     }
   }, []);
 
-  useEffect(
-    () => {
-      getUserProfile();
-      refetchMeals();
-      refetchFriends();
-    },
-    [] //   [friends]
-  );
+  useEffect(() => {
+    getUserProfile();
+    refetchFriends();
+  }, []);
+
+  useEffect(() => {
+    refetchMeals();
+  }, [selectedDate]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FEFEFA" }}>
       <Container>
-        <DateCarousel />
+        <DateCarousel selectedDate={selectedDate} onDateChange={handleDateChange} />
         <ScrollView>
           <Section>
             <SectionHeader>
@@ -115,7 +120,7 @@ const HomeScreen: React.FC = () => {
             {loading ? (
               <EmptyMealLabel>사용자 정보를 불러오는 중...</EmptyMealLabel>
             ) : userInfo?.schoolId ? (
-              <MealInfo meals={meals} isLoading={mealsLoading} error={mealsError} />
+              <MealInfo meals={meals} isLoading={mealsLoading} error={mealsError} date={selectedDate} />
             ) : (
               <EmptyMealLabel>학교 정보가 없습니다.</EmptyMealLabel>
             )}
@@ -134,8 +139,8 @@ const Container = styled.View`
 
 const Section = styled.View`
   width: 100%;
-  gap: 10px;
-  padding: 0 20px;
+  gap: 12px;
+  padding: 0 16px;
   align-items: center;
 `;
 
@@ -148,18 +153,16 @@ const SectionHeader = styled.View`
 `;
 
 const SectionHeaderTitle = styled.Text`
-  color:  ${Theme.colors.Gray900};
-  font-family: Pretendard;
+  color: #262626;
+  font-family: "Pretendard";
   font-size: 18px;
-  font-style: normal;
   font-weight: 500;
-  line-height: normal;
-  letter-spacing: 0.25px;
+  line-height: 26px;
 `;
 
 const EmptyTimeTableBox = styled.View`
   width: 100%;
-  height: 270px;
+  height: 267px;
   background-color: #f3f2ff;
   border-radius: 20px;
   justify-content: center;
@@ -168,32 +171,41 @@ const EmptyTimeTableBox = styled.View`
 `;
 
 const EmptyTimeTableBoxLabel = styled.Text`
-  font-style: ${Theme.typo.Body_04_Bold};
+  color: #555555;
+  font-family: "Pretendard";
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
 `;
 
 const AddTimeTableButton = styled(Pressable)`
-  width: 170px;
-  height: 56px;
+  padding: 16px 14px 16px 12px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background-color: ${Theme.colors.Violet};
-  border-radius: 100px;
+  background-color: #8a7eff;
+  border-radius: 56px;
 `;
 
 const AddTimeTableButtonText = styled.Text`
-  font-style: ${Theme.typo.Body_04_Bold};
-  color: #fff;
+  color: white;
+  font-family: "Pretendard";
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 20px;
+  margin-right: 6px;
 `;
 
 const CustomImage = styled.Image`
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
 `;
 
 const EmptyMealLabel = styled.Text`
-  font-style: ${Theme.typo.Body_04};
-  color: ${Theme.colors.Gray600};
+  font-family: "Pretendard";
+  font-size: 16px;
+  font-weight: 500;
+  color: #7b7b7b;
   padding: 20px 0;
 `;
 
