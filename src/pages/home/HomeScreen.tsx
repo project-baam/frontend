@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { SafeAreaView, Pressable, ScrollView } from "react-native";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { NavigationProp, useNavigation, useFocusEffect } from "@react-navigation/native";
 import styled from "@emotion/native";
 import { useMeal } from "@/hooks/useMeals";
 import MealInfo from "@/components/home/MealInfo";
@@ -10,12 +10,43 @@ import { HomeStackParamList } from "@/navigations/HomeStackNavigation";
 import { Theme } from "@/styles/theme";
 import { customAxios } from "@/apis/instance";
 import { User } from "../memo/ChatScreen";
+import { useFavoriteFriends } from "@/hooks/useFavoriteFriends";
+import FavoriteFriends from "@/components/home/FavoriteFriends";
+import { HOME_SCREEN } from "@/constants";
+import { RootNavigationProp } from "@/navigations/RootNavigation";
 
 const HomeScreen: React.FC = () => {
-  const navigation = useNavigation<NavigationProp<HomeStackParamList>>();
+  const navigation = useNavigation<RootNavigationProp>();
   const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<User | null>(null);
-  const { meals, isLoading: mealsLoading, error: mealsError } = useMeal(userInfo?.schoolId || null, "2024-10-02");
+
+  const navigateToFriendsList = () => {
+    navigation.navigate("Friends", { screen: "FriendListScreen" });
+  };
+
+  const navigateToFriendProfile = (userId: number) => {
+    navigation.navigate("Friends", {
+      screen: "FriendProfile",
+      params: { userId }
+    });
+  };
+
+  const {
+    meals,
+    isLoading: mealsLoading,
+    error: mealsError,
+    refetch: refetchMeals
+  } = useMeal(userInfo?.schoolId || null, new Date().toISOString().split("T")[0]);
+
+  const {
+    friends,
+    loading: friendsLoading,
+    error: friendsError,
+    refetch: refetchFriends,
+    loadMore: loadMoreFriends,
+    hasMore: hasMoreFriends,
+    totalCount: totalFavoriteFriends
+  } = useFavoriteFriends(HOME_SCREEN.FAVORITE_FRIENDS_COUNT);
 
   const getUserProfile = useCallback(async () => {
     try {
@@ -31,9 +62,14 @@ const HomeScreen: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    getUserProfile();
-  }, [getUserProfile]);
+  useEffect(
+    () => {
+      getUserProfile();
+      refetchMeals();
+      refetchFriends();
+    },
+    [] //   [friends]
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -49,7 +85,7 @@ const HomeScreen: React.FC = () => {
             </SectionHeader>
             <EmptyTimeTableBox>
               <EmptyTimeTableBoxLabel>아직 시간표가 없어요!</EmptyTimeTableBoxLabel>
-              <AddTimeTableButton onPress={() => navigation.navigate("AddTimeTableScreen")}>
+              <AddTimeTableButton>
                 <AddTimeTableButtonText>시간표 추가하기</AddTimeTableButtonText>
                 <CustomImage source={ChevronRight} />
               </AddTimeTableButton>
@@ -58,17 +94,19 @@ const HomeScreen: React.FC = () => {
           <Section>
             <SectionHeader>
               <SectionHeaderTitle>친한 친구들</SectionHeaderTitle>
-              <Pressable>
+              <Pressable onPress={navigateToFriendsList}>
                 <CustomImage source={BtnLeft} style={{ transform: [{ scaleX: -1 }] }} />
               </Pressable>
             </SectionHeader>
-            <FriendList>
-              {["김", "이", "박", "최", "최", "최", "최"].map((initial, index) => (
-                <Avatar key={index}>
-                  <AvatarText>{initial}</AvatarText>
-                </Avatar>
-              ))}
-            </FriendList>
+            <FavoriteFriends
+              friends={friends}
+              loading={friendsLoading}
+              error={friendsError}
+              onLoadMore={loadMoreFriends}
+              hasMore={hasMoreFriends}
+              onNavigateToFriendProfile={navigateToFriendProfile}
+              totalCount={totalFavoriteFriends}
+            />
           </Section>
           <Section>
             <SectionHeader>
@@ -106,10 +144,17 @@ const SectionHeader = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  padding: 20px 0;
 `;
 
 const SectionHeaderTitle = styled.Text`
-  font-style: ${Theme.typo.Body_04};
+  color:  ${Theme.colors.Gray900};
+  font-family: Pretendard;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: 0.25px;
 `;
 
 const EmptyTimeTableBox = styled.View`
@@ -144,27 +189,6 @@ const AddTimeTableButtonText = styled.Text`
 const CustomImage = styled.Image`
   width: 32px;
   height: 32px;
-`;
-
-const FriendList = styled.View`
-  width: 100%;
-  flex-direction: row;
-  gap: 10px;
-  padding-bottom: 20px;
-`;
-
-const Avatar = styled.View`
-  width: 48px;
-  height: 48px;
-  border-radius: 24px;
-  border: 2px solid ${Theme.colors.Gray200};
-  justify-content: center;
-  align-items: center;
-`;
-
-const AvatarText = styled.Text`
-  font-style: ${Theme.typo.Body_04_Bold};
-  color: ${Theme.colors.Gray700};
 `;
 
 const EmptyMealLabel = styled.Text`
