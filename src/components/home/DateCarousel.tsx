@@ -158,8 +158,8 @@ const NotificationIconImage = styled.Image`
 `;
 
 const DateItemContainer = styled.Pressable<{ isSelected: boolean }>`
-  width: 68px;
-  height: 80px;
+  width: ${(props) => (props.isSelected ? "68px" : "60px")};
+  height: ${(props) => (props.isSelected ? "80px" : "72px")};
   padding-top: 8px;
   padding-bottom: 14px;
   background: white;
