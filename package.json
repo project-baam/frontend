@@ -31,6 +31,8 @@
     "@types/react-native-vector-icons": "^6.4.18",
     "axios": "^1.7.7",
     "date-fns": "^3.6.0",
+    "expo-device": "^6.0.2",
+    "expo-notifications": "^0.28.18",
     "lottie-ios": "^4.4.1",
     "lottie-react-native": "^6.7.2",
     "react": "18.2.0",
