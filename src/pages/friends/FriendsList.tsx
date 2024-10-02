@@ -34,26 +34,6 @@ export default function FriendsList() {
   const { token } = useAuthStore();
   const [enteredText, setEnteredText] = useState("");
 
-  const fetchFavoriteFriends = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get("https://b-site.site/friends/favorites", {
-        params: {
-          page: 0,
-          count: 100
-        },
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      setFavoriteFriends({ list: response.data.list });
-    } catch (error) {
-      console.error("Error fetching schoolmates:", error);
-    } finally {
-      setLoading(false); // 로딩 끝
-    }
-  };
   const fetchFriends = async (page: number) => {
     setLoading(true); // 로딩 시작
     try {
@@ -68,8 +48,12 @@ export default function FriendsList() {
       });
 
       const newFriends = response.data.all;
+      const favoriteFriends = response.data.favaorites;
       setFriends((prev) => ({
         list: page === 0 ? newFriends : [...prev.list, ...newFriends]
+      }));
+      setFavoriteFriends((prev) => ({
+        list: page === 0 ? favoriteFriends : [...prev.list, ...favoriteFriends]
       }));
     } catch (error) {
       console.error("Error fetching friends:", error);
@@ -110,7 +94,6 @@ export default function FriendsList() {
   };
 
   useEffect(() => {
-    fetchFavoriteFriends();
     fetchFriends(0);
     // console.log("friendslist.tsx");
   }, []);
