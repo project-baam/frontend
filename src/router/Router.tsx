@@ -16,6 +16,9 @@ import useAuthStore from "../store/UserAuthStore";
 import LoadingOverlay from "../components/common/ui/LoadingOverlay";
 import HomeStackRouter from "./HomeStackRouter";
 import axios from "axios";
+import { useNotifications } from "@/hooks/useNotifications";
+import { registerDeviceToken } from "@/apis/notification/notification.apis";
+import { getDeviceType, getOSType } from "@/utils/DeviceUtils";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -115,6 +118,23 @@ const styles = StyleSheet.create({
 function Router() {
   const { setToken, setIsAuthenticated, setRefreshToken } = useAuthStore();
   const [isTryingLogin, setIsTryingLogin] = useState(true);
+
+  // 푸시 토큰 변경될 때마다 서버에 등록/업데이트
+  const { expoPushToken } = useNotifications();
+  useEffect(() => {
+    if (expoPushToken) {
+      console.log("Push token updated:", {
+        deviceToken: expoPushToken,
+        deviceType: getDeviceType(),
+        osType: getOSType()
+      });
+      registerDeviceToken({
+        deviceToken: expoPushToken,
+        deviceType: getDeviceType(),
+        osType: getOSType()
+      });
+    }
+  }, [expoPushToken]);
 
   useEffect(() => {
     async function fetchToken() {

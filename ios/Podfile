@@ -1,3 +1,6 @@
+require_relative '../node_modules/react-native/scripts/react_native_pods'
+require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
+
 # Resolve react_native_pods.rb with node to allow for hoisting
 #require Pod::Executable.execute_command('node', ['-p',
 #  'require.resolve(
@@ -17,7 +20,9 @@ end
 node_require('react-native/scripts/react_native_pods.rb')
 node_require('react-native-permissions/scripts/setup.rb')
 
-platform :ios, min_ios_version_supported
+require_relative '../node_modules/react-native-permissions/scripts/setup'
+
+platform :ios, '14.0'
 prepare_react_native_project!
 
 setup_permissions([
@@ -35,6 +40,8 @@ target 'BaamFrontend' do
 
   use_react_native!(
     :path => config[:reactNativePath],
+    :hermes_enabled => true,
+    :fabric_enabled => true,
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
@@ -44,13 +51,22 @@ target 'BaamFrontend' do
     # Pods for testing
   end
 
+  pod 'lottie-react-native', :path => '../node_modules/lottie-react-native'
+
   post_install do |installer|
-    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
+     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = ['$(inherited)', '_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION']
+      end
+    end
+
     react_native_post_install(
       installer,
       config[:reactNativePath],
       :mac_catalyst_enabled => false,
-      # :ccache_enabled => true
+       # :ccache_enabled => true
     )
   end
 end

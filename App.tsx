@@ -1,14 +1,37 @@
 import { NavigationContainer } from "@react-navigation/native";
-import React from "react";
+import React, { useEffect } from "react";
 import { StatusBar, StyleSheet, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import Router from "./src/router/Router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import * as Notifications from "expo-notifications";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true
+  })
+});
 
 const queryClient = new QueryClient();
 
 function App(): React.JSX.Element {
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const {
+        notification: {
+          request: {
+            content: { data }
+          }
+        }
+      } = response;
+    });
+
+    return () => subscription.remove();
+  }, []);
+
   const isDarkMode = useColorScheme() === "dark";
 
   const backgroundStyle = {

@@ -80,3 +80,6 @@ yarn-error.log
 /src/components/ChatMessageInput.tsx
 .history
 .env.local
+
+# Expo
+/.expo
