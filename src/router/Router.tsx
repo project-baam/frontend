@@ -17,6 +17,7 @@ import LoadingOverlay from "../components/common/ui/LoadingOverlay";
 import HomeStackRouter from "./HomeStackRouter";
 import axios from "axios";
 import FriendsStackRouter from "./FriendsStackRouter";
+import NotificationStackRouter from "./NotificationStackRouter";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -184,6 +185,7 @@ export function AuthenticatedStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="BottomTab" component={MyTabs} />
       {/* <Stack.Screen name="FriendProfile" component={FriendProfile} /> */}
+      <Stack.Screen name="Notification" component={NotificationStackRouter} />
     </Stack.Navigator>
   );
 }
