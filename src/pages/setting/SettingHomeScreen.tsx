@@ -16,7 +16,7 @@ type User = {
   id: number;
   status: string;
   provider: string;
-  schooId: number;
+  schoolId: number;
   schoolName: string;
   grade: number;
   className: string;
@@ -141,7 +141,7 @@ function SettingHomeScreen({ navigation, route }: SettingHomeScreenProps) {
             navigation.navigate("ProfileScreen", {
               fullName: userInfo?.fullName,
               schoolName: userInfo?.schoolName,
-              schoolId: userInfo?.schooId,
+              schoolId: userInfo?.schoolId,
               grade: userInfo?.grade,
               className: userInfo?.className,
               isTimetablePublic: userInfo?.isTimetablePublic,

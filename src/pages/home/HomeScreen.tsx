@@ -1,117 +1,162 @@
-import { View, Text, SafeAreaView, Image, Pressable } from "react-native";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
-import { HomeStackParamList } from "../../navigations/HomeStackNavigation";
-import { Theme } from "../../styles/theme";
+import React, { useCallback, useEffect, useState } from "react";
+import { SafeAreaView, Pressable, ScrollView, View, Text, Image } from "react-native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import styled from "@emotion/native";
-import DateCarousel from "../../components/home/DateCarousel";
+import { useMeal } from "@/hooks/useMeals";
+import MealInfo from "@/components/home/MealInfo";
+import { BtnLeft, ChevronRight } from "@/assets/assets";
+import DateCarousel from "@/components/home/DateCarousel";
+import { Theme } from "@/styles/theme";
+import { customAxios } from "@/apis/instance";
+import { User } from "../memo/ChatScreen";
+import { useFavoriteFriends } from "@/hooks/useFavoriteFriends";
+import FavoriteFriends from "@/components/home/FavoriteFriends";
+import { HOME_SCREEN } from "@/constants";
+import { RootNavigationProp } from "@/navigations/RootNavigation";
+import moment from "moment";
 
-function HomeScreen() {
-  const navigation = useNavigation<NavigationProp<HomeStackParamList>>();
+const HomeScreen: React.FC = () => {
+  const navigation = useNavigation<RootNavigationProp>();
+  const [loading, setLoading] = useState(false);
+  const [userInfo, setUserInfo] = useState<User | null>(null);
+  const [selectedDate, setSelectedDate] = useState(moment());
+
+  const handleDateChange = (date: moment.Moment) => {
+    setSelectedDate(date);
+  };
+
+  const navigateToFriendsList = () => {
+    navigation.navigate("Friends", { screen: "FriendListScreen" });
+  };
+
+  const {
+    meals,
+    isLoading: mealsLoading,
+    error: mealsError,
+    refetch: refetchMeals
+  } = useMeal(userInfo?.schoolId || null, selectedDate);
+
+  const {
+    friends,
+    loading: friendsLoading,
+    error: friendsError,
+    refetch: refetchFriends,
+    loadMore: loadMoreFriends,
+    hasMore: hasMoreFriends,
+    totalCount: totalFavoriteFriends
+  } = useFavoriteFriends(HOME_SCREEN.FAVORITE_FRIENDS_COUNT);
+
+  const getUserProfile = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await customAxios.get("user");
+      setUserInfo(response.data);
+    } catch (error: any) {
+      console.error(error.message);
+      console.error(error.stack);
+      setUserInfo(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      getUserProfile();
+      refetchFriends(); // 화면에 돌아올 때마다 친구 목록을 다시 불러옴
+    }, [getUserProfile, refetchFriends])
+  );
+
+  useEffect(() => {
+    refetchMeals();
+  }, [selectedDate]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FEFEFA" }}>
       <Container>
-        <DateCarousel />
-        <Section>
-          <SectionHeader>
-            <SectionHeaderTitle>시간표</SectionHeaderTitle>
-            <Pressable>
-              <CustomImage
-                source={require("../../assets/images/btn_left.png")}
-                style={{ transform: [{ scaleX: -1 }] }}
-              />
-            </Pressable>
-          </SectionHeader>
-          <EmptyTimeTableBox>
-            <EmptyTimeTableBoxLabel>아직 시간표가 없어요!</EmptyTimeTableBoxLabel>
-            <AddTimeTableButton onPress={() => navigation.navigate("AddTimeTableScreen")}>
-              <AddTimeTableButtonText>시간표 추가하기</AddTimeTableButtonText>
+        <DateCarousel selectedDate={selectedDate} onDateChange={handleDateChange} />
+        <ScrollView>
+          <Section>
+            <SectionHeader>
+              <SectionHeaderTitle>시간표</SectionHeaderTitle>
               <Pressable>
-                <CustomImage source={require("../../assets/images/chevron-right.png")} />
+                <CustomImage source={BtnLeft} style={{ transform: [{ scaleX: -1 }] }} />
               </Pressable>
-            </AddTimeTableButton>
-          </EmptyTimeTableBox>
-        </Section>
-
-        <Section>
-          <SectionHeader>
-            <SectionHeaderTitle>친한 친구들</SectionHeaderTitle>
-            <Pressable>
-              <CustomImage
-                source={require("../../assets/images/btn_left.png")}
-                style={{ transform: [{ scaleX: -1 }] }}
-              />
-            </Pressable>
-          </SectionHeader>
-          <FriendList>
-            <Avatar>
-              <AvatarText>김</AvatarText>
-            </Avatar>
-            <Avatar>
-              <AvatarText>이</AvatarText>
-            </Avatar>
-            <Avatar>
-              <AvatarText>박</AvatarText>
-            </Avatar>
-            <Avatar>
-              <AvatarText>최</AvatarText>
-            </Avatar>
-            <Avatar>
-              <AvatarText>최</AvatarText>
-            </Avatar>
-            <Avatar>
-              <AvatarText>최</AvatarText>
-            </Avatar>
-            <Avatar>
-              <AvatarText>최</AvatarText>
-            </Avatar>
-          </FriendList>
-          {/* <EmptyFriendsLabel>친한 친구들을 추가해보세요!</EmptyFriendsLabel> */}
-        </Section>
-
-        <Section>
-          <SectionHeader>
-            <SectionHeaderTitle>오늘의 급식</SectionHeaderTitle>
-            <Pressable>
-              <CustomImage
-                source={require("../../assets/images/btn_left.png")}
-                style={{ transform: [{ scaleX: -1 }] }}
-              />
-            </Pressable>
-          </SectionHeader>
-        </Section>
+            </SectionHeader>
+            <EmptyTimeTableBox>
+              <EmptyTimeTableBoxLabel>아직 시간표가 없어요!</EmptyTimeTableBoxLabel>
+              <AddTimeTableButton>
+                <AddTimeTableButtonText>시간표 추가하기</AddTimeTableButtonText>
+                <CustomImage source={ChevronRight} />
+              </AddTimeTableButton>
+            </EmptyTimeTableBox>
+          </Section>
+          <Section>
+            <SectionHeader>
+              <SectionHeaderTitle>친한 친구들</SectionHeaderTitle>
+              <Pressable onPress={navigateToFriendsList}>
+                <CustomImage source={BtnLeft} style={{ transform: [{ scaleX: -1 }] }} />
+              </Pressable>
+            </SectionHeader>
+            <FavoriteFriends
+              friends={friends}
+              loading={friendsLoading}
+              error={friendsError}
+              onLoadMore={loadMoreFriends}
+              hasMore={hasMoreFriends}
+              totalCount={totalFavoriteFriends}
+            />
+          </Section>
+          <Section>
+            <SectionHeader>
+              <SectionHeaderTitle>오늘의 급식</SectionHeaderTitle>
+            </SectionHeader>
+            {loading ? (
+              <EmptyMealLabel>사용자 정보를 불러오는 중...</EmptyMealLabel>
+            ) : userInfo?.schoolId ? (
+              <MealInfo meals={meals} isLoading={mealsLoading} error={mealsError} date={selectedDate} />
+            ) : (
+              <EmptyMealLabel>학교 정보가 없습니다.</EmptyMealLabel>
+            )}
+          </Section>
+        </ScrollView>
       </Container>
     </SafeAreaView>
   );
-}
+};
 
-const Container = styled(View)`
+const Container = styled.View`
   flex: 1;
   align-items: center;
   gap: 20px;
 `;
 
-const Section = styled(View)`
+const Section = styled.View`
   width: 100%;
-  gap: 10px;
-  padding: 0 20px;
+  gap: 12px;
+  padding: 0 16px;
   align-items: center;
 `;
 
-const SectionHeader = styled(View)`
+const SectionHeader = styled.View`
   width: 100%;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  padding: 20px 0;
 `;
 
-const SectionHeaderTitle = styled(Text)`
-  font-style: ${Theme.typo.Body_04};
+const SectionHeaderTitle = styled.Text`
+  color: #262626;
+  font-family: "Pretendard";
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 26px;
 `;
 
-const EmptyTimeTableBox = styled(View)`
+const EmptyTimeTableBox = styled.View`
   width: 100%;
-  height: 270px;
+  height: 267px;
   background-color: #f3f2ff;
   border-radius: 20px;
   justify-content: center;
@@ -119,55 +164,43 @@ const EmptyTimeTableBox = styled(View)`
   gap: 40px;
 `;
 
-const EmptyTimeTableBoxLabel = styled(Text)`
-  font-style: ${Theme.typo.Body_04_Bold};
+const EmptyTimeTableBoxLabel = styled.Text`
+  color: #555555;
+  font-family: "Pretendard";
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
 `;
 
 const AddTimeTableButton = styled(Pressable)`
-  width: 170px;
-  height: 56px;
+  padding: 16px 14px 16px 12px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background-color: ${Theme.colors.Violet};
-  border-radius: 100px;
+  background-color: #8a7eff;
+  border-radius: 56px;
 `;
 
-const AddTimeTableButtonText = styled(Text)`
-  font-style: ${Theme.typo.Body_04_Bold};
-  color: #fff;
+const AddTimeTableButtonText = styled.Text`
+  color: white;
+  font-family: "Pretendard";
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 20px;
+  margin-right: 6px;
 `;
 
-const EmptyFriendsLabel = styled(Text)`
-  font-style: ${Theme.typo.Label_02};
-  color: ${Theme.colors.Gray600};
+const CustomImage = styled.Image`
+  width: 24px;
+  height: 24px;
+`;
+
+const EmptyMealLabel = styled.Text`
+  font-family: "Pretendard";
+  font-size: 16px;
+  font-weight: 500;
+  color: #7b7b7b;
   padding: 20px 0;
-`;
-
-const CustomImage = styled(Image)`
-  width: 32px;
-  height: 32px;
-`;
-
-const FriendList = styled(View)`
-  width: 100%;
-  flex-direction: row;
-  gap: 10px;
-  padding-bottom: 20px;
-`;
-
-const Avatar = styled.View`
-  width: 48px;
-  height: 48px;
-  border-radius: 24px;
-  border: 2px solid ${Theme.colors.Gray200};
-  justify-content: center;
-  align-items: center;
-`;
-
-const AvatarText = styled.Text`
-  font-style: ${Theme.typo.Body_04_Bold};
-  color: ${Theme.colors.Gray700};
 `;
 
 export default HomeScreen;
