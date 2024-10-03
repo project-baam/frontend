@@ -16,6 +16,7 @@ import useAuthStore from "../store/UserAuthStore";
 import LoadingOverlay from "../components/common/ui/LoadingOverlay";
 import HomeStackRouter from "./HomeStackRouter";
 import axios from "axios";
+import FriendsStackRouter from "./FriendsStackRouter";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -80,7 +81,7 @@ export const MyTabs = () => {
     >
       <Tab.Screen name="Home" component={HomeStackRouter} />
       <Tab.Screen name="Memo" component={MemoStackRouter} />
-      <Tab.Screen name="Friends" component={FriendListScreen} />
+      <Tab.Screen name="Friends" component={FriendsStackRouter} />
       <Tab.Screen name="Calendar" component={CalendarStackRouter} />
       <Tab.Screen name="Setting" component={SettingStackRouter} options={{ unmountOnBlur: true }} />
     </Tab.Navigator>
@@ -182,7 +183,7 @@ export function AuthenticatedStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="BottomTab" component={MyTabs} />
-      <Stack.Screen name="FriendProfile" component={FriendProfile} />
+      {/* <Stack.Screen name="FriendProfile" component={FriendProfile} /> */}
     </Stack.Navigator>
   );
 }
