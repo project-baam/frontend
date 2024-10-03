@@ -26,6 +26,20 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   onCancel,
   requestType
 }) => {
+  const isFriendRequest = category === NotificationCategory.FriendRequest;
+
+  const handleAccept = () => {
+    if (!isRead && onAccept) onAccept();
+  };
+
+  const handleReject = () => {
+    if (!isRead && onReject) onReject();
+  };
+
+  const handleCancel = () => {
+    if (!isRead && onCancel) onCancel();
+  };
+
   return (
     <Container isRead={isRead} onPress={onPress}>
       <Category>{category}</Category>
@@ -35,20 +49,20 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           <Title>{title}</Title>
           {description ? (
             <Description>{description}</Description>
-          ) : category === NotificationCategory.FriendRequest ? (
+          ) : isFriendRequest ? (
             <ButtonContainer>
               {requestType === "received" ? (
                 <>
-                  <AcceptButton onPress={onAccept}>
-                    <AcceptButtonText>수락하기</AcceptButtonText>
+                  <AcceptButton onPress={handleAccept} isDisabled={isRead}>
+                    <AcceptButtonText isDisabled={isRead}>수락하기</AcceptButtonText>
                   </AcceptButton>
-                  <RejectButton onPress={onReject}>
-                    <RejectButtonText>거절하기</RejectButtonText>
+                  <RejectButton onPress={handleReject} isDisabled={isRead}>
+                    <RejectButtonText isDisabled={isRead}>거절하기</RejectButtonText>
                   </RejectButton>
                 </>
               ) : (
-                <CancelButton onPress={onCancel}>
-                  <CancelButtonText>취소하기</CancelButtonText>
+                <CancelButton onPress={handleCancel} isDisabled={isRead}>
+                  <CancelButtonText isDisabled={isRead}>취소하기</CancelButtonText>
                 </CancelButton>
               )}
             </ButtonContainer>
@@ -59,7 +73,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   );
 };
 
-const Container = styled.View<{ isRead: boolean }>`
+const Container = styled(TouchableOpacity)<{ isRead: boolean }>`
   width: 100%;
   padding: 10px 16px;
   background-color: ${(props) => (props.isRead ? "#F5F5F5" : "white")};
@@ -119,41 +133,43 @@ const Description = styled.Text`
   line-height: 22px;
 `;
 
-const AcceptButton = styled(TouchableOpacity)`
-  align-self: flex-start;
-`;
-
-const AcceptButtonText = styled.Text`
-  color: #8a7eff;
-  font-size: 16px;
-  font-family: "Pretendard";
-  font-weight: 500;
-  line-height: 22px;
-`;
-
 const ButtonContainer = styled.View`
   flex-direction: row;
   gap: 8px;
 `;
-
-const RejectButton = styled(TouchableOpacity)`
+const AcceptButton = styled(TouchableOpacity)<{ isDisabled: boolean }>`
   align-self: flex-start;
+  opacity: ${(props) => (props.isDisabled ? 0.5 : 1)};
 `;
 
-const RejectButtonText = styled.Text`
-  color: #9d9d9d;
+const AcceptButtonText = styled.Text<{ isDisabled: boolean }>`
+  color: ${(props) => (props.isDisabled ? "#CCCCCC" : "#8a7eff")};
   font-size: 16px;
   font-family: "Pretendard";
   font-weight: 500;
   line-height: 22px;
 `;
 
-const CancelButton = styled(TouchableOpacity)`
+const RejectButton = styled(TouchableOpacity)<{ isDisabled: boolean }>`
   align-self: flex-start;
+  opacity: ${(props) => (props.isDisabled ? 0.5 : 1)};
 `;
 
-const CancelButtonText = styled.Text`
-  color: #9d9d9d;
+const RejectButtonText = styled.Text<{ isDisabled: boolean }>`
+  color: ${(props) => (props.isDisabled ? "#CCCCCC" : "#9d9d9d")};
+  font-size: 16px;
+  font-family: "Pretendard";
+  font-weight: 500;
+  line-height: 22px;
+`;
+
+const CancelButton = styled(TouchableOpacity)<{ isDisabled: boolean }>`
+  align-self: flex-start;
+  opacity: ${(props) => (props.isDisabled ? 0.5 : 1)};
+`;
+
+const CancelButtonText = styled.Text<{ isDisabled: boolean }>`
+  color: ${(props) => (props.isDisabled ? "#CCCCCC" : "#9d9d9d")};
   font-size: 16px;
   font-family: "Pretendard";
   font-weight: 500;
