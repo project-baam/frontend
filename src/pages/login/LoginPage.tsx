@@ -1,15 +1,11 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import * as S from "./styles";
-import { AnimatedLogoImage, AppleImg, KakaoImg } from "../../assets/assets";
-import { StackScreenProps } from "@react-navigation/stack";
-import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
-import LottieView from "lottie-react-native";
 import appleAuth from "@invertase/react-native-apple-authentication";
-import useAuthStore from "@/store/UserAuthStore";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StackScreenProps } from "@react-navigation/stack";
+import LottieView from "lottie-react-native";
 import { useEffect, useState } from "react";
-import LoadingOverlay from "@/components/common/ui/LoadingOverlay";
+import { Image, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { AnimatedLogoImage, AppleImg, KakaoImg } from "../../assets/assets";
+import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
+import * as S from "./styles";
 
 type LoginPageProps = StackScreenProps<SignUpStackParamList, "LoginPage">;
 
@@ -50,59 +46,12 @@ export default function LoginPage({ navigation }: LoginPageProps) {
     });
   }, []);
 
-  if (!appleAuth.isSupported) {
+  if (Platform.OS === "ios" && !appleAuth.isSupported) {
     return (
       <View style={[styles.container, styles.horizontal]}>
         <Text>Apple Authentication is not supported on this device.</Text>
       </View>
     );
-  }
-
-  const { setRefreshToken, setToken, setIsAuthenticated } = useAuthStore();
-
-  const [isTryingLogin, setIsTryingLogin] = useState(false);
-
-  const fetchToken = async () => {
-    const storedToken = await AsyncStorage.getItem("refreshToken");
-
-    if (storedToken) {
-      axios
-        .post(
-          "https://b-site.site/authentication/refresh-tokens",
-          {
-            refreshToken: storedToken
-          },
-          {
-            headers: {
-              accept: "application/json",
-              "Content-Type": "application/json"
-            }
-          }
-        )
-        .then((response) => {
-          const accessToken = response.data.accessToken;
-          const refreshToken = response.data.refreshToken;
-          AsyncStorage.setItem("refreshToken", refreshToken);
-          AsyncStorage.setItem("accessToken", accessToken);
-
-          setRefreshToken(refreshToken);
-          setToken(accessToken);
-          setIsAuthenticated(true);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    } else {
-      navigation.navigate("KakaoLoginPage");
-    }
-
-    setTimeout(() => {
-      setIsTryingLogin(false);
-    }, 2500);
-  };
-
-  if (isTryingLogin) {
-    return <LoadingOverlay />;
   }
 
   async function handleSignInApple(updateCredentialStateForUser: any) {
@@ -156,11 +105,7 @@ export default function LoginPage({ navigation }: LoginPageProps) {
         <S.SubTitle>친구들 수업 확인까지 동시에!</S.SubTitle>
       </S.TextContainer>
       <S.ButtonContainer>
-        <Pressable
-          onPress={() => {
-            fetchToken();
-          }}
-        >
+        <Pressable onPress={() => navigation.navigate("KakaoLoginPage")}>
           <S.PrimaryButtonContainer>
             <Image source={KakaoImg} style={{ width: 29, height: 24 }} />
             <S.PrimaryButtonText>카카오로 로그인</S.PrimaryButtonText>
@@ -171,10 +116,12 @@ export default function LoginPage({ navigation }: LoginPageProps) {
             handleSignInApple(updateCredentialStateForUser);
           }}
         >
-          <S.SecondaryButtonContainer>
-            <Image source={AppleImg} style={{ width: 20, height: 24 }} />
-            <S.SecondaryButtonText>애플로 로그인</S.SecondaryButtonText>
-          </S.SecondaryButtonContainer>
+          {Platform.OS === "ios" && (
+            <S.SecondaryButtonContainer>
+              <Image source={AppleImg} style={{ width: 20, height: 24 }} />
+              <S.SecondaryButtonText>애플로 로그인</S.SecondaryButtonText>
+            </S.SecondaryButtonContainer>
+          )}
         </Pressable>
       </S.ButtonContainer>
     </S.RootContainer>
