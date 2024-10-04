@@ -49,10 +49,6 @@ function CustomCalendar() {
   const [marked, setMarked] = useState<MarkedDates>({});
   const [formattedData, setFormattedData] = useState<FormattedItem[]>([]);
 
-  // store
-  const { token } = useAuthStore();
-  // const { agenda, setAgenda } = useCalendarStore();
-
   const navigation = useNavigation<NavigationProp<CalendarStackParamList>>();
 
   const renderItem = useCallback(({ item, index }: { item: any; index: number }) => {
