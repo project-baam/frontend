@@ -4,6 +4,8 @@ import moment, { Moment } from "moment";
 import styled from "@emotion/native";
 import "moment/locale/ko";
 import { DropDownDown, IconBell } from "@/assets/assets";
+import { useNavigation } from "@react-navigation/native";
+import { RootNavigationProp } from "@/navigations/RootNavigation";
 
 type DateItem = Moment;
 
@@ -27,6 +29,12 @@ const generateDatesForMonth = (currentMonth: Moment): DateItem[] => {
 };
 
 const DateCarousel: React.FC<DateCarouselProps> = ({ selectedDate, onDateChange }) => {
+  const navigation = useNavigation<RootNavigationProp>();
+
+  const navigateToNotification = () => {
+    navigation.navigate("Notification", { screen: "NotificationScreen" });
+  };
+
   const [currentMonth, setCurrentMonth] = useState<Moment>(moment());
   const [dates, setDates] = useState<DateItem[]>(generateDatesForMonth(currentMonth));
   const flatListRef = useRef<FlatList<DateItem>>(null);
@@ -86,7 +94,7 @@ const DateCarousel: React.FC<DateCarouselProps> = ({ selectedDate, onDateChange 
             <CalendarIconImage source={DropDownDown} style={{ transform: [{ scaleY: -1 }] }} />
           </Pressable>
         </MonthContainer>
-        <Pressable>
+        <Pressable onPress={navigateToNotification}>
           <NotificationIconImage source={IconBell} />
         </Pressable>
       </TopBar>

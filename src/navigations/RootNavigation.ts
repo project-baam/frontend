@@ -5,6 +5,7 @@ import { CalendarStackParamList } from "./CalendarStackNavigation";
 import { MemoStackParamList } from "./MemoStackNavigation";
 import { SettingStackParamList } from "./SettingStackNavigation";
 import { SignUpStackParamList } from "./SignUpStackNavigation";
+import { NotificationStackParamList } from "./NotificationStackNavigation";
 
 export type RootStackParamList = {
   Home: NavigatorScreenParams<HomeStackParamList>;
@@ -13,6 +14,7 @@ export type RootStackParamList = {
   Memo: NavigatorScreenParams<MemoStackParamList>;
   Setting: NavigatorScreenParams<SettingStackParamList>;
   SignUp: NavigatorScreenParams<SignUpStackParamList>;
+  Notification: NavigatorScreenParams<NotificationStackParamList>;
 };
 
 export type RootNavigationProp = NavigationProp<RootStackParamList>;
