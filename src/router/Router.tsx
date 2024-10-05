@@ -18,6 +18,8 @@ import HomeStackRouter from "./HomeStackRouter";
 import axios from "axios";
 import FriendsStackRouter from "./FriendsStackRouter";
 import NotificationStackRouter from "./NotificationStackRouter";
+import { registerDeviceToken } from "@/apis/notification/notification-device.apis";
+import { getDeviceType, getOSType } from "@/utils/PushNotificationUtil";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -145,6 +147,22 @@ function Router() {
             setRefreshToken(refreshToken);
             setToken(accessToken);
             setIsAuthenticated(true);
+
+            // 푸시 토큰 등록
+            AsyncStorage.getItem("pushToken").then((pushToken: string | null) => {
+              if (pushToken) {
+                console.log("getDeviceType: ", getDeviceType());
+                console.log("getOSType: ", getOSType());
+                console.log("pushToken: ", pushToken);
+                registerDeviceToken({
+                  deviceToken: pushToken,
+                  deviceType: getDeviceType(),
+                  osType: getOSType()
+                })
+                  .then(() => console.log("Push token registered successfully"))
+                  .catch((error) => console.error("Error registering push token:", error));
+              }
+            });
           })
           .catch((error) => {
             console.error(error);
