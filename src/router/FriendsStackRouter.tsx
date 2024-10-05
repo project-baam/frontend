@@ -29,8 +29,8 @@ export default function FriendsStackRouter() {
         )
       }}
     >
-      <Stack.Screen name="FriendProfile" component={FriendProfile} options={{ headerShown: false }} />
       <Stack.Screen name="FriendListScreen" component={FriendListScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="FriendProfile" component={FriendProfile} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
