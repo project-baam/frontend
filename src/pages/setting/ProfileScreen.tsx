@@ -50,15 +50,19 @@ function ProfileScreen({ navigation, route }: ProfileScreenProps) {
           console.log(response.errorMessage);
         } else {
           console.log("여기 ", response.assets?.[0]);
-          setLocalProfileImage(response.assets?.[0].uri ? response.assets?.[0].uri : "");
-          uploadImage(response.assets?.[0]);
+          if (chooseType === "profile") {
+            setLocalProfileImage(response.assets?.[0].uri ? response.assets?.[0].uri : "");
+            uploadImage(response.assets?.[0], chooseType);
+          } else {
+            setLocalBackgroundImage(response.assets?.[0].uri ? response.assets?.[0].uri : "");
+            uploadImage(response.assets?.[0], chooseType);
+          }
         }
       }
     );
   };
 
-  const uploadImage = async (imagePath: any) => {
-    console.log("이거", token);
+  const uploadImage = async (imagePath: any, chooseType: string) => {
     try {
       // const base64String = imagePath.base64;
       // const mimeType = imagePath.type || "image/jpeg";
@@ -66,7 +70,6 @@ function ProfileScreen({ navigation, route }: ProfileScreenProps) {
       // const file = new File([blob], imagePath.fileName || "image.jpeg", { type: mimeType });
       const isAndroid = Platform.OS === "android";
       let photoUri = imagePath.uri;
-      console.log("이거", imagePath);
 
       var photo = {
         uri: photoUri,
@@ -91,8 +94,12 @@ function ProfileScreen({ navigation, route }: ProfileScreenProps) {
       formData.append("fullName", fullName);
       formData.append("isClassPublic", isClassPublic);
       formData.append("isTimetablePublic", isTimetablePublic);
-      formData.append("profileImage", photo);
-      console.log("form", photo.uri);
+      if (chooseType === "profile") {
+        formData.append("profileImage", photo);
+      } else {
+        formData.append("backgroundImage", photo);
+      }
+
       const response = await axios.patch("https://b-site.site/user", formData, {
         headers: {
           accept: "application/json",
