@@ -1,25 +1,22 @@
 import { useState } from "react";
 import styled from "@emotion/native";
+import { StackScreenProps } from "@react-navigation/stack";
+import { HomeStackParamList } from "@/navigations/HomeStackNavigation";
 
 interface ScheduleAddItemProps {
   title: string;
+  addSubject: () => {};
 }
 
-const ScheduleAddItem = ({ title }: ScheduleAddItemProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(true);
-
-  const handleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
+const ScheduleAddItem = ({ title, addSubject }: ScheduleAddItemProps) => {
   return (
-    <Container>
+    <Container onPress={addSubject}>
       <Title>{title}</Title>
     </Container>
   );
 };
 
-const Container = styled.View`
+const Container = styled.TouchableOpacity`
   width: 100%;
   height: 58px;
   justify-content: center;
@@ -29,8 +26,8 @@ const Container = styled.View`
 `;
 
 const Title = styled.Text`
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 17px;
+  font-weight: 600;
   color: #000;
 `;
 

@@ -6,6 +6,7 @@ import { HomeStackParamList } from "../navigations/HomeStackNavigation";
 import styled from "@emotion/native";
 import AddTimeTableScreen from "../pages/home/AddTimeTableScreen";
 import AddTimeTableDetailScreen from "../pages/home/AddTimeTableDetailScreen";
+import SetTimeSetting from "@/pages/home/SetTimeSetting";
 
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +33,7 @@ const HomeStackRouter = () => {
       }}
     >
       <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="SetTimeSetting" component={SetTimeSetting} options={{ headerShown: false }} />
       <Stack.Screen name="AddTimeTableScreen" component={AddTimeTableScreen} options={{ headerTitle: "시간표 추가" }} />
       <Stack.Screen
         name="AddTimeTableDetailScreen"
