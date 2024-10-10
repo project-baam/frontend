@@ -7,7 +7,7 @@ import { View, ScrollView, ActivityIndicator } from "react-native";
 import { FriendRequestNotificationData, Notification } from "@/apis/notification/notification.types";
 import { NotificationCategory } from "@/apis/notification/notification.enums";
 import { RootNavigationProp } from "@/navigations/RootNavigation";
-import { getNotificationsMock } from "@/apis/notification/notification.apis";
+import { getNotifications, markAsRead } from "@/apis/notification/notification.apis";
 
 const PAGE_SIZE = 15;
 
@@ -24,9 +24,7 @@ const NotificationsScreen: React.FC = () => {
 
     setLoading(true);
     try {
-      // TODO: 현재 푸시알림이 없어서 Mock 데이터로 대체
-      // const result = await getNotifications(page, PAGE_SIZE);
-      const result = await getNotificationsMock(page, PAGE_SIZE);
+      const result = await getNotifications(page, PAGE_SIZE);
 
       if (result) {
         const { total, list } = result;
@@ -53,7 +51,7 @@ const NotificationsScreen: React.FC = () => {
   const handleNotificationPress = async (notification: Notification) => {
     try {
       if (notification.category !== NotificationCategory.FriendRequest) {
-        // markAsRead(notification.id); // TODO: 푸시알림 작업 후 주석 해제
+        markAsRead(notification.id);
         updateNotificationReadStatus(notification.id);
       }
     } catch (error) {
@@ -119,7 +117,7 @@ const NotificationsScreen: React.FC = () => {
       }
 
       // 액션 성공 후 읽음 처리
-      // await markAsRead(requestId); // TODO: 푸시알림 작업 후 주석 해제
+      await markAsRead(requestId);
 
       // 상태 업데이트
       setNotifications((prevNotifications) =>
