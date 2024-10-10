@@ -15,7 +15,6 @@ export const registerDeviceToken = async (data: {
 }): Promise<void> => {
   try {
     const response = await customAxios.post("device-token", data);
-    console.log(response.data)
     if (response.status !== HttpStatusCode.Ok) {
       if (response.status === HttpStatusCode.BadRequest) {
         if (response.data.code === ErrorCode.MalformedExpoPushToken) {

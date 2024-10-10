@@ -78,19 +78,23 @@ function FriendListScreen() {
 
   return (
     <Container>
-      <ScrollViewContainer>
-        <ContentContainer>
-          <Tabs>
-            <TabButton active={selectedTab === "friends"} onPress={() => setSelectedTab("friends")}>
-              <TabText active={selectedTab === "friends"}>친구들</TabText>
-            </TabButton>
-            <TabButton active={selectedTab === "more"} onPress={() => setSelectedTab("more")}>
-              <TabText active={selectedTab === "more"}>더보기</TabText>
-            </TabButton>
-          </Tabs>
-          {selectedTab === "friends" ? <FriendsList /> : <SchoolFriends />}
-        </ContentContainer>
-      </ScrollViewContainer>
+      <ContentContainer>
+        <Tabs>
+          <TabButton active={selectedTab === "friends"} onPress={() => setSelectedTab("friends")}>
+            <TabText active={selectedTab === "friends"}>친구들</TabText>
+          </TabButton>
+          <TabButton active={selectedTab === "more"} onPress={() => setSelectedTab("more")}>
+            <TabText active={selectedTab === "more"}>더보기</TabText>
+          </TabButton>
+        </Tabs>
+        {selectedTab === "friends" ? (
+          <ScrollViewContainer>
+            <FriendsList />
+          </ScrollViewContainer>
+        ) : (
+          <SchoolFriends />
+        )}
+      </ContentContainer>
     </Container>
   );
 }

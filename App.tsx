@@ -53,10 +53,7 @@ function AppWithNotification({
     const enabled =
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-    if (enabled) {
-      console.log("Authorization status:", authStatus);
-    }
+    // if enabled (TODO:)
   }
 
   useEffect(() => {
@@ -68,7 +65,6 @@ function AppWithNotification({
 
   const getDevicePushToken = async () => {
     const token = await messaging().getToken();
-    console.log("[+] Device Push Token: ", token);
     if (token) {
       await AsyncStorage.setItem(DEVICE_PUSH_TOKEN_KEY, token);
     }
