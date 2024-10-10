@@ -13,13 +13,18 @@ const customAxios: AxiosInstance = axios.create({
 // AsyncStorage.getItem 함수: 비동기 > 요청 인터셉터로 토큰을 동적 추가
 customAxios.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem("accessToken");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.error("Error fetching token:", error);
     }
     return config;
   },
   (error) => {
+    console.error("Interceptor error:", error);
     return Promise.reject(error);
   }
 );
