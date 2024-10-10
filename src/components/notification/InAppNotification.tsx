@@ -1,18 +1,19 @@
-import { IconBell } from "@/assets/assets";
-import styled from "@emotion/native";
 import React, { useEffect, useRef } from "react";
-import { Animated, TouchableOpacity, SafeAreaView } from "react-native";
+import { Animated, TouchableOpacity, View, SafeAreaView } from "react-native";
+import styled from "@emotion/native";
+import { IconBell } from "@/assets/assets";
+import { FCMMessage } from "@/types/notification";
+import { useInAppNotificationNavigation } from "@/hooks/useInAppNotificationNavigation";
 
 interface InAppNotificationProps {
-  title: string;
-  message: string;
-  onPress: () => void;
+  message: FCMMessage;
   onHide: () => void;
   duration?: number;
 }
 
-const InAppNotification: React.FC<InAppNotificationProps> = ({ title, message, onPress, onHide, duration = 3000 }) => {
+const InAppNotification: React.FC<InAppNotificationProps> = ({ message, onHide, duration = 3000 }) => {
   const translateY = useRef(new Animated.Value(-100)).current;
+  const navigateByInAppNotification = useInAppNotificationNavigation();
 
   useEffect(() => {
     Animated.sequence([
@@ -32,17 +33,22 @@ const InAppNotification: React.FC<InAppNotificationProps> = ({ title, message, o
     });
   }, [translateY, duration, onHide]);
 
+  const handlePress = () => {
+    navigateByInAppNotification(message.data.category);
+    onHide();
+  };
+
   return (
     <SafeAreaContainer>
       <AnimatedContainer style={{ transform: [{ translateY }] }}>
-        <TouchableOpacity onPress={onPress}>
+        <TouchableOpacity onPress={handlePress}>
           <Content>
             <IconContainer>
               <NotificationIconImage source={IconBell} />
             </IconContainer>
             <TextContainer>
-              <Title numberOfLines={1}>{title}</Title>
-              <Message numberOfLines={2}>{message}</Message>
+              <Title numberOfLines={1}>{message.notification.title}</Title>
+              <Message numberOfLines={2}>{message.notification.body}</Message>
             </TextContainer>
           </Content>
         </TouchableOpacity>

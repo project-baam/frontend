@@ -30,7 +30,9 @@ function App(): React.JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
       <NotificationProvider>
-        <AppWithNotification backgroundStyle={backgroundStyle} isDarkMode={isDarkMode} />
+        <NavigationContainer>
+          <AppWithNotification backgroundStyle={backgroundStyle} isDarkMode={isDarkMode} />
+        </NavigationContainer>
       </NotificationProvider>
     </QueryClientProvider>
   );
@@ -87,21 +89,9 @@ function AppWithNotification({
         barStyle={isDarkMode ? "light-content" : "dark-content"}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <NavigationContainer>
-        <Router />
-      </NavigationContainer>
+      <Router />
       {notificationState.show && notificationState.message && (
-        <InAppNotification
-          title={notificationState.message.notification.title}
-          message={notificationState.message.notification.body}
-          onPress={() => {
-            // TODO: 
-            console.log("알림이 탭되었습니다.", notificationState.message?.data);
-            hideNotification();
-          }}
-          onHide={hideNotification}
-          duration={4000}
-        />
+        <InAppNotification message={notificationState.message} onHide={hideNotification} duration={4000} />
       )}
     </SafeAreaView>
   );
