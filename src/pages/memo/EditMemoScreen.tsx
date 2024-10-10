@@ -79,7 +79,7 @@ function EditMemoScreen({ navigation, route }: any) {
   const createMemo = async () => {
     const params: any = {
       subjectName: subjectName,
-      datetime: "2024-09-18 00:00:00",
+      datetime: date,
       title: title,
       memo: content
     };

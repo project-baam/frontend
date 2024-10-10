@@ -53,7 +53,6 @@ const HomeScreen: React.FC = () => {
       setUserInfo(response.data);
     } catch (error: any) {
       console.error(error.message);
-      console.error(error.stack);
       setUserInfo(null);
     } finally {
       setLoading(false);
@@ -85,7 +84,7 @@ const HomeScreen: React.FC = () => {
             </SectionHeader>
             <EmptyTimeTableBox>
               <EmptyTimeTableBoxLabel>아직 시간표가 없어요!</EmptyTimeTableBoxLabel>
-              <AddTimeTableButton onPress={() => navigation.navigate("SetTimeSetting")}>
+              <AddTimeTableButton onPress={() => navigation.navigate("Home", { screen: "SetTimeSetting" })}>
                 <AddTimeTableButtonText>시간표 추가하기</AddTimeTableButtonText>
                 <CustomImage source={ChevronRight} />
               </AddTimeTableButton>

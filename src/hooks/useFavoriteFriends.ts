@@ -15,19 +15,23 @@ export const useFavoriteFriends = (initialCount: number) => {
       if (!hasMore && pageNum !== 0) return;
 
       setLoading(true);
+      setError(null);
       try {
-        const { list, total } = await getFavoriteFriends({ count: initialCount, page: pageNum });
+        const result = await getFavoriteFriends({ count: initialCount, page: pageNum });
+        if (result) {
+          const { list, total } = result;
 
-        setTotalCount(total);
+          setTotalCount(total);
 
-        if (pageNum === 0) {
-          setFriends(list);
-        } else {
-          setFriends((prev) => [...prev, ...list]);
+          if (pageNum === 0) {
+            setFriends(list);
+          } else {
+            setFriends((prev) => [...prev, ...list]);
+          }
+
+          setHasMore((prev) => (pageNum === 0 ? list.length < total : prev));
+          setPage((prevPage) => prevPage + 1);
         }
-
-        setHasMore((prev) => (pageNum === 0 ? list.length < total : prev));
-        setPage((prevPage) => prevPage + 1);
       } catch (err: any) {
         console.error(err.message);
         console.error(err.stack);

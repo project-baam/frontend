@@ -13,7 +13,8 @@
     "test": "jest",
     "lint": "eslint .",
     "pod": "cd ios && pod install && cd ..",
-    "podu": "cd ios && pod update && cd .."
+    "podu": "cd ios && pod update && cd ..",
+    "pod:clean": "cd ios && rm -rf Pods && rm -rf Podfile.lock && pod deintegrate && pod cache clean --all && cd .."
   },
   "dependencies": {
     "@emotion/native": "^11.11.0",
@@ -22,6 +23,8 @@
     "@invertase/react-native-apple-authentication": "^2.4.0",
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-community/datetimepicker": "^8.1.1",
+    "@react-native-firebase/app": "^21.0.0",
+    "@react-native-firebase/messaging": "^21.0.0",
     "@react-native-picker/picker": "^2.7.7",
     "@react-navigation/bottom-tabs": "^6.6.0",
     "@react-navigation/native": "^6.1.17",

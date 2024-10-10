@@ -1,7 +1,6 @@
 import { HttpStatusCode } from "axios";
 import { customAxios } from "../instance";
 import { ErrorCode } from "../error-codes";
-import { MockNotifications } from "./mock-data";
 import { Notification } from "./notification.types";
 
 export const getNotifications = async (
@@ -20,26 +19,6 @@ export const getNotifications = async (
 
     return null;
   }
-};
-
-// TODO: 푸시알림이 없어서 Mock 데이터 임시 사용
-export const getNotificationsMock = async (
-  page: number,
-  count: number
-): Promise<{
-  total: number;
-  list: Notification[];
-} | null> => {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  const startIndex = (page - 1) * count;
-  const endIndex = startIndex + count;
-  const paginatedNotifications = MockNotifications.slice(startIndex, endIndex);
-
-  return {
-    total: MockNotifications.length,
-    list: paginatedNotifications
-  };
 };
 
 export const markAsRead = async (id: number): Promise<boolean | null> => {
