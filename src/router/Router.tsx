@@ -140,29 +140,25 @@ function Router() {
               }
             }
           )
-          .then((response) => {
+          .then(async (response) => {
             const accessToken = response.data.accessToken;
             const refreshToken = response.data.refreshToken;
-            AsyncStorage.setItem("refreshToken", refreshToken);
-            AsyncStorage.setItem("accessToken", accessToken);
+            await AsyncStorage.setItem("refreshToken", refreshToken);
+            await AsyncStorage.setItem("accessToken", accessToken);
 
             setRefreshToken(refreshToken);
             setToken(accessToken);
             setIsAuthenticated(true);
 
             // 푸시 토큰 등록
-            AsyncStorage.getItem(DEVICE_PUSH_TOKEN_KEY).then((pushToken: string | null) => {
-              console.log("pushToken: ", pushToken);
-              if (pushToken) {
-                registerDeviceToken({
-                  deviceToken: pushToken,
-                  deviceType: getDeviceType(),
-                  osType: getOSType()
-                })
-                  .then(() => console.log("Push token registered successfully"))
-                  .catch((error) => console.error("Error registering push token:", error));
-              }
-            });
+            const pushToken = await AsyncStorage.getItem(DEVICE_PUSH_TOKEN_KEY);
+            if (pushToken) {
+              await registerDeviceToken({
+                deviceToken: pushToken,
+                deviceType: getDeviceType(),
+                osType: getOSType()
+              });
+            }
           })
           .catch((error) => {
             console.error(error);

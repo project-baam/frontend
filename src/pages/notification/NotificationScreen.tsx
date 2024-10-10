@@ -14,7 +14,7 @@ const PAGE_SIZE = 15;
 const NotificationsScreen: React.FC = () => {
   const navigation = useNavigation<RootNavigationProp>();
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [totalNotifications, setTotalNotifications] = useState(0);
