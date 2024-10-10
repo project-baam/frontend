@@ -6,6 +6,13 @@ import { Colors } from "react-native/Libraries/NewAppScreen";
 import Router from "./src/router/Router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import messaging from "@react-native-firebase/messaging";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { DEVICE_PUSH_TOKEN_KEY } from "./src/constants/async-storage-keys";
+
+// 백그라운드 메시지 핸들러
+messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+  console.log("[+] Background message handled: ", remoteMessage);
+});
 
 const queryClient = new QueryClient();
 
@@ -25,16 +32,16 @@ function App(): React.JSX.Element {
   requestUserPermission();
 
   useEffect(() => {
-    getFcmToken();
-    subscribe();
-    return () => {
-      subscribe();
-    };
+    getDevicePushToken();
+    return subscribe;
   }, []);
 
-  const getFcmToken = async () => {
-    const fcmToken = await messaging().getToken();
-    console.log("[+] FCM Token :: ", fcmToken);
+  const getDevicePushToken = async () => {
+    const token = await messaging().getToken();
+    console.log("[+] Device Push Token: ", token);
+    if (token) {
+      await AsyncStorage.setItem(DEVICE_PUSH_TOKEN_KEY, token);
+    }
   };
 
   /**

@@ -18,6 +18,10 @@ import HomeStackRouter from "./HomeStackRouter";
 import axios from "axios";
 import FriendsStackRouter from "./FriendsStackRouter";
 import NotificationStackRouter from "./NotificationStackRouter";
+import { getDeviceType, getOSType } from "@/utils/DeviceUtil";
+import { registerDeviceToken } from "@/apis/notification/notification-device.apis";
+import { DEVICE_PUSH_TOKEN_KEY } from "@/constants/async-storage-keys";
+import { SERVER_HOST } from "@env";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -125,7 +129,7 @@ function Router() {
       if (storedToken) {
         axios
           .post(
-            "https://b-site.site/authentication/refresh-tokens",
+            `${SERVER_HOST}/authentication/refresh-tokens`,
             {
               refreshToken: storedToken
             },
@@ -145,6 +149,20 @@ function Router() {
             setRefreshToken(refreshToken);
             setToken(accessToken);
             setIsAuthenticated(true);
+
+            // 푸시 토큰 등록
+            AsyncStorage.getItem(DEVICE_PUSH_TOKEN_KEY).then((pushToken: string | null) => {
+              console.log("pushToken: ", pushToken);
+              if (pushToken) {
+                registerDeviceToken({
+                  deviceToken: pushToken,
+                  deviceType: getDeviceType(),
+                  osType: getOSType()
+                })
+                  .then(() => console.log("Push token registered successfully"))
+                  .catch((error) => console.error("Error registering push token:", error));
+              }
+            });
           })
           .catch((error) => {
             console.error(error);
