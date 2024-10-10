@@ -8,6 +8,7 @@ import { FriendRequestNotificationData, Notification } from "@/apis/notification
 import { NotificationCategory } from "@/apis/notification/notification.enums";
 import { RootNavigationProp } from "@/navigations/RootNavigation";
 import { getNotifications, markAsRead } from "@/apis/notification/notification.apis";
+import { acceptOrRejectFriendRequest, deleteSentFriendRequest } from "@/apis/friend-request.ts/friend-request.apis";
 
 const PAGE_SIZE = 15;
 
@@ -71,7 +72,6 @@ const NotificationsScreen: React.FC = () => {
         });
         break;
       case NotificationCategory.FriendRequest:
-        console.log("친구 요청 알림 클릭:", notification);
         navigation.navigate("Friends", {
           screen: "FriendListScreen"
         });
@@ -82,15 +82,15 @@ const NotificationsScreen: React.FC = () => {
   };
 
   const handleAcceptFriendRequest = async (requestId: number) => {
-    // TODO: 친구 요청 수락 API 호출
+    await acceptOrRejectFriendRequest(requestId, true);
   };
 
   const handleRejectFriendRequest = async (requestId: number) => {
-    // TODO: 친구 요청 거절 API 호출
+    await acceptOrRejectFriendRequest(requestId, false);
   };
 
   const handleCancelFriendRequest = async (requestId: number) => {
-    //  TODO: 친구 요청 취소 API 호출
+    await deleteSentFriendRequest(requestId);
   };
 
   const handleFriendRequestAction = async (
@@ -101,23 +101,20 @@ const NotificationsScreen: React.FC = () => {
     try {
       switch (action) {
         case "accept":
-          console.log("친구 요청 수락:", requestId);
-          handleAcceptFriendRequest(requestId);
+          await handleAcceptFriendRequest(requestId);
           break;
         case "reject":
-          console.log("친구 요청 거절:", requestId);
-          handleRejectFriendRequest(requestId);
+          await handleRejectFriendRequest(requestId);
           break;
         case "cancel":
-          console.log("친구 요청 취소:", requestId);
-          handleCancelFriendRequest(requestId);
+          await handleCancelFriendRequest(requestId);
           break;
         default:
           console.warn("Unknown action:", action);
       }
 
       // 액션 성공 후 읽음 처리
-      await markAsRead(requestId);
+      await markAsRead(notificationId);
 
       // 상태 업데이트
       setNotifications((prevNotifications) =>
