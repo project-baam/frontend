@@ -10,6 +10,7 @@ import ProfileScreen from "../pages/setting/ProfileScreen";
 import SchoolSearchScreen from "../pages/setting/SchoolSearchScreen";
 import SettingHomeScreen from "../pages/setting/SettingHomeScreen";
 import TermsOfServiceScreen from "../pages/setting/TermsOfServiceScreen";
+import LoginPage from "../pages/login/LoginPage";
 
 const Stack = createNativeStackNavigator<SettingStackParamList>();
 export default function SettingStackRouter() {
@@ -46,6 +47,7 @@ export default function SettingStackRouter() {
       <Stack.Screen name="ProfileEditScreen" component={ProfileEditScreen} options={{ headerShown: false }} />
       <Stack.Screen name="TermsOfServiceScreen" component={TermsOfServiceScreen} options={{ headerShown: false }} />
       <Stack.Screen name="ImagePickerScreen" component={ImagePickerScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="LoginPage" component={LoginPage} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
