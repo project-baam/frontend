@@ -49,7 +49,6 @@ function ProfileScreen({ navigation, route }: ProfileScreenProps) {
         } else if (response.errorCode) {
           console.log(response.errorMessage);
         } else {
-          console.log("여기 ", response.assets?.[0]);
           if (chooseType === "profile") {
             setLocalProfileImage(response.assets?.[0].uri ? response.assets?.[0].uri : "");
             uploadImage(response.assets?.[0], chooseType);
@@ -64,10 +63,6 @@ function ProfileScreen({ navigation, route }: ProfileScreenProps) {
 
   const uploadImage = async (imagePath: any, chooseType: string) => {
     try {
-      // const base64String = imagePath.base64;
-      // const mimeType = imagePath.type || "image/jpeg";
-      // const blob = await fetch(`data:${mimeType};base64,${base64String}`).then((response) => response.blob());
-      // const file = new File([blob], imagePath.fileName || "image.jpeg", { type: mimeType });
       const isAndroid = Platform.OS === "android";
       let photoUri = imagePath.uri;
 
@@ -76,17 +71,6 @@ function ProfileScreen({ navigation, route }: ProfileScreenProps) {
         type: "multipart/form-data",
         name: imagePath.fileName || "image.jpeg"
       };
-      // console.log("토큰", token, schoolId);
-      // const formData = {
-      //   schoolId: schoolId,
-      //   grade: grade,
-      //   className: className,
-      //   fullName: fullName,
-      //   isClassPublic: isClassPublic,
-      //   isTimetablePublic: isTimetablePublic,
-      //   profileImage: file,
-      //   backgroundImage: null
-      // };
       const formData = new FormData();
       formData.append("schoolId", schoolId);
       formData.append("grade", grade);
@@ -177,7 +161,12 @@ function ProfileScreen({ navigation, route }: ProfileScreenProps) {
   return (
     <Container>
       <Header style={{ zIndex: 2 }}>
-        <BackButton onPress={() => navigation.goBack()}>
+        <BackButton
+          onPress={() => {
+            //저장 추가
+            navigation.goBack();
+          }}
+        >
           <BackIcon source={VectorLeft} />
         </BackButton>
         <Text
