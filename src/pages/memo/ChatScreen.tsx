@@ -11,18 +11,25 @@ import {
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  Alert,
+  TouchableWithoutFeedback
 } from "react-native";
 import useAuthStore from "../../store/UserAuthStore";
 import { io, Socket } from "socket.io-client";
 import axios from "axios";
-import { VectorLeft, FriendsIcon, IconPlus, SendIcon } from "../../assets/assets";
+import RNFS from "react-native-fs";
+import { launchCamera, launchImageLibrary, Asset } from "react-native-image-picker";
+import { VectorLeft, FriendsIcon, IconPlus, SendIcon, CameraIcon, AlbumIcon, Hamburger } from "../../assets/assets";
 
 const MessageItem = ({ message, isOwnMessage }: any) => {
   if (!message) return null;
-  if (!message.sender) return null;
+  if (!message.sender) {
+    // return <Text>{message.content}</Text>;
+    return null;
+  }
   return (
-    <View style={[styles.messageContainer, { justifyContent: isOwnMessage ? "flex-end" : "flex-start" }]}>
+    <View style={[styles.messageContainer2, { justifyContent: isOwnMessage ? "flex-end" : "flex-start" }]}>
       {!isOwnMessage && (
         <Image
           source={
@@ -34,22 +41,31 @@ const MessageItem = ({ message, isOwnMessage }: any) => {
       {isOwnMessage ? (
         <>
           <Text style={styles.timestamp}>{new Date(message.sentAt).toLocaleTimeString()}</Text>
-
-          <View
-            style={[
-              styles.messageBubble,
-              {
-                backgroundColor: "#8A7EFF"
-              }
-            ]}
-          >
-            {message.type === MessageType.TEXT ? (
+          {message.type === MessageType.TEXT ? (
+            <View
+              style={[
+                styles.messageBubble,
+                {
+                  backgroundColor: "#8A7EFF",
+                  height: 38
+                }
+              ]}
+            >
               <Text style={[styles.messageContent, styles.white]}>{message.content}</Text>
-            ) : (
-              //   <FileMessage file={message.file} />
-              <></>
-            )}
-          </View>
+            </View>
+          ) : (
+            <View
+              style={[
+                styles.messageBubble,
+                {
+                  backgroundColor: "#8A7EFF"
+                }
+              ]}
+            >
+              <Image source={{ uri: message.file.url }} style={{ height: 120, width: 120, borderRadius: 12 }} />
+              {/* <Text>{message.file}</Text> */}
+            </View>
+          )}
         </>
       ) : (
         <View style={{ flexDirection: "column" }}>
@@ -67,7 +83,16 @@ const MessageItem = ({ message, isOwnMessage }: any) => {
                 <Text style={[styles.messageContent, styles.black]}>{message.content}</Text>
               ) : (
                 //   <FileMessage file={message.file} />
-                <></>
+                <View
+                  style={[
+                    styles.messageBubble,
+                    {
+                      backgroundColor: "#E9E9E9"
+                    }
+                  ]}
+                >
+                  <Image source={{ uri: message.file.url }} style={{ height: 120, width: 120, borderRadius: 12 }} />
+                </View>
               )}
             </View>
             <Text style={styles.timestamp}>{new Date(message.sentAt).toLocaleTimeString()}</Text>
@@ -163,10 +188,13 @@ function ChatScreen({ navigation, route }: any) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isTextState, setIsTextState] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   const connectSocket = useCallback(() => {
     console.log("Attempting to connect socket with token:", token);
 
@@ -207,6 +235,110 @@ function ChatScreen({ navigation, route }: any) {
     setSocket(newSocket);
   }, []);
 
+  // 전체 메시지 저장 함수
+  const storeAllMessages = async (chatRoomId: string, messages: Message[]) => {
+    const path = `${RNFS.DocumentDirectoryPath}/chat_room_${chatRoomId}_messages.json`;
+    const jsonValue = JSON.stringify(messages);
+
+    try {
+      await RNFS.writeFile(path, jsonValue, "utf8");
+      console.log("All messages saved", messages);
+    } catch (e) {
+      console.log("Error saving all messages", e);
+    }
+  };
+
+  // 전체 메시지 불러오기 함수
+  const loadAllMessages = async (chatRoomId: string) => {
+    const path = `${RNFS.DocumentDirectoryPath}/chat_room_${chatRoomId}_messages.json`;
+
+    try {
+      const jsonValue = await RNFS.readFile(path, "utf8");
+      // return jsonValue ? JSON.parse(jsonValue) : [];
+      const parsedMessages: Message[] = JSON.parse(jsonValue);
+      setMessages(parsedMessages);
+      return parsedMessages;
+    } catch (e) {
+      console.log("Error loading all messages", e);
+      return [];
+    }
+  };
+  // 이미지나 파일들만 저장하는 함수
+  const storeFilesOnly = async (chatRoomId: string, files: File[]) => {
+    const path = `${RNFS.DocumentDirectoryPath}/chat_room_${chatRoomId}_files.json`;
+    const jsonValue = JSON.stringify(files);
+
+    try {
+      await RNFS.writeFile(path, jsonValue, "utf8");
+      console.log("Files only saved", files);
+    } catch (e) {
+      console.log("Error saving files only", e);
+    }
+  };
+
+  // 이미지나 파일들만 불러오기 함수
+  const loadFilesOnly = async (chatRoomId: string) => {
+    const path = `${RNFS.DocumentDirectoryPath}/chat_room_${chatRoomId}_files.json`;
+
+    try {
+      const jsonValue = await RNFS.readFile(path, "utf8");
+      return jsonValue ? JSON.parse(jsonValue) : [];
+    } catch (e) {
+      console.log("Error loading files only", e);
+      return [];
+    }
+  };
+  const convertToFile = async (asset: Asset): Promise<File> => {
+    const response = await fetch(asset.uri as string);
+    const blob = await response.blob();
+    const fileName = asset.fileName || "unknown";
+    const fileType = asset.type || "image/jpeg";
+    return new File([blob], fileName, { type: fileType });
+  };
+
+  const getPhotos = () => {
+    launchImageLibrary(
+      {
+        mediaType: "photo",
+        includeBase64: true,
+        maxHeight: 400,
+        maxWidth: 400
+      },
+      async (response) => {
+        if (response.didCancel) {
+          console.log("cancled");
+        } else if (response.errorCode) {
+          console.log(response.errorMessage);
+        } else if (response.assets && response.assets.length > 0) {
+          const fileData = response.assets[0];
+          const convertedFile = await convertToFile(fileData); // 파일로 변환
+          setFile(convertedFile); // 파일 설정
+        }
+      }
+    );
+  };
+
+  // 카메라 실행
+  const openCamera = () => {
+    launchCamera(
+      {
+        mediaType: "photo",
+        includeBase64: false
+      },
+      async (response) => {
+        if (response.didCancel) {
+          Alert.alert("카메라 사용이 취소되었습니다.");
+        } else if (response.errorCode) {
+          Alert.alert("카메라 에러", response.errorMessage || "카메라를 사용할 수 없습니다.");
+        } else if (response.assets && response.assets.length > 0) {
+          const photoData = response.assets[0];
+          const convertedFile = await convertToFile(photoData); // 파일로 변환
+          setFile(convertedFile); // 파일 설정
+        }
+      }
+    );
+  };
+
   useEffect(() => {
     connectSocket();
 
@@ -216,7 +348,9 @@ function ChatScreen({ navigation, route }: any) {
       }
     };
   }, [connectSocket]);
-
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible); // 모달의 가시성을 토글
+  };
   const leaveRoom = useCallback(() => {
     if (socket && currentRoom) {
       console.log(`Leaving room: ${currentRoom}`);
@@ -260,7 +394,6 @@ function ChatScreen({ navigation, route }: any) {
           console.log("Server acknowledged message:", response);
         }
       );
-
       setInputMessage("");
     }
   };
@@ -272,8 +405,9 @@ function ChatScreen({ navigation, route }: any) {
         fileName: file.name,
         fileSize: file.size
       });
-
+      setFiles((prevFiles) => [...prevFiles, file]);
       const reader = new FileReader();
+
       reader.onload = (e) => {
         if (e.target && e.target.result) {
           const arrayBuffer = e.target.result as ArrayBuffer;
@@ -299,7 +433,7 @@ function ChatScreen({ navigation, route }: any) {
     }
   }, [socket, file, currentRoom]);
 
-  const exitChatApplication = () => {
+  const exitChatApplication = async () => {
     if (socket) {
       socket.disconnect();
     }
@@ -308,7 +442,15 @@ function ChatScreen({ navigation, route }: any) {
     setMessages([]);
     setIsConnected(false);
     setCurrentUser(null);
+    setFiles([]);
     console.log("Exited chat application");
+  };
+  const handleExit = async () => {
+    await storeAllMessages(route.params.roomId, messages);
+    await storeFilesOnly(route.params.roomId, files);
+    await exitChatApplication();
+
+    navigation.goBack();
   };
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -317,15 +459,19 @@ function ChatScreen({ navigation, route }: any) {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCurrentUser(response.data);
-        console.log("chat,", response.data);
       } catch (error) {
         console.error("Error fetching user info:", error);
       }
     };
-    // joinRoom(route.params.roomId);
     fetchUserInfo();
+    console.log("roomId", route.params.roomId);
+    // console.log("불러오기: ", loadAllMessages(route.params.roomId));
+    // console.log("불러오기: ", loadFilesOnly(route.params.roomId));
   }, []);
 
+  useEffect(() => {
+    sendFileMessage();
+  }, [file]);
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {loading && ( // 로딩 상태면 인디케이터 표시
@@ -338,6 +484,8 @@ function ChatScreen({ navigation, route }: any) {
               title="예"
               onPress={() => {
                 joinRoom(route.params.roomId);
+                loadAllMessages(route.params.roomId);
+                loadFilesOnly(route.params.roomId);
                 setLoading(false);
               }}
             />
@@ -345,7 +493,7 @@ function ChatScreen({ navigation, route }: any) {
         </LoadingContainer>
       )}
       <Header style={{ zIndex: 2 }}>
-        <BackButton onPress={() => navigation.goBack()}>
+        <BackButton onPress={handleExit}>
           <BackIcon source={VectorLeft} />
         </BackButton>
 
@@ -367,16 +515,24 @@ function ChatScreen({ navigation, route }: any) {
           >
             {route.params.roomName}
           </Text>
-          <View style={{ flexDirection: "row" }}>
+          <TouchableOpacity
+            style={{ flexDirection: "row" }}
+            onPress={() =>
+              navigation.navigate("ParticipantsList", { roomName: route.params.roomName, roomId: route.params.roomId })
+            }
+          >
             <Image source={FriendsIcon} style={{ width: 20, height: 20 }} />
             <Text>{route.params.roomCount}</Text>
-          </View>
+          </TouchableOpacity>
         </View>
-        <View style={{ width: 24, height: 24 }} />
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("FileList", { roomName: route.params.roomName, roomId: route.params.roomId })
+          }
+        >
+          <Image source={Hamburger} style={{ width: 24, height: 24 }} />
+        </TouchableOpacity>
       </Header>
-      {/* <Text>Current Room: {route.params.roomId}</Text> */}
-      {/* <Button title="join room" onPress={() => joinRoom(route.params.roomId)}></Button> */}
-      {/* <Button title="해당 채팅방 나가기" color="red" onPress={leaveRoom} /> */}
       <View style={styles.messageContainer}>
         <FlatList
           data={messages}
@@ -386,6 +542,11 @@ function ChatScreen({ navigation, route }: any) {
           )}
         />
       </View>
+      {isModalVisible && (
+        <TouchableWithoutFeedback onPress={toggleModal}>
+          <View style={{ flex: 1 }} />
+        </TouchableWithoutFeedback>
+      )}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
@@ -401,7 +562,7 @@ function ChatScreen({ navigation, route }: any) {
             borderTopColor: "#e9e9e9"
           }}
         >
-          <TouchableOpacity style={{ justifyContent: "center", paddingRight: 16 }}>
+          <TouchableOpacity style={{ justifyContent: "center", paddingRight: 16 }} onPress={toggleModal}>
             {/* 파일 추가 */}
             <Image style={{ width: 24, height: 24 }} source={IconPlus} />
           </TouchableOpacity>
@@ -420,18 +581,39 @@ function ChatScreen({ navigation, route }: any) {
           >
             <TextInput placeholder="메시지 보내기" value={inputMessage} onChangeText={setInputMessage} />
 
-            {file && <Text>선택된 파일: {file.name}</Text>}
+            {/* {file && <Text>선택된 파일: {file.name}</Text>} */}
             <TouchableOpacity
               style={{ justifyContent: "center", alignContent: "flex-end" }}
               onPress={() => {
-                if (isTextState) sendTextMessage();
-                else sendFileMessage();
+                sendTextMessage();
               }}
             >
               <Image source={SendIcon} style={{ width: 28, height: 28 }} />
             </TouchableOpacity>
           </View>
         </View>
+
+        {isModalVisible && (
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              {/* 카메라 버튼 */}
+              <TouchableOpacity onPress={openCamera}>
+                <View style={{ alignItems: "center" }}>
+                  <Image source={CameraIcon} style={{ width: 40, height: 40 }} />
+                  <Text style={styles.modalText}>카메라</Text>
+                </View>
+              </TouchableOpacity>
+
+              {/* 앨범 버튼 */}
+              <TouchableOpacity onPress={getPhotos}>
+                <View style={{ alignItems: "center" }}>
+                  <Image source={AlbumIcon} style={{ width: 40, height: 40 }} />
+                  <Text style={styles.modalText}>앨범</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -532,7 +714,14 @@ const styles = StyleSheet.create({
     paddingVertical: 0
   },
   messageContainer: {
-    display: "flex",
+    // display: "flex",
+    flexDirection: "row",
+    marginBottom: 10,
+    alignItems: "flex-end",
+    maxHeight: 604
+  },
+  messageContainer2: {
+    // display: "flex",
     flexDirection: "row",
     marginBottom: 10,
     alignItems: "flex-end"
@@ -545,12 +734,16 @@ const styles = StyleSheet.create({
   },
   messageBubble: {
     borderRadius: 16,
-    height: 38,
+
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginHorizontal: 8
+  },
+  modalTriggerText: {
+    fontSize: 24,
+    textAlign: "center"
   },
   senderName: {
     fontSize: 14,
@@ -572,6 +765,61 @@ const styles = StyleSheet.create({
     color: "#9d9d9d",
     textAlign: "left",
     marginHorizontal: 8
+  },
+  modalContainer: {
+    justifyContent: "flex-end"
+  },
+  modalContent: {
+    paddingLeft: 20,
+    backgroundColor: "#fff",
+    padding: 16,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    flexDirection: "row",
+    gap: 32,
+    paddingBottom: 64
+  },
+  modalText: {
+    alignSelf: "stretch",
+    fontSize: 14,
+    lineHeight: 16,
+    fontFamily: "Pretendard",
+    color: "#9d9d9d",
+    textAlign: "center"
+  },
+  modalOverlay: {
+    flex: 1 // 모달 뒤에 있는 영역
+  },
+  container: {
+    padding: 10,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    marginVertical: 10
+  },
+  fileName: {
+    fontSize: 16,
+    fontWeight: "bold"
+  },
+  fileSize: {
+    color: "#555",
+    marginVertical: 5
+  },
+  downloadButton: {
+    marginTop: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    backgroundColor: "#007bff",
+    borderRadius: 4
+  },
+  downloadButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    textAlign: "center"
+  },
+  errorText: {
+    color: "red",
+    marginTop: 10
   }
 });
 const LoadingContainer = styled(View)`
