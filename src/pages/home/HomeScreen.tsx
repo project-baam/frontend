@@ -1,10 +1,20 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { SafeAreaView, Pressable, ScrollView, View, Text, Image } from "react-native";
+import { SafeAreaView, Pressable, ScrollView, View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import styled from "@emotion/native";
 import { useMeal } from "@/hooks/useMeals";
 import MealInfo from "@/components/home/MealInfo";
-import { BtnLeft, ChevronRight } from "@/assets/assets";
+import {
+  BtnLeft,
+  ChevronRight,
+  MondayIcon,
+  TuesdayIcon,
+  WednesdayIcon,
+  ThursdayIcon,
+  FridayIcon,
+  WeekendIcon,
+  BottomSettingIcon
+} from "@/assets/assets";
 import DateCarousel from "@/components/home/DateCarousel";
 import { Theme } from "@/styles/theme";
 import { customAxios } from "@/apis/instance";
@@ -14,15 +24,35 @@ import FavoriteFriends from "@/components/home/FavoriteFriends";
 import { HOME_SCREEN } from "@/constants";
 import { RootNavigationProp } from "@/navigations/RootNavigation";
 import moment from "moment";
+import axios from "axios";
+import useAuthStore from "../../store/UserAuthStore";
+import { getTimetableColorType, getSubjectType } from "../../utils/SubjectUtil";
 
+type Current = {
+  subject: string;
+  startTime: Date;
+  endTime: Date;
+};
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<RootNavigationProp>();
   const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<User | null>(null);
   const [selectedDate, setSelectedDate] = useState(moment());
-
+  const [haveTimetable, setHaveTimetable] = useState(false);
+  const [currentSubject, setCurrentSubject] = useState<Current | null>(null);
+  const [remainingTime, setRemainingTime] = useState<number | null>(null);
+  const { token } = useAuthStore();
   const handleDateChange = (date: moment.Moment) => {
     setSelectedDate(date);
+    // 오늘 날짜와 비교
+    const today = moment().startOf("day"); // 오늘 날짜의 시작 시점 (00:00:00)
+
+    // 파라미터로 들어온 date가 오늘이 아닌 경우
+    if (!date.isSame(today, "day")) {
+      setHaveTimetable(false);
+    } else {
+      setHaveTimetable(true); // 현재 주제 초기화
+    }
   };
 
   const navigateToFriendsList = () => {
@@ -60,6 +90,86 @@ const HomeScreen: React.FC = () => {
     }
   }, []);
 
+  const getTimeSetting = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("https://b-site.site/timetable/time-settings", {
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.data.firstPeriodStart) {
+        //시간표 등록되어잇음
+        setHaveTimetable(true);
+      } else {
+        //시간표 등록 전
+        setHaveTimetable(false);
+      }
+    } catch (error: any) {
+      console.error(error.response ? error.response.data : error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getCurrrentSubject = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("https://b-site.site/timetable/current-subject", {
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
+      console.log(response.data);
+      if (response.data.subject === null) {
+        //듣는과목 없음
+      } else {
+        //듣는 과목 있음
+
+        setCurrentSubject(response.data);
+      }
+    } catch (error: any) {
+      console.error(error.response ? error.response.data : error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  function getImoji(day: string): Image {
+    const DayImoji: { [key: string]: Image } = {
+      월요일: MondayIcon,
+      화요일: TuesdayIcon,
+      수요일: WednesdayIcon,
+      목요일: ThursdayIcon,
+      금요일: FridayIcon,
+      토요일: WeekendIcon,
+      일요일: WeekendIcon
+    };
+    return DayImoji[day];
+  }
+  function getComment(day: string): string {
+    const DayComment: { [key: string]: string } = {
+      월요일: "선배, \n월요일인데 마라탕 사주세요",
+      화요일: "소원을 말해봐~ \n오늘이 금요일이었으면 좋겠지?",
+      수요일: "워워 진정해~ \n이제 수요일 끝난거야",
+      목요일: "하암~ 목요인데 \n설마 보충수업 있는거 아니지?",
+      금요일: "불금인데, \n모히또가서 몰디브 한잔 할사람?",
+      토요일: "너 집에만 있을꺼야? \n주말은 순삭이야~!",
+      일요일: "너 집에만 있을꺼야? \n주말은 순삭이야~!"
+    };
+    return DayComment[day];
+  }
+
+  function getTime(date: Date) {
+    const hours = date.getHours(); // 0-23 범위의 시간
+    const minutes = date.getMinutes(); // 0-59 범위의 분
+
+    // 두 자리로 포맷팅 (예: 12:00)
+    const formattedTime = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+    return formattedTime;
+  }
   useFocusEffect(
     useCallback(() => {
       getUserProfile();
@@ -67,9 +177,79 @@ const HomeScreen: React.FC = () => {
     }, [getUserProfile, refetchFriends])
   );
 
+  const getTodayInKorean = (): string => {
+    const daysInKorean = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+    const today = new Date();
+    const dayIndex = today.getDay(); // 0: 일요일, 1: 월요일, ..., 6: 토요일
+    return daysInKorean[dayIndex];
+  };
+  const TimeBar: React.FC<{ startTime: Date; endTime: Date }> = ({ startTime, endTime }) => {
+    const [remainingTime, setRemainingTime] = useState<string>(""); // 남은 시간 상태
+
+    useEffect(() => {
+      const updateRemainingTime = () => {
+        const now = new Date();
+        const totalDuration = endTime.getTime() - startTime.getTime();
+        const elapsed = Math.max(0, now.getTime() - startTime.getTime());
+
+        const remaining = Math.max(0, totalDuration - elapsed);
+        const remainingMinutes = Math.floor(remaining / 60000); // 밀리초를 분으로 변환
+
+        // 남은 시간을 업데이트
+        setRemainingTime(remainingMinutes > 0 ? `${remainingMinutes}분` : "시간 종료");
+      };
+
+      updateRemainingTime(); // 초기 남은 시간 계산
+      const interval = setInterval(updateRemainingTime, 60000); // 1분마다 업데이트
+
+      // 컴포넌트 언마운트 시 interval 정리
+      return () => clearInterval(interval);
+    }, [startTime, endTime]);
+    return (
+      <View style={styles.container}>
+        <View style={styles.barContainer}>
+          <View
+            style={[
+              styles.elapsedBar,
+              {
+                width: `${
+                  ((new Date().getTime() - startTime.getTime()) / (endTime.getTime() - startTime.getTime())) * 100 - 8
+                }%`
+              }
+            ]}
+          />
+          <View style={styles.timeText}>
+            <Text
+              style={{ fontSize: 14, fontWeight: "600", fontFamily: "Pretendard", color: "#fff", textAlign: "left" }}
+            >
+              {remainingTime}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.remainingBar,
+              {
+                width: `${
+                  (1 - (new Date().getTime() - startTime.getTime()) / (endTime.getTime() - startTime.getTime())) * 100 -
+                  8
+                }%`
+              }
+            ]}
+          />
+        </View>
+      </View>
+    );
+  };
   useEffect(() => {
     refetchMeals();
   }, [selectedDate]);
+
+  useEffect(() => {
+    getTimeSetting();
+  }, []);
+  useEffect(() => {
+    getCurrrentSubject();
+  }, [haveTimetable]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FEFEFA" }}>
@@ -83,13 +263,78 @@ const HomeScreen: React.FC = () => {
                 <CustomImage source={BtnLeft} style={{ transform: [{ scaleX: -1 }] }} />
               </Pressable>
             </SectionHeader>
-            <EmptyTimeTableBox>
-              <EmptyTimeTableBoxLabel>아직 시간표가 없어요!</EmptyTimeTableBoxLabel>
-              <AddTimeTableButton onPress={() => navigation.navigate("SetTimeSetting")}>
-                <AddTimeTableButtonText>시간표 추가하기</AddTimeTableButtonText>
-                <CustomImage source={ChevronRight} />
-              </AddTimeTableButton>
-            </EmptyTimeTableBox>
+            {haveTimetable ? (
+              <TimeTableBox
+                bgColor={currentSubject?.subject ? getTimetableColorType(currentSubject.subject) : "#DBD7FF"}
+              >
+                {currentSubject ? (
+                  <>
+                    {/* 과목 있는 경우 */}
+                    <Image
+                      source={getSubjectType(currentSubject.subject)}
+                      style={{
+                        width: 48,
+                        height: 48,
+                        marginBottom: 20
+                      }}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 20,
+                        letterSpacing: 1,
+                        fontWeight: "600",
+                        fontFamily: "Pretendard",
+                        color: "#262626",
+                        textAlign: "left"
+                      }}
+                    >
+                      {currentSubject.subject}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        letterSpacing: 1,
+                        fontFamily: "Pretendard",
+                        color: "#262626",
+                        marginTop: 4
+                      }}
+                    >
+                      {getTime(currentSubject.startTime)} ~ {getTime(currentSubject.endTime)}
+                    </Text>
+                    <TimeBar startTime={currentSubject.startTime} endTime={currentSubject.endTime} />
+                  </>
+                ) : (
+                  <>
+                    {/* 과목 없는 경우 */}
+                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                      <Image source={getImoji(getTodayInKorean())} style={{ width: 48, height: 48 }} />
+                      <TouchableOpacity
+                        style={{
+                          backgroundColor: "rgba(265,265,265,0.3)",
+                          marginBottom: 18,
+                          borderRadius: 20,
+                          padding: 2
+                        }}
+                        onPress={() => {
+                          navigation.navigate("AddTimeTableScreen");
+                        }}
+                      >
+                        <Image source={BottomSettingIcon} style={{ width: 30, height: 30, tintColor: "#FFFFFF" }} />
+                      </TouchableOpacity>
+                    </View>
+                    <TimeTableBoxLabel>{getComment(getTodayInKorean())}</TimeTableBoxLabel>
+                  </>
+                )}
+              </TimeTableBox>
+            ) : (
+              <EmptyTimeTableBox>
+                <EmptyTimeTableBoxLabel>아직 시간표가 없어요!</EmptyTimeTableBoxLabel>
+                <AddTimeTableButton onPress={() => navigation.navigate("SetTimeSetting")}>
+                  <AddTimeTableButtonText>시간표 추가하기</AddTimeTableButtonText>
+                  <CustomImage source={ChevronRight} />
+                </AddTimeTableButton>
+              </EmptyTimeTableBox>
+            )}
           </Section>
           <Section>
             <SectionHeader>
@@ -154,6 +399,15 @@ const SectionHeaderTitle = styled.Text`
   line-height: 26px;
 `;
 
+const TimeTableBox = styled.View<{ bgColor: string }>`
+  width: 100%;
+  height: 174px;
+  background-color: ${(props) => props.bgColor};
+  border-radius: 20px;
+  justify-content: center;
+  padding-vertical: 16px;
+  padding-horizontal: 20px;
+`;
 const EmptyTimeTableBox = styled.View`
   width: 100%;
   height: 267px;
@@ -170,6 +424,16 @@ const EmptyTimeTableBoxLabel = styled.Text`
   font-size: 20px;
   font-weight: 600;
   line-height: 28px;
+`;
+const TimeTableBoxLabel = styled.Text`
+  color: #000;
+  font-family: "Pretendard";
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+  text-align: "left";
+  flex: 1;
+  margin-top: 34px;
 `;
 
 const AddTimeTableButton = styled(Pressable)`
@@ -204,3 +468,34 @@ const EmptyMealLabel = styled.Text`
 `;
 
 export default HomeScreen;
+const styles = StyleSheet.create({
+  container: {
+    alignItems: "center"
+    // margin: 20
+  },
+  barContainer: {
+    flexDirection: "row",
+
+    // overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  elapsedBar: {
+    height: 3,
+    backgroundColor: "black"
+  },
+  remainingBar: {
+    height: 3,
+    backgroundColor: "white"
+  },
+  timeText: {
+    backgroundColor: "#262626",
+    height: "100%",
+    borderRadius: 45,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 2
+  }
+});
