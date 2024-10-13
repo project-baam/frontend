@@ -5,11 +5,7 @@ export const IconSearch = require("../assets/images/icon_search.png");
 export const IconPlus = require("../assets/images/icon_plus.png");
 export const IconSend = require("../assets/images/icon_send.png");
 export const DropDownDown = require("../assets/images/dropdown_down.png");
-export const HomeIcon = require("../assets/images/icon_home.png");
-export const PinIcon = require("../assets/images/icon_pin.png");
 export const FriendsIcon = require("../assets/images/icon_friends.png");
-export const CalendarIcon = require("../assets/images/icon_calendar.png");
-export const SettingIcon = require("../assets/images/icon_setting.png");
 export const AddMemoIcon = require("../assets/images/add_memo.png");
 export const VectorLeft = require("../assets/images/VectorLeft.png");
 export const FilterLine = require("../assets/images/filter-lines.png");
@@ -61,5 +57,23 @@ export const Vietnamese = require("../assets/images/Vietnamese.png");
 
 export const ETC = require("../assets/images/etc.png");
 
+export const CameraIcon = require("../assets/images/CameraIcon.png");
+export const AlbumIcon = require("../assets/images/AlbumIcon.png");
+export const FileIcon = require("../assets/images/FileIcon.png");
+
+//하단바
+export const BottomHomeIcon = require("../assets/images/BottomHome.png");
+export const BottomFriendsIcon = require("../assets/images/BottomFriends.png");
+export const BottomCalendarIcon = require("../assets/images/BottomCalendar.png");
+export const BottomFolderIcon = require("../assets/images/BottomFolder.png");
+export const BottomSettingIcon = require("../assets/images/BottomSetting.png");
+
+//요일
+export const MondayIcon = require("../assets/images/Monday.png");
+export const TuesdayIcon = require("../assets/images/Tuesday.png");
+export const WednesdayIcon = require("../assets/images/Wednesday.png");
+export const ThursdayIcon = require("../assets/images/Thursday.png");
+export const FridayIcon = require("../assets/images/Friday.png");
+export const WeekendIcon = require("../assets/images/Weekend.png");
 //test
 export const DummyProfile = require("../assets/images/dummyprofile.png");

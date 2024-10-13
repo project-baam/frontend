@@ -4,32 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import useAuthStore from "../../store/UserAuthStore";
 import { Korean } from "../../assets/assets";
 import { io, Socket } from "socket.io-client";
-const MessageItem = ({ message, isOwnMessage }: any) => {
-  if (!message) return null;
-
-  return (
-    <View style={[styles.messageContainer, { justifyContent: isOwnMessage ? "flex-end" : "flex-start" }]}>
-      {!isOwnMessage && <Image source={{ uri: message.sender.profileImageUrl }} style={styles.avatar} />}
-      <View
-        style={[
-          styles.messageBubble,
-          {
-            backgroundColor: isOwnMessage ? "#8A7EFF" : "#E9E9E9" // Custom color
-          }
-        ]}
-      >
-        {!isOwnMessage && <Text style={styles.senderName}>{message.sender.name}</Text>}
-        {message.type === MessageType.TEXT ? (
-          <Text style={styles.messageContent}>{message.content}</Text>
-        ) : (
-          //   <FileMessage file={message.file} />
-          <></>
-        )}
-        <Text style={styles.timestamp}>{new Date(message.sentAt).toLocaleTimeString()}</Text>
-      </View>
-    </View>
-  );
-};
 
 export const ChatEvents = {
   FromClient: {

@@ -3,13 +3,17 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React, { useEffect, useState } from "react";
 import styled from "@emotion/native";
-import FriendListScreen from "../pages/friends/FriendListScreen";
 import CalendarStackRouter from "./CalendarStackRouter";
 import MemoStackRouter from "./MemoStackRouter";
 import SettingStackRouter from "./SettingStackRouter";
-import { HomeIcon, PinIcon, FriendsIcon, CalendarIcon, SettingIcon } from "../assets/assets";
-import { Image, StyleSheet, View } from "react-native";
-import FriendProfile from "../pages/friends/FriendProfile";
+import {
+  BottomHomeIcon,
+  BottomFriendsIcon,
+  BottomCalendarIcon,
+  BottomFolderIcon,
+  BottomSettingIcon
+} from "../assets/assets";
+import { Image, StyleSheet, View, Text } from "react-native";
 import SignUpStackRouter from "./SignUpStackRouter";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import useAuthStore from "../store/UserAuthStore";
@@ -50,17 +54,31 @@ const CustomTabBar = ({ state, navigation }: CustomTabBarProps) => {
         const getIconSource = () => {
           switch (route.name) {
             case "Home":
-              return isFocused
-                ? HomeIcon // 아이콘의 활성화된 상태
-                : HomeIcon; // 아이콘의 비활성화된 상태
-            case "Memo":
-              return isFocused ? PinIcon : PinIcon;
+              return BottomHomeIcon;
             case "Friends":
-              return isFocused ? FriendsIcon : FriendsIcon;
+              return BottomFriendsIcon;
             case "Calendar":
-              return isFocused ? CalendarIcon : CalendarIcon;
+              return BottomCalendarIcon;
+            case "Memo":
+              return BottomFolderIcon;
             case "Setting":
-              return isFocused ? SettingIcon : SettingIcon;
+              return BottomSettingIcon;
+            default:
+              return null;
+          }
+        };
+        const getText = () => {
+          switch (route.name) {
+            case "Home":
+              return "홈";
+            case "Friends":
+              return "친구";
+            case "Calendar":
+              return "캘린더";
+            case "Memo":
+              return "수업함";
+            case "Setting":
+              return "설정";
             default:
               return null;
           }
@@ -69,6 +87,21 @@ const CustomTabBar = ({ state, navigation }: CustomTabBarProps) => {
         return (
           <TabButton key={route.key} onTouchEnd={onPress}>
             <Image source={getIconSource()} style={[styles.icon, isFocused && styles.iconFocused]} />
+            <Text
+              style={{
+                alignSelf: "stretch",
+                fontSize: 12,
+                lineHeight: 14,
+                fontWeight: "600",
+                fontFamily: "Pretendard",
+                color: "#7b7b7b",
+                textAlign: "center",
+                marginTop: 4,
+                marginBottom: 20
+              }}
+            >
+              {getText()}
+            </Text>
           </TabButton>
         );
       })}
@@ -85,23 +118,23 @@ export const MyTabs = () => {
       }}
     >
       <Tab.Screen name="Home" component={HomeStackRouter} />
-      <Tab.Screen name="Memo" component={MemoStackRouter} />
       <Tab.Screen name="Friends" component={FriendsStackRouter} />
       <Tab.Screen name="Calendar" component={CalendarStackRouter} />
+      <Tab.Screen name="Memo" component={MemoStackRouter} />
       <Tab.Screen name="Setting" component={SettingStackRouter} options={{ unmountOnBlur: true }} />
     </Tab.Navigator>
   );
 };
 const TabBarContainer = styled(View)`
   flex-direction: row;
-  width: 328px;
-  height: 56px;
-  background-color: #333;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
+  width: "100%";
+  height: 70px;
+  background-color: #ffffff;
   justify-content: space-between;
   align-items: center;
-  margin: auto;
+  padding-top: 10px;
+  border-top-width: 1px;
+  border-top-color: #7b7b7b;
 `;
 const TabButton = styled(View)`
   flex: 1;
@@ -109,12 +142,12 @@ const TabButton = styled(View)`
 `;
 const styles = StyleSheet.create({
   icon: {
-    width: 32,
-    height: 32,
-    tintColor: "white" // 비활성화된 아이콘의 색상
+    width: 24,
+    height: 24,
+    tintColor: "#7B7B7B" // 비활성화된 아이콘의 색상
   },
   iconFocused: {
-    tintColor: "#fff" // 활성화된 아이콘의 색상
+    tintColor: "#8A7EFF" // 활성화된 아이콘의 색상
   }
 });
 
@@ -198,7 +231,6 @@ export function AuthenticatedStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="BottomTab" component={MyTabs} />
-      {/* <Stack.Screen name="FriendProfile" component={FriendProfile} /> */}
       <Stack.Screen name="Notification" component={NotificationStackRouter} />
     </Stack.Navigator>
   );

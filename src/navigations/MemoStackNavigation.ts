@@ -1,4 +1,6 @@
 export type MemoStackParamList = {
+  ParticipantsList: undefined;
+  FileList: undefined;
   ChatScreen: undefined;
   EditMemoScreen: {
     id: number;

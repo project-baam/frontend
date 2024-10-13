@@ -146,6 +146,40 @@ export function getSubjectType(sj: string) {
   return getSubjectIcon(subject);
 }
 
+export function getTimetableColorType(sj: string) {
+  const subject = subjectList[sj];
+  return getTimetableColor(subject);
+}
+function getTimetableColor(subject: string): string {
+  const subjectColor: { [key: string]: string } = {
+    국어: "rgba(207, 186, 240,1)",
+    수학: "rgba(126, 183, 251,1)",
+    영어: "rgba(85, 196, 224,1)",
+    물리: "rgba(181, 197, 255,1)",
+    화학: "rgba(181, 197, 255,1)",
+    생명과학: "rgba(181, 197, 255,1)",
+    지구과학: "rgba(181, 197, 255,1)",
+    과학: "rgba(181, 197, 255,1)",
+    사회: "rgba(81, 202, 129,1)",
+    지리: "rgba(81, 202, 129,1)",
+    경제: "rgba(81, 202, 129,1)",
+    법: "rgba(81, 202, 129,1)",
+    체육: "rgba(249, 136, 136,1)",
+    음악: "rgba(249, 136, 136,1)",
+    미술: "rgba(249, 136, 136,1)",
+    중국어: "rgba(247, 217, 120,1)",
+    일본어: "rgba(247, 217, 120,1)",
+    독일어: "rgba(247, 217, 120,1)",
+    프랑스어: "rgba(247, 217, 120,1)",
+    스페인어: "rgba(247, 217, 120,1)",
+    러시아어: "rgba(247, 217, 120,1)",
+    아랍어: "rgba(247, 217, 120,1)",
+    베트남어: "rgba(247, 217, 120,1)",
+    기타: "rgba(246, 199, 167,1)"
+  };
+  return subjectColor[subject];
+}
+
 export function getSubjectColorType(sj: string) {
   const subject = subjectList[sj];
   return getSubjectColor(subject);
