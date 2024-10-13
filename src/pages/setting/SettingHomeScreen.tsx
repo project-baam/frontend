@@ -27,6 +27,7 @@ type User = {
   isClassPublic: boolean;
   notificationsEnabled: boolean;
 };
+const API_URL = "https://b-site.site";
 function SettingHomeScreen({ navigation, route }: SettingHomeScreenProps) {
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -35,7 +36,7 @@ function SettingHomeScreen({ navigation, route }: SettingHomeScreenProps) {
   const [dummyState, setDummyState] = useState(false);
 
   // const { schoolName, grade, className, fullName, profileImage, backgroundImage, isClassPublic } = useUserStore();
-  const { token } = useAuthStore();
+  const { token, setToken, setIsAuthenticated, setRefreshToken } = useAuthStore();
 
   const handleToggleSwitch = async () => {
     try {
@@ -68,8 +69,20 @@ function SettingHomeScreen({ navigation, route }: SettingHomeScreenProps) {
     setIsDialogVisible(false);
   };
 
-  const handleConfirmDialog = () => {
+  const handleConfirmDialog = async () => {
     //[ ]TODO : 회원 탈퇴 로직 추가
+    try {
+      const response = await axios.delete(`${API_URL}/user`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setToken("");
+      setIsAuthenticated(false);
+      setRefreshToken("");
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+    } finally {
+      navigation.navigate("LoginPage");
+    }
     handleHideDialog();
   };
   useEffect(() => {
