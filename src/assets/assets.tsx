@@ -68,5 +68,12 @@ export const BottomCalendarIcon = require("../assets/images/BottomCalendar.png")
 export const BottomFolderIcon = require("../assets/images/BottomFolder.png");
 export const BottomSettingIcon = require("../assets/images/BottomSetting.png");
 
+//요일
+export const MondayIcon = require("../assets/images/Monday.png");
+export const TuesdayIcon = require("../assets/images/Tuesday.png");
+export const WednesdayIcon = require("../assets/images/Wednesday.png");
+export const ThursdayIcon = require("../assets/images/Thursday.png");
+export const FridayIcon = require("../assets/images/Friday.png");
+export const WeekendIcon = require("../assets/images/Weekend.png");
 //test
 export const DummyProfile = require("../assets/images/dummyprofile.png");
