@@ -62,7 +62,6 @@ const FavoriteFriends: React.FC<FavoriteFriendsProps> = ({
   );
 
   const handleLoadMore = useCallback(() => {
-    console.log("handleLoadMore");
     if (!loading && hasMore) {
       onLoadMore();
     }

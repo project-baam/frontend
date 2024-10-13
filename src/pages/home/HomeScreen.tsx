@@ -83,7 +83,6 @@ const HomeScreen: React.FC = () => {
       setUserInfo(response.data);
     } catch (error: any) {
       console.error(error.message);
-      console.error(error.stack);
       setUserInfo(null);
     } finally {
       setLoading(false);

@@ -41,8 +41,8 @@ export default function SocialLoginRedirect({ navigation, route }: SocialLoginRe
         // 기 가입 회원
 
         // 기기에 jwt 토큰 저장
-        AsyncStorage.setItem("accessToken", accessToken);
-        AsyncStorage.setItem("refreshToken", refreshToken);
+        await AsyncStorage.setItem("accessToken", accessToken);
+        await AsyncStorage.setItem("refreshToken", refreshToken);
 
         // 스크린 이동
         setIsAuthenticated(true);

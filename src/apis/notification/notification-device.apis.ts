@@ -12,23 +12,23 @@ export const registerDeviceToken = async (data: {
   deviceToken: string;
   deviceType: DeviceType;
   osType: OSType;
-}): Promise<boolean | null> => {
-  const response = await customAxios.post("device-token", data);
-  if (response.status === HttpStatusCode.Ok) {
-    return response.data;
-  }
-
-  if (response.status === HttpStatusCode.BadRequest) {
-    if (response.data.code === ErrorCode.MalformedExpoPushToken) {
-      console.log("Expo 푸시 토큰 형식이 아님:", data.deviceToken);
-    } else if (response.data.code === ErrorCode.InvalidParameter) {
-      console.log("잘못된 요청 파라미터:", response.data);
+}): Promise<void> => {
+  try {
+    const response = await customAxios.post("device-token", data);
+    if (response.status !== HttpStatusCode.Ok) {
+      if (response.status === HttpStatusCode.BadRequest) {
+        if (response.data.code === ErrorCode.MalformedExpoPushToken) {
+          throw new Error(`Expo 푸시 토큰 형식이 아님: ${data.deviceToken}`);
+        } else if (response.data.code === ErrorCode.InvalidParameter) {
+          throw new Error(`잘못된 요청 파라미터: '${response.data}`);
+        }
+      } else {
+        throw new Error(`디바이스 토큰 등록/업데이트 실패: ${response.data}`);
+      }
     }
-  } else {
-    console.error("디바이스 토큰 등록/업데이트 실패:", response.data);
+  } catch (error) {
+    throw error;
   }
-
-  return null;
 };
 
 /**

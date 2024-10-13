@@ -78,9 +78,7 @@ function FriendListScreen() {
 
   return (
     <Container>
-      {/* <ScrollViewContainer> */}
       <ContentContainer>
-
         <Tabs>
           <TabButton active={selectedTab === "friends"} onPress={() => setSelectedTab("friends")}>
             <TabText active={selectedTab === "friends"}>친구들</TabText>
@@ -89,8 +87,13 @@ function FriendListScreen() {
             <TabText active={selectedTab === "more"}>더보기</TabText>
           </TabButton>
         </Tabs>
-        {selectedTab === "friends" ? <FriendsList /> : <SchoolFriends />}
-      {/* </ScrollViewContainer> */}
+        {selectedTab === "friends" ? (
+          <ScrollViewContainer>
+            <FriendsList />
+          </ScrollViewContainer>
+        ) : (
+          <SchoolFriends />
+        )}
       </ContentContainer>
     </Container>
   );

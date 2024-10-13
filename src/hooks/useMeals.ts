@@ -18,8 +18,10 @@ export const useMeal = (schoolId: number | null, date: Moment) => {
     setIsLoading(true);
     try {
       const data = await fetchMealData(schoolId, date.format("YYYY-MM-DD"));
-      setMeals(data.list);
-      setError(null);
+      if (data) {
+        setMeals(data.list);
+        setError(null);
+      }
     } catch (err: any) {
       console.error(err);
       setError(err instanceof Error ? err : new Error("Unknown error occurred"));
