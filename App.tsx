@@ -1,6 +1,6 @@
 import { NavigationContainer } from "@react-navigation/native";
 import React, { useEffect } from "react";
-import { StatusBar, StyleSheet, useColorScheme } from "react-native";
+import { PermissionsAndroid, Platform, StatusBar, StyleSheet, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 import Router from "./src/router/Router";
@@ -54,6 +54,19 @@ function AppWithNotification({
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
     // if enabled (TODO:)
+
+    if (Platform.OS === "android" && Platform.Version >= 33) {
+      try {
+        const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log("Notification permission granted");
+        } else {
+          console.log("Notification permission denied");
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    }
   }
 
   useEffect(() => {
@@ -65,6 +78,7 @@ function AppWithNotification({
 
   const getDevicePushToken = async () => {
     const token = await messaging().getToken();
+    console.log("[+] Device push token: ", token);
     if (token) {
       await AsyncStorage.setItem(DEVICE_PUSH_TOKEN_KEY, token);
     }
