@@ -5,10 +5,10 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { FriendsStackParamList } from "../../navigations/FriendsStackNavigation";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
-import useAuthStore from "../../store/UserAuthStore";
 import { IconSearch } from "../../assets/assets";
 
 import { getSubjectType } from "@/utils/SubjectUtil";
+import useUserStore from "@/store/UserStore";
 type NavigationProps = StackNavigationProp<FriendsStackParamList, "FriendProfile">;
 
 interface schoolmate {
@@ -31,7 +31,7 @@ export default function FriendsList() {
     list: []
   });
   const [total, setTotal] = useState(0);
-  const { token } = useAuthStore();
+  const { accessToken: token } = useUserStore();
   const [enteredText, setEnteredText] = useState("");
 
   const fetchFriends = async (page: number) => {

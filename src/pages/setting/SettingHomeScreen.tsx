@@ -10,6 +10,7 @@ import { Theme } from "../../styles/theme";
 import { VectorLeft } from "../../assets/assets";
 import { StackScreenProps } from "@react-navigation/stack";
 import { SettingStackParamList } from "../../navigations/SettingStackNavigation";
+import useUserStore from "@/store/UserStore";
 type SettingHomeScreenProps = StackScreenProps<SettingStackParamList, "SettingHomeScreen">;
 
 type User = {
@@ -36,7 +37,8 @@ function SettingHomeScreen({ navigation, route }: SettingHomeScreenProps) {
   const [dummyState, setDummyState] = useState(false);
 
   // const { schoolName, grade, className, fullName, profileImage, backgroundImage, isClassPublic } = useUserStore();
-  const { token, setToken, setIsAuthenticated, setRefreshToken } = useAuthStore();
+  const { setToken, setIsAuthenticated, setRefreshToken } = useAuthStore();
+  const { accessToken: token } = useUserStore();
 
   const handleToggleSwitch = async () => {
     try {

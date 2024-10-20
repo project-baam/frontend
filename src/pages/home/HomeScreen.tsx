@@ -25,8 +25,8 @@ import { HOME_SCREEN } from "@/constants";
 import { RootNavigationProp } from "@/navigations/RootNavigation";
 import moment from "moment";
 import axios from "axios";
-import useAuthStore from "../../store/UserAuthStore";
 import { getTimetableColorType, getSubjectType } from "../../utils/SubjectUtil";
+import useUserStore from "@/store/UserStore";
 
 type Current = {
   subject: string;
@@ -41,7 +41,7 @@ const HomeScreen: React.FC = () => {
   const [haveTimetable, setHaveTimetable] = useState(false);
   const [currentSubject, setCurrentSubject] = useState<Current | null>(null);
   const [remainingTime, setRemainingTime] = useState<number | null>(null);
-  const { token } = useAuthStore();
+  const { accessToken: token } = useUserStore();
   const handleDateChange = (date: moment.Moment) => {
     setSelectedDate(date);
     // 오늘 날짜와 비교

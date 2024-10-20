@@ -22,9 +22,6 @@ import HomeStackRouter from "./HomeStackRouter";
 import axios from "axios";
 import FriendsStackRouter from "./FriendsStackRouter";
 import NotificationStackRouter from "./NotificationStackRouter";
-import { getDeviceType, getOSType } from "@/utils/DeviceUtil";
-import { registerDeviceToken } from "@/apis/notification/notification-device.apis";
-import { DEVICE_PUSH_TOKEN_KEY } from "@/constants/async-storage-keys";
 import { SERVER_HOST } from "@env";
 
 const Stack = createNativeStackNavigator();
@@ -182,16 +179,6 @@ function Router() {
             setRefreshToken(refreshToken);
             setToken(accessToken);
             setIsAuthenticated(true);
-
-            // 푸시 토큰 등록
-            const pushToken = await AsyncStorage.getItem(DEVICE_PUSH_TOKEN_KEY);
-            if (pushToken) {
-              await registerDeviceToken({
-                deviceToken: pushToken,
-                deviceType: getDeviceType(),
-                osType: getOSType()
-              });
-            }
           })
           .catch((error) => {
             console.error(error);
