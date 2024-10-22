@@ -6,6 +6,9 @@ import { View } from "react-native";
 import { SignUpStackParamList } from "../../navigations/SignUpStackNavigation";
 import useAuthStore from "../../store/UserAuthStore";
 import useUserStore from "../../store/UserStore";
+import { DEVICE_PUSH_TOKEN_KEY } from "@/constants/async-storage-keys";
+import { registerDeviceToken } from "@/apis/notification/notification-device.apis";
+import { getDeviceType, getOSType } from "@/utils/DeviceUtil";
 
 type SocialLoginRedirectProps = StackScreenProps<SignUpStackParamList, "SocialLoginRedirect">;
 
@@ -37,13 +40,22 @@ export default function SocialLoginRedirect({ navigation, route }: SocialLoginRe
       setAccessToken(accessToken);
       setRefreshToken(refreshToken);
 
+      // 기기에 jwt 토큰 저장
+      await AsyncStorage.setItem("accessToken", accessToken);
+      await AsyncStorage.setItem("refreshToken", refreshToken);
+
+      const storedDeviceToken = (await AsyncStorage.getItem(DEVICE_PUSH_TOKEN_KEY)) || "";
+
+      if (storedDeviceToken) {
+        await registerDeviceToken({
+          deviceToken: storedDeviceToken,
+          deviceType: getDeviceType(),
+          osType: getOSType()
+        });
+      }
+
+      // 최초 가입 회원(학교 선택 화면으로 이동)
       if (status === "active") {
-        // 기 가입 회원
-
-        // 기기에 jwt 토큰 저장
-        await AsyncStorage.setItem("accessToken", accessToken);
-        await AsyncStorage.setItem("refreshToken", refreshToken);
-
         // 스크린 이동
         setIsAuthenticated(true);
         navigation.reset({

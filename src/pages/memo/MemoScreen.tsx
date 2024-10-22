@@ -5,8 +5,8 @@ import axios from "axios";
 import { AddMemoIcon, TodayTodoImg, ChevronRight } from "../../assets/assets";
 import { subjectList } from "../../utils/SubjectUtil";
 import { getSubjectColorType } from "../../utils/SubjectUtil";
-import useAuthStore from "../../store/UserAuthStore";
 import ChatRooms from "./ChatRooms";
+import useUserStore from "@/store/UserStore";
 
 type Memo = {
   id: number;
@@ -37,7 +37,7 @@ function MemoScreen({ navigation, route }: any) {
   const [memos, setMemos] = useState<Memo[]>([]);
   const [subjectMemos, setSubjectMemos] = useState<SubjectMemos[]>([]);
   const [selectedTab, setSelectedTab] = useState("subjects");
-  const { token } = useAuthStore();
+  const { accessToken: token } = useUserStore();
   const Todayform = formatDate();
   const getTodayMemo = async () => {
     try {

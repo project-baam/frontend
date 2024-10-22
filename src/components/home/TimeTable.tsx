@@ -5,8 +5,8 @@ import { useNavigation } from "@react-navigation/native";
 import { HomeScreenNavigationProp, HomeStackParamList } from "../../navigations/HomeStackNavigation";
 import { IconPlus } from "@/assets/assets";
 import axios from "axios";
-import useAuthStore from "@/store/UserAuthStore";
 import { StackScreenProps } from "@react-navigation/stack";
+import useUserStore from "@/store/UserStore";
 
 const timeSlots = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 const weekdays = ["월", "화", "수", "목", "금"];
@@ -23,7 +23,7 @@ const Timetable = () => {
   const [timetable, setTimetable] = useState([{}]);
 
   const router = useNavigation<HomeScreenNavigationProp>();
-  const { token } = useAuthStore();
+  const { accessToken: token } = useUserStore();
 
   // 요일(day)과 교시(period)를 기준으로 수업을 찾아 반환하는 함수
   const getSubjectForDayAndPeriod = (day: number, period: number) => {

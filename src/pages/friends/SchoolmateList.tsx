@@ -7,11 +7,11 @@ import { FriendsStackParamList } from "../../navigations/FriendsStackNavigation"
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import Chip from "../../components/common/Chip";
-import useAuthStore from "../../store/UserAuthStore";
 
 import { IconSearch } from "../../assets/assets";
 
 import { getSubjectType } from "@/utils/SubjectUtil";
+import useUserStore from "@/store/UserStore";
 type NavigationProps = StackNavigationProp<FriendsStackParamList, "FriendProfile">;
 const filterList = [
   {
@@ -61,7 +61,7 @@ export default function SchoolFriends() {
   });
   const [filterCache, setFilterCache] = useState<{ [key: string]: { list: schoolmate[]; total: number } }>({});
   const [selectedFilter, setSelectedFilter] = useState("전체");
-  const { token } = useAuthStore();
+  const { accessToken: token } = useUserStore();
   const [page, setPage] = useState(0);
   const [enteredText, setEnteredText] = useState("");
 

@@ -1,9 +1,9 @@
 import axios from "axios";
 import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Button, FlatList, TextInput } from "react-native";
 import { useCallback, useEffect, useState } from "react";
-import useAuthStore from "../../store/UserAuthStore";
 import { Korean } from "../../assets/assets";
 import { io, Socket } from "socket.io-client";
+import useUserStore from "@/store/UserStore";
 
 export const ChatEvents = {
   FromClient: {
@@ -83,7 +83,7 @@ const API_URL = "https://b-site.site";
 const SOCKET_URL = "https://b-site.site";
 
 const ChatRooms = ({ navigation }: { navigation: any }) => {
-  const { token } = useAuthStore();
+  const { accessToken: token } = useUserStore();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);
