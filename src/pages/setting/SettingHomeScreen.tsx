@@ -61,6 +61,17 @@ function SettingHomeScreen({ navigation, route }: SettingHomeScreenProps) {
     }
   };
 
+  const handleLogout = () => {
+    try {
+      setToken("");
+      setIsAuthenticated(false);
+      setRefreshToken("");
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+    } finally {
+      navigation.navigate("LoginPage");
+    }
+  };
   const handleShowDialog = () => {
     setIsDialogVisible(true);
   };
@@ -109,6 +120,10 @@ function SettingHomeScreen({ navigation, route }: SettingHomeScreenProps) {
     {
       label: "서비스약관",
       action: () => navigation.navigate("TermsOfServiceScreen")
+    },
+    {
+      label: "로그아웃하기",
+      action: handleLogout
     },
     {
       label: "회원 탈퇴하기",
