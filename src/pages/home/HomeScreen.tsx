@@ -4,6 +4,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import styled from "@emotion/native";
 import { useMeal } from "@/hooks/useMeals";
 import MealInfo from "@/components/home/MealInfo";
+import { parse } from "date-fns";
 import {
   BtnLeft,
   ChevronRight,
@@ -30,9 +31,9 @@ import useAuthStore from "@/store/UserAuthStore";
 // import useUserStore from "@/store/UserStore";
 
 type Current = {
-  subject: string;
-  startTime: Date;
   endTime: Date;
+  startTime: Date;
+  subject: string;
 };
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<RootNavigationProp>();
@@ -123,13 +124,16 @@ const HomeScreen: React.FC = () => {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log(response.data);
-      if (response.data.subject === null) {
-        //듣는과목 없음
-      } else {
-        //듣는 과목 있음
-
-        setCurrentSubject(response.data);
+      // console.log(response.data);
+      if (response.data.subject != null) {
+        //듣는과목 있음
+        setCurrentSubject({
+          subject: response.data.subject,
+          startTime: parse(response.data.startTime, "yyyy-MM-dd HH:mm:ss", new Date()),
+          endTime: parse(response.data.endTime, "yyyy-MM-dd HH:mm:ss", new Date())
+        });
+        // setCurrentSubject(JSON.stringify(response.data));
+        // console.log("듣는 과목 : ", response.data);
       }
     } catch (error: any) {
       console.error(error.response ? error.response.data : error.message);
@@ -155,7 +159,7 @@ const HomeScreen: React.FC = () => {
       월요일: "선배, \n월요일인데 마라탕 사주세요",
       화요일: "소원을 말해봐~ \n오늘이 금요일이었으면 좋겠지?",
       수요일: "워워 진정해~ \n이제 수요일 끝난거야",
-      목요일: "하암~ 목요인데 \n설마 보충수업 있는거 아니지?",
+      목요일: "하암~ 목요일인데 \n설마 보충수업 있는거 아니지?",
       금요일: "불금인데, \n모히또가서 몰디브 한잔 할사람?",
       토요일: "너 집에만 있을꺼야? \n주말은 순삭이야~!",
       일요일: "너 집에만 있을꺼야? \n주말은 순삭이야~!"
@@ -163,9 +167,11 @@ const HomeScreen: React.FC = () => {
     return DayComment[day];
   }
 
-  function getTime(date: Date) {
-    const hours = date.getHours(); // 0-23 범위의 시간
-    const minutes = date.getMinutes(); // 0-59 범위의 분
+  function getTimes(date: string) {
+    // const dates = parse(date, "yyyy-MM-dd HH:mm:ss", new Date());
+    // return dates;
+    const hours = new Date(date).getHours(); // 0-23 범위의 시간
+    const minutes = new Date(date).getMinutes(); // 0-59 범위의 분
 
     // 두 자리로 포맷팅 (예: 12:00)
     const formattedTime = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
@@ -300,7 +306,7 @@ const HomeScreen: React.FC = () => {
                         marginTop: 4
                       }}
                     >
-                      {getTime(currentSubject.startTime)} ~ {getTime(currentSubject.endTime)}
+                      {getTimes(currentSubject.startTime)} ~ {getTimes(currentSubject.endTime)}
                     </Text>
                     <TimeBar startTime={currentSubject.startTime} endTime={currentSubject.endTime} />
                   </>
