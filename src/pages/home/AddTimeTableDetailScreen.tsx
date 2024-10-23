@@ -7,7 +7,8 @@ import ScheduleAddItem from "../../components/home/ScheduleAddItem";
 import { StackScreenProps } from "@react-navigation/stack";
 import { HomeStackParamList } from "@/navigations/HomeStackNavigation";
 import axios from "axios";
-import useUserStore from "@/store/UserStore";
+import useAuthStore from "@/store/UserAuthStore";
+// import useUserStore from "@/store/UserStore";
 
 const pillOptions = ["전체", "국어", "수학", "영어", "과학", "사회", "기타"];
 // const schedules = ["국어", "고전 읽기", "고전과 윤리", "과학사", "기술가정", "가정학", "논리학"];
@@ -21,7 +22,8 @@ const AddTimeTableDetailScreen = ({ navigation, route }: HomeScreenProps) => {
   const [activeOption, setActiveOption] = useState("전체");
   const [schedules, setSchedules] = useState([]);
   const [grade, setGrade] = useState(1);
-  const { accessToken: token } = useUserStore();
+  // const { accessToken: token } = useUserStore();
+  const { token } = useAuthStore();
   const getYear = (): number => {
     const today = new Date();
     const year = today.getFullYear();

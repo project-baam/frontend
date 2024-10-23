@@ -3,7 +3,8 @@ import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Button, Fl
 import { useCallback, useEffect, useState } from "react";
 import { Korean } from "../../assets/assets";
 import { io, Socket } from "socket.io-client";
-import useUserStore from "@/store/UserStore";
+import useAuthStore from "@/store/UserAuthStore";
+// import useUserStore from "@/store/UserStore";
 
 export const ChatEvents = {
   FromClient: {
@@ -83,7 +84,8 @@ const API_URL = "https://b-site.site";
 const SOCKET_URL = "https://b-site.site";
 
 const ChatRooms = ({ navigation }: { navigation: any }) => {
-  const { accessToken: token } = useUserStore();
+  // const { accessToken: token } = useUserStore();
+  const { token } = useAuthStore();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
   const [currentRoom, setCurrentRoom] = useState<string | null>(null);

@@ -12,6 +12,7 @@ import { IconSearch } from "../../assets/assets";
 
 import { getSubjectType } from "@/utils/SubjectUtil";
 import useUserStore from "@/store/UserStore";
+import useAuthStore from "@/store/UserAuthStore";
 type NavigationProps = StackNavigationProp<FriendsStackParamList, "FriendProfile">;
 const filterList = [
   {
@@ -61,7 +62,8 @@ export default function SchoolFriends() {
   });
   const [filterCache, setFilterCache] = useState<{ [key: string]: { list: schoolmate[]; total: number } }>({});
   const [selectedFilter, setSelectedFilter] = useState("전체");
-  const { accessToken: token } = useUserStore();
+  // const { accessToken: token } = useUserStore();
+  const { token } = useAuthStore();
   const [page, setPage] = useState(0);
   const [enteredText, setEnteredText] = useState("");
 
@@ -193,7 +195,8 @@ export default function SchoolFriends() {
             <FriendItem
               onPress={() =>
                 navigation.navigate("FriendProfile", {
-                  userId: item.userId
+                  userId: item.userId,
+                  isFavorite: item.isFavorite
                 })
               }
             >
