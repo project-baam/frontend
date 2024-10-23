@@ -9,6 +9,7 @@ import { IconSearch } from "../../assets/assets";
 
 import { getSubjectType } from "@/utils/SubjectUtil";
 import useUserStore from "@/store/UserStore";
+import useAuthStore from "@/store/UserAuthStore";
 type NavigationProps = StackNavigationProp<FriendsStackParamList, "FriendProfile">;
 
 interface schoolmate {
@@ -16,6 +17,7 @@ interface schoolmate {
   fullName: string;
   profileImage: string;
   activeClassNow: string;
+  isFavorite: boolean;
 }
 interface schoolmateList {
   list: schoolmate[];
@@ -31,7 +33,8 @@ export default function FriendsList() {
     list: []
   });
   const [total, setTotal] = useState(0);
-  const { accessToken: token } = useUserStore();
+  // const { accessToken: token } = useUserStore();
+  const { token } = useAuthStore();
   const [enteredText, setEnteredText] = useState("");
 
   const fetchFriends = async (page: number) => {
@@ -115,7 +118,8 @@ export default function FriendsList() {
               key={friend.userId} // key prop 추가
               onPress={() =>
                 navigation.navigate("FriendProfile", {
-                  userId: friend.userId
+                  userId: friend.userId,
+                  isFavorite: true
                 })
               }
             >
@@ -238,7 +242,8 @@ export default function FriendsList() {
               key={friend.userId} // key prop 추가
               onPress={() =>
                 navigation.navigate("FriendProfile", {
-                  userId: friend.userId
+                  userId: friend.userId,
+                  isFavorite: friend.isFavorite
                 })
               }
             >
