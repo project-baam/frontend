@@ -47,6 +47,7 @@ const getRandomColor = (itemIndex: number): string => {
 function FriendProfile({ navigation, route }: any) {
   const [selectedTab, setSelectedTab] = useState("today");
   const [requestId, setRequestId] = useState();
+  const [isFavorite, setIsFavorite] = useState(route.params.isFavorite);
   const [profile, setProfile] = useState<UserDetail>({
     isClassPublic: false,
     className: "",
@@ -66,6 +67,27 @@ function FriendProfile({ navigation, route }: any) {
   const handleShowDeleteOption = () => {
     if (showDeleteOption) setShowDeleteOption(false);
     else setShowDeleteOption(true);
+  };
+  useEffect(() => {
+    console.log("친친 여부 : ", route.params.isFavorite);
+  }, []);
+  const handleFavorite = async () => {
+    try {
+      await axios.patch(
+        `https://b-site.site/friends/${route.params.userId}/favorite`,
+        {},
+        {
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ` + token // 실제 토큰으로 교체
+          }
+        }
+      );
+      console.log("변경");
+      setIsFavorite(!isFavorite);
+    } catch (error: any) {
+      console.error("Error patching favorite friend :", error);
+    }
   };
   const handlePostRequest = async () => {
     try {
@@ -235,7 +257,7 @@ function FriendProfile({ navigation, route }: any) {
       <>
         {profile.isTimetablePublic ? (
           <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-            <Text>시간표 공개 회원입니다.</Text>
+            <Text>시간표 비공개 회원입니다.</Text>
           </View>
         ) : (
           <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
@@ -255,7 +277,17 @@ function FriendProfile({ navigation, route }: any) {
               <BackIcon source={VectorLeft} />
             </BackButton>
             <View style={{ flexDirection: "row", gap: 8 }}>
-              {route.params.isFavorite ? <Image source={Star02} /> : <Image source={Star01} />}
+              {isFavorite ? (
+                //즐겨찾기
+                <TouchableOpacity onPress={handleFavorite}>
+                  <Image source={Star02} />
+                </TouchableOpacity>
+              ) : (
+                //빈별
+                <TouchableOpacity onPress={handleFavorite}>
+                  <Image source={Star01} />
+                </TouchableOpacity>
+              )}
               <TouchableOpacity onPress={handleShowDeleteOption}>
                 <Image source={Hamburger} style={{ width: 24, height: 24 }} />
                 {showDeleteOption && (

@@ -17,7 +17,7 @@ export default function SocialLoginRedirect({ navigation, route }: SocialLoginRe
   const code = route.params.code;
 
   const { setAccessToken } = useUserStore((state) => state);
-  const { setRefreshToken, setIsAuthenticated } = useAuthStore();
+  const { setToken, setRefreshToken, setIsAuthenticated } = useAuthStore();
 
   useEffect(() => {
     const requestBody = {
@@ -38,6 +38,7 @@ export default function SocialLoginRedirect({ navigation, route }: SocialLoginRe
       const status = response.data.user.status;
 
       setAccessToken(accessToken);
+      setToken(accessToken);
       setRefreshToken(refreshToken);
 
       // 기기에 jwt 토큰 저장
